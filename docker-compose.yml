@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: thrift
+      POSTGRES_PASSWORD: thrift
+      POSTGRES_DB: thrift_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - web
+
+  api:
+    build: .
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://thrift:thrift@db:5432/thrift_db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ims.rule=Host(`ims.localhost`)"
+      - "traefik.http.routers.ims.entrypoints=web"
+      - "traefik.http.services.ims.loadbalancer.server.port=8000"
+    networks:
+      - web
+
+  frontend:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+    depends_on:
+      - api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ims-frontend.rule=Host(`ims-ui.localhost`)"
+      - "traefik.http.routers.ims-frontend.entrypoints=web"
+      - "traefik.http.services.ims-frontend.loadbalancer.server.port=5173"
+    networks:
+      - web
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.rule=Host(`adminer.localhost`)"
+      - "traefik.http.routers.adminer.entrypoints=web"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+    networks:
+      - web
+
+  traefik:
+    image: traefik:v2.11
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "6000:80"        # access via http://ims.localhost:6000 and http://adminer.localhost:6000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+
+volumes:
+  postgres_data:
+
+networks:
+  web:
+    driver: bridge
+
