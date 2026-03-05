@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GetAppButton } from "@/components/GetAppButton";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="h-14 flex items-center justify-between gap-4 border-b px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
             <SidebarTrigger className="md:hidden" />
             <div className="flex-1" />
+            <GetAppButton />
             <ThemeToggle />
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-4 w-4" />
