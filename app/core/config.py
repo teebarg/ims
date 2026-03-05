@@ -21,7 +21,6 @@ class Settings(BaseSettings):
     debug: bool = Field(default=True)
 
     database_url: str = Field(alias="DATABASE_URL")
-    secret_key: str = Field(alias="SECRET_KEY")
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost"]'

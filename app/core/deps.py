@@ -44,7 +44,6 @@ async def get_current_user(request: Request):
             issuer="https://pretty-shrew-80.clerk.accounts.dev",
             options={"verify_aud": False},
         )
-        print("🚀 ~ file: deps.py:41 ~ payload:", payload)
     except Exception:
         raise HTTPException(401, "Invalid or expired token")
 

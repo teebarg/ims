@@ -10,6 +10,7 @@ from app.services.categories import (
     list_categories,
     update_category,
 )
+from app.schemas.generic import Message
 
 
 router = APIRouter()
@@ -47,17 +48,15 @@ def update_category_endpoint(
         raise HTTPException(status_code=status_code, detail=message) from exc
 
 
-@router.delete(
-    "/{category_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
+@router.delete("/{category_id}")
 def delete_category_endpoint(
     category_id: int,
     db: Session = Depends(get_db),
     _: None = Depends(require_roles(UserRole.SUPER_ADMIN)),
-) -> None:
+) -> Message:
     try:
         delete_category(db, category_id)
+        return Message(details="Category deleted successfully")
     except ValueError as exc:
         message = str(exc)
         status_code = status.HTTP_404_NOT_FOUND if "not found" in message.lower() else status.HTTP_400_BAD_REQUEST

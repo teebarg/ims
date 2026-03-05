@@ -2,7 +2,7 @@ import type React from "react";
 import { useOverlayTriggerState } from "react-stately";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fetchApi } from "@/lib/api";
 import { Category } from "@/schema/category";
@@ -15,12 +15,14 @@ interface Props {
 }
 
 const CategoryAction: React.FC<Props> = ({ category }) => {
+    const queryClient = useQueryClient();
     const deleteState = useOverlayTriggerState({});
     const editState = useOverlayTriggerState({});
     const deleteMutation = useMutation({
         mutationFn: async (id: number) => await fetchApi(`/categories/${id}`, { method: "DELETE" }),
         onSuccess: () => {
             toast.success("Category deleted successfully");
+            queryClient.invalidateQueries({ queryKey: ["categories"] });
         },
         onError: (error) => {
             toast.error("Failed to delete category" + error);

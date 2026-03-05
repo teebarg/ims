@@ -17,13 +17,6 @@ export default function CategoriesPage() {
         queryKey: ["categories"],
         queryFn: async () => await fetchApi<Category[]>("/categories/"),
     });
-    console.log("🚀 ~ file: CategoriesPage.tsx:17 ~ data:", categories)
-    // TODO: Implement categories page
-    // get categories from API
-    // display categories in a table
-    // allow adding new categories
-    // allow editing categories
-    // allow deleting categories
 
     return (
         <div>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchApi } from "@/lib/api";
 import { Category } from "@/schema/category";
 
@@ -25,6 +25,7 @@ interface Props {
 type ChildRef = {};
 
 const CategoryForm = forwardRef<ChildRef, Props>(({ type = "create", onClose, current }, ref) => {
+    const queryClient = useQueryClient();
     const isCreate = type === "create";
     const defaultValues = React.useMemo<CategoryFormValues>(
         () => ({
@@ -44,6 +45,7 @@ const CategoryForm = forwardRef<ChildRef, Props>(({ type = "create", onClose, cu
         mutationFn: async (data: CategoryFormValues) => await fetchApi<Category>("/categories/", { method: "POST", body: JSON.stringify(data) }),
         onSuccess: () => {
             toast.success("Category created successfully");
+            queryClient.invalidateQueries({ queryKey: ["categories"] });
         },
         onError: (error) => {
             toast.error("Failed to create category" + error);
@@ -53,6 +55,7 @@ const CategoryForm = forwardRef<ChildRef, Props>(({ type = "create", onClose, cu
         mutationFn: async ({ id, data }: { id: number; data: CategoryFormValues }) => await fetchApi<Category>(`/categories/${id}`, { method: "PUT", body: JSON.stringify(data) }),
         onSuccess: () => {
             toast.success("Category updated successfully");
+            queryClient.invalidateQueries({ queryKey: ["categories"] });
         },
         onError: (error) => {
             toast.error("Failed to update category" + error);

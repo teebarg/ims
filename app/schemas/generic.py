@@ -1,11 +1,7 @@
 from pydantic import BaseModel
 
-# Contents of JWT token
-class TokenPayload(BaseModel):
-    sub: str | None = None
-
 class Message(BaseModel):
-    message: str
+    details: str
 
 class Token(BaseModel):
     access_token: str

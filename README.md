@@ -57,7 +57,6 @@ cp .env.example .env
 2. Adjust values as needed:
 
 - **DATABASE_URL** – e.g. `postgresql+psycopg2://thrift:thrift@localhost:5432/thrift_db`
-- **SECRET_KEY** – any random string for signing/crypto
 
 ---
 
