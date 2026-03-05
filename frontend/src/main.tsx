@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { ClerkProvider } from "@clerk/react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const rootElement = document.getElementById("root") as HTMLElement;
 
@@ -12,7 +13,9 @@ const AppWrapper = () => {
 
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <App />
+      <ThemeProvider defaultTheme="system" enableSystem>
+        <App />
+      </ThemeProvider>
     </ClerkProvider>
   );
 };
