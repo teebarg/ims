@@ -58,9 +58,9 @@ export default function CustomersPage() {
         identifier: c.identifier,
         identifierType: apiToUiIdentifierType(c.identifier_type),
         phone: c.phone ?? undefined,
-        totalPurchases: 0,
-        outstandingBalance: 0,
-        lastPurchaseDate: null,
+        totalPurchases: Number(c.lifetime_value ?? 0),
+        outstandingBalance: Number(c.balance ?? 0),
+        lastPurchaseDate: c.last_sale_date ?? null,
     }));
 
     const filtered = customers.filter((c) => {

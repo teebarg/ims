@@ -79,6 +79,10 @@ export interface CustomerDto {
     phone: string | null;
     created_at: string;
     updated_at: string;
+    /** Present when listing customers (GET /customers) */
+    balance?: number;
+    lifetime_value?: number;
+    last_sale_date?: string | null;
 }
 
 export interface CreateCustomerInput {

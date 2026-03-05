@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import UserRole, require_roles
 from app.db.session import get_db
-from app.schemas.customer import CustomerCreate, CustomerProfileResponse, CustomerResponse, CustomerUpdate
+from app.schemas.customer import CustomerCreate, CustomerListResponse, CustomerProfileResponse, CustomerResponse, CustomerUpdate
 from app.schemas.payment import PaymentRead
 from app.schemas.sale import SaleRead
 from app.schemas.generic import Message
@@ -38,8 +38,8 @@ def create_customer_endpoint(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.get("/", response_model=list[CustomerResponse])
-def list_customers_endpoint(db: Session = Depends(get_db)) -> list[CustomerResponse]:
+@router.get("/", response_model=list[CustomerListResponse])
+def list_customers_endpoint(db: Session = Depends(get_db)) -> list[CustomerListResponse]:
     return list_customers(db)
 
 

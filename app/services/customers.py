@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
@@ -7,7 +8,13 @@ from sqlalchemy.orm import Session
 from app.models.customer import Customer
 from app.models.payment import Payment
 from app.models.sale import Sale
-from app.schemas.customer import CustomerCreate, CustomerProfileResponse, CustomerResponse, CustomerUpdate
+from app.schemas.customer import (
+    CustomerCreate,
+    CustomerListResponse,
+    CustomerProfileResponse,
+    CustomerResponse,
+    CustomerUpdate,
+)
 from app.schemas.payment import PaymentRead
 from app.schemas.sale import SaleRead
 from app.services.sales import enrich_sales_with_payments
@@ -32,9 +39,65 @@ def create_customer(db: Session, customer_in: CustomerCreate) -> CustomerRespons
     return CustomerResponse.model_validate(customer)
 
 
-def list_customers(db: Session) -> list[CustomerResponse]:
+def list_customers(db: Session) -> list[CustomerListResponse]:
     customers = db.scalars(select(Customer).order_by(Customer.created_at.desc())).all()
-    return [CustomerResponse.model_validate(c) for c in customers]
+    if not customers:
+        return []
+
+    customer_ids = [c.id for c in customers]
+
+    # Sales total and last_sale_date per customer
+    sales_stmt = (
+        select(
+            Sale.customer_id,
+            func.coalesce(func.sum(Sale.total_amount), 0).label("ltv"),
+            func.max(Sale.sale_date).label("last_sale_date"),
+        )
+        .where(Sale.customer_id.in_(customer_ids))
+        .group_by(Sale.customer_id)
+    )
+    sales_rows = db.execute(sales_stmt).all()
+    ltv_by_customer: dict[UUID, Decimal] = {}
+    last_sale_by_customer: dict[UUID, date] = {}
+    for row in sales_rows:
+        ltv_by_customer[row.customer_id] = Decimal(row.ltv)
+        if row.last_sale_date:
+            last_sale_by_customer[row.customer_id] = row.last_sale_date
+
+    # Payments total per customer (via sale)
+    payments_stmt = (
+        select(
+            Sale.customer_id,
+            func.coalesce(func.sum(Payment.amount), 0).label("total_paid"),
+        )
+        .join(Sale, Payment.sale_id == Sale.id)
+        .where(Sale.customer_id.in_(customer_ids))
+        .group_by(Sale.customer_id)
+    )
+    payments_rows = db.execute(payments_stmt).all()
+    paid_by_customer: dict[UUID, Decimal] = {row.customer_id: Decimal(row.total_paid) for row in payments_rows}
+
+    result: list[CustomerListResponse] = []
+    for c in customers:
+        ltv = ltv_by_customer.get(c.id, Decimal("0"))
+        paid = paid_by_customer.get(c.id, Decimal("0"))
+        balance = ltv - paid
+        last_sale = last_sale_by_customer.get(c.id)
+        result.append(
+            CustomerListResponse(
+                id=c.id,
+                display_name=c.display_name,
+                identifier=c.identifier,
+                identifier_type=c.identifier_type,
+                phone=c.phone,
+                created_at=c.created_at,
+                updated_at=c.updated_at,
+                balance=balance,
+                lifetime_value=ltv,
+                last_sale_date=last_sale,
+            )
+        )
+    return result
 
 
 def get_customer(db: Session, customer_id: UUID) -> CustomerResponse | None:

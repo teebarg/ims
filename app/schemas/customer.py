@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
 from uuid import UUID
@@ -40,6 +40,14 @@ class CustomerResponse(CustomerBase):
 
     class Config:
         from_attributes = True
+
+
+class CustomerListResponse(CustomerResponse):
+    """Customer with summary fields for list views."""
+
+    balance: Decimal = Decimal("0")
+    lifetime_value: Decimal = Decimal("0")
+    last_sale_date: date | None = None
 
 
 class CustomerProfileResponse(BaseModel):
