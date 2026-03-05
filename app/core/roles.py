@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException
-from clerk_auth import get_current_user
+from app.core.deps import get_current_user
 
 
 def require_roles(allowed_roles: list[str]):

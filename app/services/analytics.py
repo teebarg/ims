@@ -5,6 +5,7 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from app.models.bale import Bale
+from app.models.category import Category
 from app.models.inventory import InventoryStock
 from app.models.sale import Sale
 from app.schemas.analytics import (
@@ -20,18 +21,19 @@ from app.schemas.analytics import (
 def get_stock_snapshot(db: Session) -> StockSnapshot:
     stmt = (
         select(
-            InventoryStock.category,
+            Category.name,
             func.coalesce(func.sum(InventoryStock.quantity_change), 0).label(
                 "quantity"
             ),
         )
-        .group_by(InventoryStock.category)
-        .order_by(InventoryStock.category)
+        .join(Category, InventoryStock.category_id == Category.id)
+        .group_by(Category.name)
+        .order_by(Category.name)
     )
     rows = db.execute(stmt).all()
     categories = [
-        StockCategory(category=category, quantity=int(quantity))
-        for category, quantity in rows
+        StockCategory(category=category_name, quantity=int(quantity))
+        for category_name, quantity in rows
     ]
     total_stock = sum(c.quantity for c in categories)
     return StockSnapshot(total_stock=total_stock, categories=categories)

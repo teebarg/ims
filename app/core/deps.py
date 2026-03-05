@@ -1,13 +1,10 @@
-import jwt
+# import jwt
 from fastapi import Depends, HTTPException
 from app.core.config import settings
-from app.core.logging import get_logger
 import time
 import httpx
 from jose import jwt
 from fastapi import Request, HTTPException
-
-logger = get_logger(__name__)
 
 CLERK_JWKS_URL = "https://pretty-shrew-80.clerk.accounts.dev/.well-known/jwks.json"
 
@@ -32,7 +29,6 @@ async def get_jwks():
 
 async def get_current_user(request: Request):
     auth = request.headers.get("Authorization")
-
     if not auth:
         raise HTTPException(401, "Missing Authorization header")
 
@@ -45,8 +41,10 @@ async def get_current_user(request: Request):
             token,
             jwks,
             algorithms=["RS256"],
+            issuer="https://pretty-shrew-80.clerk.accounts.dev",
             options={"verify_aud": False},
         )
+        print("🚀 ~ file: deps.py:41 ~ payload:", payload)
     except Exception:
         raise HTTPException(401, "Invalid or expired token")
 

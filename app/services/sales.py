@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.bale import Bale
+from app.models.category import Category
 from app.models.customer import Customer
 from app.models.inventory import InventoryStock
 from app.models.payment import Payment
@@ -33,16 +34,20 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
     if customer is None:
         raise ValueError("Customer not found")
 
+    category = db.get(Category, sale_in.category_id)
+    if category is None:
+        raise ValueError("Category not found")
+
     total_amount = Decimal(sale_in.unit_price) * Decimal(sale_in.total_quantity)
 
     sale = Sale(
         bale_id=sale_in.bale_id,
         customer_id=sale_in.customer_id,
-        category=sale_in.category,
+        category_id=sale_in.category_id,
         total_quantity=sale_in.total_quantity,
         total_amount=total_amount,
         channel=sale_in.channel,
-        user_id=sale_in.user_id,
+        staff_id=sale_in.user_id or "",
         sale_date=sale_in.sale_date or date.today(),
     )
     db.add(sale)
@@ -50,7 +55,8 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
 
     stock = InventoryStock(
         bale_id=sale.bale_id,
-        category=sale.category,
+        sale_id=sale.id,
+        category_id=sale.category_id,
         quantity_change=-sale.total_quantity,
         reason="sale_out",
     )
@@ -65,11 +71,11 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
         id=sale.id,
         bale_id=sale.bale_id,
         customer_id=sale.customer_id,
-        category=sale.category,
+        category_id=sale.category_id,
         total_quantity=sale.total_quantity,
         unit_price=sale_in.unit_price,
         channel=sale.channel,
-        user_id=sale.user_id,
+        user_id=sale.staff_id,
         sale_date=sale.sale_date,
         created_at=sale.created_at,
         total_amount=total_amount,
@@ -92,13 +98,13 @@ def enrich_sales_with_payments(db: Session, sales: list[Sale]) -> list[SaleRead]
                 id=sale.id,
                 bale_id=sale.bale_id,
                 customer_id=sale.customer_id,
-                category=sale.category,
+                category_id=sale.category_id,
                 total_quantity=sale.total_quantity,
                 unit_price=total_amount / Decimal(sale.total_quantity)
                 if sale.total_quantity
                 else Decimal(0),
                 channel=sale.channel,
-                user_id=sale.user_id,
+                user_id=sale.staff_id,
                 sale_date=sale.sale_date,
                 created_at=sale.created_at,
                 total_amount=total_amount,

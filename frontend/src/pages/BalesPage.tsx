@@ -1,115 +1,89 @@
 import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Package, Search } from "lucide-react";
+import { createBale, listBales, type BaleDto } from "@/lib/api";
+import { toast } from "sonner";
 
-interface Bale {
-    id: string;
+interface BaleRow {
+    id: number;
+    reference: string;
     purchaseDate: string;
     totalItems: number;
     remainingItems: number;
     totalCost: number;
-    category: string;
-    shirts: number;
-    pants: number;
-    jackets: number;
-    others: number;
 }
 
-const initialBales: Bale[] = [
-    {
-        id: "BL-001",
-        purchaseDate: "2026-02-20",
-        totalItems: 120,
-        remainingItems: 85,
-        totalCost: 480,
-        category: "Mixed",
-        shirts: 50,
-        pants: 35,
-        jackets: 20,
-        others: 15,
-    },
-    {
-        id: "BL-002",
-        purchaseDate: "2026-02-15",
-        totalItems: 80,
-        remainingItems: 22,
-        totalCost: 320,
-        category: "Mixed",
-        shirts: 30,
-        pants: 25,
-        jackets: 15,
-        others: 10,
-    },
-    {
-        id: "BL-003",
-        purchaseDate: "2026-03-01",
-        totalItems: 200,
-        remainingItems: 195,
-        totalCost: 750,
-        category: "Mixed",
-        shirts: 80,
-        pants: 60,
-        jackets: 30,
-        others: 30,
-    },
-    {
-        id: "BL-004",
-        purchaseDate: "2026-01-28",
-        totalItems: 60,
-        remainingItems: 0,
-        totalCost: 240,
-        category: "Shirts",
-        shirts: 60,
-        pants: 0,
-        jackets: 0,
-        others: 0,
-    },
-];
-
 export default function BalesPage() {
-    const [bales, setBales] = useState<Bale[]>(initialBales);
+    const queryClient = useQueryClient();
+
+    const { data: baleDtos, isLoading, isError } = useQuery({
+        queryKey: ["bales"],
+        queryFn: listBales,
+    });
+
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
     const [newBale, setNewBale] = useState({
         totalItems: "",
         totalCost: "",
-        shirts: "",
-        pants: "",
-        jackets: "",
-        others: "",
         purchaseDate: "",
     });
 
+    const createMutation = useMutation({
+        mutationFn: async () => {
+            const totalItems = Number(newBale.totalItems);
+            const totalCost = Number(newBale.totalCost);
+            if (!Number.isFinite(totalItems) || totalItems <= 0 || !Number.isFinite(totalCost) || totalCost <= 0) {
+                throw new Error("Please enter valid totals");
+            }
+
+            const reference = `BL-${Date.now()}`;
+
+            return createBale({
+                reference,
+                // TODO: when categories are exposed in the UI, pass a real category instead of a generic one.
+                category: "Mixed",
+                // These numeric fields mirror the backend BaleCreate schema.
+                purchase_price: totalCost,
+                total_items: totalItems,
+            } as any);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["bales"] });
+            setNewBale({ totalItems: "", totalCost: "", purchaseDate: "" });
+            setOpen(false);
+            toast.success("Bale created");
+        },
+        onError: (err: unknown) => {
+            const message = err instanceof Error ? err.message : "Failed to create bale";
+            toast.error(message);
+        },
+    });
+
+    const bales: BaleRow[] =
+        baleDtos?.map((b: BaleDto) => ({
+            id: b.id,
+            reference: b.reference,
+            purchaseDate: b.created_at?.slice(0, 10) ?? "",
+            totalItems: b.total_items,
+            // Until we have per-bale stock tracking, assume all items are currently in stock
+            remainingItems: b.total_items,
+            totalCost: b.purchase_price,
+        })) ?? [];
+
     const filteredBales = bales.filter(
-        (b) => b.id.toLowerCase().includes(search.toLowerCase()) || b.category.toLowerCase().includes(search.toLowerCase())
+        (b) =>
+            b.reference.toLowerCase().includes(search.toLowerCase()) ||
+            `BL-${String(b.id).padStart(3, "0")}`.toLowerCase().includes(search.toLowerCase()),
     );
 
-    const handleAddBale = () => {
-        const total = Number(newBale.totalItems);
-        const bale: Bale = {
-            id: `BL-${String(bales.length + 1).padStart(3, "0")}`,
-            purchaseDate: newBale.purchaseDate || new Date().toISOString().slice(0, 10),
-            totalItems: total,
-            remainingItems: total,
-            totalCost: Number(newBale.totalCost),
-            category: "Mixed",
-            shirts: Number(newBale.shirts) || 0,
-            pants: Number(newBale.pants) || 0,
-            jackets: Number(newBale.jackets) || 0,
-            others: Number(newBale.others) || 0,
-        };
-        setBales([bale, ...bales]);
-        setNewBale({ totalItems: "", totalCost: "", shirts: "", pants: "", jackets: "", others: "", purchaseDate: "" });
-        setOpen(false);
-    };
-
-    const stockPercent = (b: Bale) => Math.round((b.remainingItems / b.totalItems) * 100);
+    const stockPercent = (b: BaleRow) => (b.totalItems ? Math.round((b.remainingItems / b.totalItems) * 100) : 0);
 
     return (
         <div className="space-y-6">
@@ -155,49 +129,15 @@ export default function BalesPage() {
                                     onChange={(e) => setNewBale((p) => ({ ...p, purchaseDate: e.target.value }))}
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label className="text-muted-foreground text-xs">Category Distribution</Label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <Label className="text-xs">Shirts</Label>
-                                        <Input
-                                            type="number"
-                                            value={newBale.shirts}
-                                            onChange={(e) => setNewBale((p) => ({ ...p, shirts: e.target.value }))}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs">Pants</Label>
-                                        <Input
-                                            type="number"
-                                            value={newBale.pants}
-                                            onChange={(e) => setNewBale((p) => ({ ...p, pants: e.target.value }))}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs">Jackets</Label>
-                                        <Input
-                                            type="number"
-                                            value={newBale.jackets}
-                                            onChange={(e) => setNewBale((p) => ({ ...p, jackets: e.target.value }))}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs">Others</Label>
-                                        <Input
-                                            type="number"
-                                            value={newBale.others}
-                                            onChange={(e) => setNewBale((p) => ({ ...p, others: e.target.value }))}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setOpen(false)}>
                                 Cancel
                             </Button>
-                            <Button onClick={handleAddBale}>Add Bale</Button>
+                            <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+                                {createMutation.isPending ? "Saving..." : "Add Bale"}
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -209,6 +149,13 @@ export default function BalesPage() {
             </div>
 
             <div className="grid gap-4">
+                {isLoading && (
+                    <p className="text-sm text-muted-foreground">Loading bales...</p>
+                )}
+                {isError && (
+                    <p className="text-sm text-destructive">Failed to load bales. Please try again.</p>
+                )}
+
                 {/* Mobile cards + Desktop table */}
                 <div className="hidden md:block">
                     <Card>
@@ -222,15 +169,16 @@ export default function BalesPage() {
                                             <th className="text-left p-3 font-medium text-muted-foreground">Items</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Remaining</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Cost</th>
-                                            <th className="text-left p-3 font-medium text-muted-foreground">Distribution</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {filteredBales.map((bale) => (
                                             <tr key={bale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                                <td className="p-3 font-mono text-xs font-medium">{bale.id}</td>
-                                                <td className="p-3">{bale.purchaseDate}</td>
+                                                <td className="p-3 font-mono text-xs font-medium">
+                                                    BL-{String(bale.id).padStart(3, "0")}
+                                                </td>
+                                                <td className="p-3">{bale.purchaseDate || "—"}</td>
                                                 <td className="p-3">{bale.totalItems}</td>
                                                 <td className="p-3">
                                                     <div className="flex items-center gap-2">
@@ -252,9 +200,6 @@ export default function BalesPage() {
                                                     </div>
                                                 </td>
                                                 <td className="p-3 font-medium">${bale.totalCost}</td>
-                                                <td className="p-3 text-xs text-muted-foreground">
-                                                    S:{bale.shirts} P:{bale.pants} J:{bale.jackets} O:{bale.others}
-                                                </td>
                                                 <td className="p-3">
                                                     <Badge
                                                         variant={
@@ -286,7 +231,9 @@ export default function BalesPage() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Package className="h-4 w-4 text-primary" />
-                                        <span className="font-mono text-sm font-medium">{bale.id}</span>
+                                        <span className="font-mono text-sm font-medium">
+                                            BL-{String(bale.id).padStart(3, "0")}
+                                        </span>
                                     </div>
                                     <Badge
                                         variant={bale.remainingItems === 0 ? "destructive" : bale.remainingItems < 20 ? "secondary" : "default"}

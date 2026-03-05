@@ -14,6 +14,7 @@ import CustomerProfilePage from "@/pages/CustomerProfilePage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import NotFound from "./pages/NotFound";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
+import CategoriesPage from "./pages/CategoriesPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
                       />
                       <Route path="/sales" element={<SalesPage />} />
                       <Route path="/analytics" element={<AnalyticsPage />} />
+                      <Route path="/categories" element={<CategoriesPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </DashboardLayout>

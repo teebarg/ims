@@ -143,5 +143,9 @@
   .page-subtitle {
     @apply text-sm text-muted-foreground;
   }
+  
+  .sheet-footer {
+    @apply bg-background/80 backdrop-blur-2xl flex gap-2 justify-end p-4 border-t border-border;
+  }
 }
 

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, ChevronLeft, Store } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, ChevronLeft, Store, Tag } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -20,6 +20,7 @@ const mainItems = [
     { title: "Bales", url: "/bales", icon: Package },
     { title: "Customers", url: "/customers", icon: Users },
     { title: "Sales", url: "/sales", icon: ShoppingCart },
+    { title: "Categories", url: "/categories", icon: Tag },
     { title: "Analytics", url: "/analytics", icon: BarChart3 },
 ];
 

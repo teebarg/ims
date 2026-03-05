@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class BaleBase(BaseModel):
     reference: str = Field(..., max_length=50)
-    category: str = Field(..., max_length=50, description="e.g. shirts, pants, jackets")
+    category_id: int = Field(..., description="Foreign key to category.id")
     purchase_price: Decimal = Field(..., gt=0)
     total_items: int = Field(..., gt=0)
 

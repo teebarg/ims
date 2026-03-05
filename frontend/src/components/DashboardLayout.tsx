@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="min-h-screen flex w-full">
                 <AppSidebar />
                 <div className="flex-1 flex flex-col min-w-0">
-                    <header className="h-14 flex items-center justify-between border-b px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
+                    <header className="h-14 flex items-center justify-between gap-4 border-b px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
                         <SidebarTrigger className="md:hidden" />
                         <div className="flex-1" />
                         <Button variant="ghost" size="icon" className="relative">

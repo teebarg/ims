@@ -1,9 +1,19 @@
 from functools import lru_cache
-from typing import Optional
-
-from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings
+from typing import Annotated, Any, Literal
+from pydantic import (
+    Field,
+    AnyUrl,
+    BeforeValidator,
+    computed_field,
+)
 
+def parse_cors(v: Any) -> list[str] | str:
+    if isinstance(v, str) and not v.startswith("["):
+        return [i.strip() for i in v.split(",")]
+    elif isinstance(v, list | str):
+        return v
+    raise ValueError(v)
 
 class Settings(BaseSettings):
     app_name: str = "Thrift Shop Inventory API"
@@ -13,9 +23,16 @@ class Settings(BaseSettings):
     database_url: str = Field(alias="DATABASE_URL")
     secret_key: str = Field(alias="SECRET_KEY")
 
-    backend_cors_origins: list[AnyHttpUrl] | list[str] = Field(
-        default_factory=lambda: ["http://localhost", "http://localhost:8000"]
+    # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
+    # e.g: '["http://localhost"]'
+    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = (
+        []
     )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def all_cors_origins(self) -> list[str]:
+        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
 
     class Config:
         env_file = ".env"
