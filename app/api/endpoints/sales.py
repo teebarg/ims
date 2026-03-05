@@ -14,7 +14,7 @@ router = APIRouter()
 def record_sale(
     sale_in: SaleCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
 ) -> SaleRead:
     try:
         sale = create_sale(db, sale_in)

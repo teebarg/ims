@@ -1,55 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+@layer base {
+  :root {
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
 
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
+    --background: 40 20% 97%;
+    --foreground: 30 10% 12%;
 
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
+    --card: 40 25% 99%;
+    --card-foreground: 30 10% 12%;
 
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
+    --popover: 40 25% 99%;
+    --popover-foreground: 30 10% 12%;
 
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+    --primary: 25 75% 47%;
+    --primary-foreground: 40 20% 98%;
 
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+    --secondary: 35 30% 92%;
+    --secondary-foreground: 30 10% 20%;
 
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+    --muted: 35 15% 93%;
+    --muted-foreground: 30 8% 46%;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+    --accent: 35 30% 90%;
+    --accent-foreground: 30 10% 15%;
 
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-  --radius: 0.75rem;
+    --success: 152 60% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 10% 12%;
+
+    --border: 35 18% 88%;
+    --input: 35 18% 88%;
+    --ring: 25 75% 47%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 30 15% 14%;
+    --sidebar-foreground: 35 20% 85%;
+    --sidebar-primary: 25 75% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 12% 20%;
+    --sidebar-accent-foreground: 35 20% 90%;
+    --sidebar-border: 30 10% 22%;
+    --sidebar-ring: 25 75% 52%;
+    --sidebar-muted: 30 8% 40%;
+  }
+
+  .dark {
+    --background: 30 10% 8%;
+    --foreground: 35 20% 92%;
+    --card: 30 10% 11%;
+    --card-foreground: 35 20% 92%;
+    --popover: 30 10% 11%;
+    --popover-foreground: 35 20% 92%;
+    --primary: 25 75% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 10% 18%;
+    --secondary-foreground: 35 20% 90%;
+    --muted: 30 10% 18%;
+    --muted-foreground: 30 8% 55%;
+    --accent: 30 10% 18%;
+    --accent-foreground: 35 20% 90%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 35%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 10% 12%;
+    --border: 30 10% 20%;
+    --input: 30 10% 20%;
+    --ring: 25 75% 52%;
+    --sidebar-background: 30 10% 6%;
+    --sidebar-foreground: 35 20% 85%;
+    --sidebar-primary: 25 75% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 10% 14%;
+    --sidebar-accent-foreground: 35 20% 90%;
+    --sidebar-border: 30 10% 14%;
+    --sidebar-ring: 25 75% 52%;
+    --sidebar-muted: 30 8% 40%;
+  }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
+@layer components {
+  .stat-card {
+    @apply bg-card rounded-xl border p-5 transition-shadow hover:shadow-md;
+  }
 
-body {
-  margin: 0;
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  .metric-value {
+    @apply text-2xl md:text-3xl font-heading font-bold tracking-tight;
+  }
+
+  .metric-label {
+    @apply text-sm text-muted-foreground font-medium;
+  }
+
+  .status-success {
+    @apply text-success;
+  }
+
+  .status-danger {
+    @apply text-destructive;
+  }
+
+  .status-warning {
+    @apply text-warning;
+  }
+
+  .page-header {
+    @apply text-xl md:text-2xl font-heading font-bold;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-muted-foreground;
+  }
 }
 

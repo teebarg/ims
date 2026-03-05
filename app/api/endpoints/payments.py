@@ -14,7 +14,7 @@ router = APIRouter()
 def record_payment(
     payment_in: PaymentCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
 ) -> PaymentRead:
     try:
         payment = create_payment(db, payment_in)

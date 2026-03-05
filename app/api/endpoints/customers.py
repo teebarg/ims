@@ -24,7 +24,7 @@ router = APIRouter()
 def create_customer_endpoint(
     customer_in: CustomerCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
 ) -> CustomerResponse:
     try:
         return create_customer(db, customer_in)

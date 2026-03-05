@@ -1,17 +1,21 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Annotated
 
 from fastapi import Cookie, Depends, HTTPException, status
 from jose import JWTError, jwt
 from pydantic import BaseModel
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.db.session import get_db
 
 
 class UserRole(str, Enum):
+    SUPER_ADMIN = "SUPER_ADMIN"
     ADMIN = "ADMIN"
     STAFF = "STAFF"
 
@@ -24,11 +28,13 @@ class TokenPayload(BaseModel):
 
 class CurrentUser(BaseModel):
     id: str
+    email: str
     role: UserRole
 
 
 ACCESS_TOKEN_COOKIE_NAME = "access_token"
 ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRES_MINUTES = 60 * 24
 
 
 def _decode_token(token: str) -> TokenPayload:
@@ -66,7 +72,27 @@ def _decode_token(token: str) -> TokenPayload:
     return token_data
 
 
+def create_access_token(
+    *,
+    subject: str,
+    role: UserRole,
+    expires_delta: timedelta | None = None,
+) -> str:
+    if expires_delta is None:
+        expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+
+    expire = datetime.now(tz=timezone.utc) + expires_delta
+    payload = {
+        "sub": subject,
+        "role": role.value,
+        "exp": int(expire.timestamp()),
+    }
+    encoded_jwt = jwt.encode(payload, settings.secret_key, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
 def get_current_user(
+    db: Annotated[Session, Depends(get_db)],
     access_token: Annotated[str | None, Cookie(alias=ACCESS_TOKEN_COOKIE_NAME)] = None,
 ) -> CurrentUser:
     if not access_token:
@@ -77,7 +103,39 @@ def get_current_user(
         )
 
     token_data = _decode_token(access_token)
-    return CurrentUser(id=token_data.sub, role=token_data.role)
+
+    # Fetch user using a lightweight SQL query, not the ORM model
+    result = db.execute(
+        text(
+            'SELECT id, email, role, is_active '
+            'FROM "user" '
+            "WHERE id = :user_id"
+        ),
+        {"user_id": token_data.sub},
+    ).mappings().first()
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not result["is_active"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user",
+        )
+
+    try:
+        role = UserRole(result["role"])
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user role",
+        )
+
+    return CurrentUser(id=str(result["id"]), email=result["email"], role=role)
 
 
 def require_roles(*roles: UserRole):

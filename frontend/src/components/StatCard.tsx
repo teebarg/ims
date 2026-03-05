@@ -19,20 +19,19 @@ export function StatCard({ label, value, change, changeType = "neutral", icon: I
                     <p className="metric-label">{label}</p>
                     <p className="metric-value">{value}</p>
                     {change && (
-                        <p className={cn(
-                            "text-xs font-medium",
-                            changeType === "positive" && "status-success",
-                            changeType === "negative" && "status-danger",
-                            changeType === "neutral" && "text-muted-foreground"
-                        )}>
+                        <p
+                            className={cn(
+                                "text-xs font-medium",
+                                changeType === "positive" && "status-success",
+                                changeType === "negative" && "status-danger",
+                                changeType === "neutral" && "text-muted-foreground"
+                            )}
+                        >
                             {change}
                         </p>
                     )}
                 </div>
-                <div className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
-                    iconColor || "bg-primary/10 text-primary"
-                )}>
+                <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", iconColor || "bg-primary/10 text-primary")}>
                     <Icon className="h-5 w-5" />
                 </div>
             </div>

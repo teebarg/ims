@@ -19,6 +19,13 @@ help:
 	@echo "  make push              - push Docker image to Docker Hub"
 	@echo "  make up                - start app + db via docker-compose"
 	@echo "  make down              - stop docker-compose services"
+	@echo ""
+	@echo "Frontend (Vite/React):"
+	@echo "  make fe-install        - install frontend dependencies (npm install)"
+	@echo "  make fe-dev            - run frontend dev server (vite)"
+	@echo "  make fe-build          - build frontend for production"
+	@echo "  make fe-preview        - preview production frontend build"
+	@echo "  make fe-lint           - run frontend lint"
 
 .PHONY: venv
 venv:
@@ -72,4 +79,27 @@ up:
 .PHONY: down
 down:
 	docker compose down
+
+# Frontend (Vite/React)
+FE_DIR = frontend
+
+.PHONY: fe-install
+fe-install:
+	cd $(FE_DIR) && npm install
+
+.PHONY: fe-dev
+fe-dev:
+	cd $(FE_DIR) && npm run dev
+
+.PHONY: fe-build
+fe-build:
+	cd $(FE_DIR) && npm run build
+
+.PHONY: fe-preview
+fe-preview:
+	cd $(FE_DIR) && npm run preview
+
+.PHONY: fe-lint
+fe-lint:
+	cd $(FE_DIR) && npm run lint
 

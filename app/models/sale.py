@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
+from uuid import UUID as UUIDType
 
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -25,7 +26,12 @@ class Sale(Base):
     channel: Mapped[SalesChannel] = mapped_column(
         Enum(SalesChannel, name="sales_channel", native_enum=False), nullable=False
     )
-    user_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    user_id: Mapped[UUIDType | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("user.id"),
+        nullable=True,
+        index=True,
+    )
 
     sale_date: Mapped[date] = mapped_column(Date, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

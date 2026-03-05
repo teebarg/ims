@@ -14,7 +14,7 @@ router = APIRouter()
 def add_bale(
     bale_in: BaleCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
 ) -> BaleRead:
     bale = create_bale(db, bale_in)
     if not bale:

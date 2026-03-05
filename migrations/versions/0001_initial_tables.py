@@ -18,6 +18,48 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
+        "user",
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+        ),
+        sa.Column("email", sa.String(length=255), nullable=False, unique=True),
+        sa.Column("full_name", sa.String(length=255), nullable=False),
+        sa.Column("hashed_password", sa.String(length=255), nullable=False),
+        sa.Column(
+            "role",
+            sa.Enum(
+                "SUPER_ADMIN",
+                "ADMIN",
+                "STAFF",
+                name="user_role",
+                native_enum=False,
+            ),
+            nullable=False,
+            server_default="STAFF",
+        ),
+        sa.Column(
+            "is_active",
+            sa.Boolean(),
+            nullable=False,
+            server_default=sa.sql.expression.true(),
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+    )
+
+    op.create_table(
         "bale",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("reference", sa.String(length=50), nullable=False, unique=True),
@@ -77,7 +119,12 @@ def upgrade() -> None:
         sa.Column("total_quantity", sa.Integer(), nullable=False),
         sa.Column("total_amount", sa.Numeric(12, 2), nullable=False),
         sa.Column("channel", sa.String(length=50), nullable=False),
-        sa.Column("user_id", sa.String(length=100), nullable=True),
+        sa.Column(
+            "user_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("user.id"),
+            nullable=True,
+        ),
         sa.Column(
             "sale_date",
             sa.Date(),
@@ -135,4 +182,5 @@ def downgrade() -> None:
     op.drop_table("sale")
     op.drop_table("customer")
     op.drop_table("bale")
+    op.drop_table("user")
 

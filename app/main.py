@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.endpoints import analytics, bales, customers, payments, sales
+from app.api.endpoints import analytics, auth, bales, customers, payments, sales, users
 
 
 def create_application() -> FastAPI:
@@ -13,6 +13,8 @@ def create_application() -> FastAPI:
         ),
     )
 
+    app.include_router(auth.router, prefix="/auth", tags=["auth"])
+    app.include_router(users.router, prefix="/users", tags=["users"])
     app.include_router(customers.router, prefix="/customers", tags=["customers"])
     app.include_router(bales.router, prefix="/bales", tags=["bales"])
     app.include_router(sales.router, prefix="/sales", tags=["sales"])
