@@ -1,14 +1,22 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Package, Search } from "lucide-react";
-import { createBale, listBales, type BaleDto } from "@/lib/api";
+import { createBale, listBales, listCategories, type BaleDto } from "@/lib/api";
 import { toast } from "sonner";
+import { currency } from "@/lib/utils";
 
 interface BaleRow {
     id: number;
@@ -27,9 +35,16 @@ export default function BalesPage() {
         queryFn: listBales,
     });
 
+    const { data: categories = [] } = useQuery({
+        queryKey: ["categories"],
+        queryFn: listCategories,
+    });
+
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
     const [newBale, setNewBale] = useState({
+        reference: "",
+        categoryId: "",
         totalItems: "",
         totalCost: "",
         purchaseDate: "",
@@ -37,26 +52,30 @@ export default function BalesPage() {
 
     const createMutation = useMutation({
         mutationFn: async () => {
+            const ref = newBale.reference.trim();
+            if (!ref) throw new Error("Please enter a reference for the bale");
+
+            const categoryId = Number(newBale.categoryId);
+            if (!Number.isFinite(categoryId) || categoryId <= 0) {
+                throw new Error("Please select a category");
+            }
+
             const totalItems = Number(newBale.totalItems);
             const totalCost = Number(newBale.totalCost);
             if (!Number.isFinite(totalItems) || totalItems <= 0 || !Number.isFinite(totalCost) || totalCost <= 0) {
                 throw new Error("Please enter valid totals");
             }
 
-            const reference = `BL-${Date.now()}`;
-
             return createBale({
-                reference,
-                // TODO: when categories are exposed in the UI, pass a real category instead of a generic one.
-                category: "Mixed",
-                // These numeric fields mirror the backend BaleCreate schema.
+                reference: ref,
+                category_id: categoryId,
                 purchase_price: totalCost,
                 total_items: totalItems,
-            } as any);
+            });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["bales"] });
-            setNewBale({ totalItems: "", totalCost: "", purchaseDate: "" });
+            setNewBale({ reference: "", categoryId: "", totalItems: "", totalCost: "", purchaseDate: "" });
             setOpen(false);
             toast.success("Bale created");
         },
@@ -77,10 +96,8 @@ export default function BalesPage() {
             totalCost: b.purchase_price,
         })) ?? [];
 
-    const filteredBales = bales.filter(
-        (b) =>
-            b.reference.toLowerCase().includes(search.toLowerCase()) ||
-            `BL-${String(b.id).padStart(3, "0")}`.toLowerCase().includes(search.toLowerCase()),
+    const filteredBales = bales.filter((b) =>
+        b.reference.toLowerCase().includes(search.toLowerCase()),
     );
 
     const stockPercent = (b: BaleRow) => (b.totalItems ? Math.round((b.remainingItems / b.totalItems) * 100) : 0);
@@ -103,11 +120,42 @@ export default function BalesPage() {
                             <DialogTitle className="font-heading">Add New Bale</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
+                            <div>
+                                <Label htmlFor="bale-reference">Reference</Label>
+                                <Input
+                                    id="bale-reference"
+                                    placeholder="e.g. BL-001 or Summer-2024"
+                                    value={newBale.reference}
+                                    onChange={(e) => setNewBale((p) => ({ ...p, reference: e.target.value }))}
+                                />
+                            </div>
+                            <div>
+                                <Label>Category</Label>
+                                <Select
+                                    value={newBale.categoryId || undefined}
+                                    onValueChange={(value) => setNewBale((p) => ({ ...p, categoryId: value }))}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categories.map((cat) => (
+                                            <SelectItem key={cat.id} value={String(cat.id)}>
+                                                {cat.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {categories.length === 0 && (
+                                    <p className="text-xs text-muted-foreground mt-1">No categories yet. Add one from the Categories page.</p>
+                                )}
+                            </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <Label>Total Items</Label>
                                     <Input
                                         type="number"
+                                        min={1}
                                         value={newBale.totalItems}
                                         onChange={(e) => setNewBale((p) => ({ ...p, totalItems: e.target.value }))}
                                     />
@@ -116,6 +164,8 @@ export default function BalesPage() {
                                     <Label>Total Cost ($)</Label>
                                     <Input
                                         type="number"
+                                        min={0}
+                                        step="0.01"
                                         value={newBale.totalCost}
                                         onChange={(e) => setNewBale((p) => ({ ...p, totalCost: e.target.value }))}
                                     />
@@ -129,7 +179,6 @@ export default function BalesPage() {
                                     onChange={(e) => setNewBale((p) => ({ ...p, purchaseDate: e.target.value }))}
                                 />
                             </div>
-
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setOpen(false)}>
@@ -164,7 +213,7 @@ export default function BalesPage() {
                                 <table className="w-full text-sm">
                                     <thead>
                                         <tr className="border-b bg-muted/30">
-                                            <th className="text-left p-3 font-medium text-muted-foreground">Bale ID</th>
+                                            <th className="text-left p-3 font-medium text-muted-foreground">Reference</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Items</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Remaining</th>
@@ -176,7 +225,7 @@ export default function BalesPage() {
                                         {filteredBales.map((bale) => (
                                             <tr key={bale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
                                                 <td className="p-3 font-mono text-xs font-medium">
-                                                    BL-{String(bale.id).padStart(3, "0")}
+                                                    {bale.reference}
                                                 </td>
                                                 <td className="p-3">{bale.purchaseDate || "—"}</td>
                                                 <td className="p-3">{bale.totalItems}</td>
@@ -199,7 +248,7 @@ export default function BalesPage() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 font-medium">${bale.totalCost}</td>
+                                                <td className="p-3 font-medium">{currency(bale.totalCost)}</td>
                                                 <td className="p-3">
                                                     <Badge
                                                         variant={
@@ -232,7 +281,7 @@ export default function BalesPage() {
                                     <div className="flex items-center gap-2">
                                         <Package className="h-4 w-4 text-primary" />
                                         <span className="font-mono text-sm font-medium">
-                                            BL-{String(bale.id).padStart(3, "0")}
+                                            {bale.reference}
                                         </span>
                                     </div>
                                     <Badge
@@ -253,7 +302,7 @@ export default function BalesPage() {
                                     </div>
                                     <div>
                                         <p className="text-muted-foreground">Cost</p>
-                                        <p className="font-medium">${bale.totalCost}</p>
+                                        <p className="font-medium">{currency(bale.totalCost)}</p>
                                     </div>
                                 </div>
                                 <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">

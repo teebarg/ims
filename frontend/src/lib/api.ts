@@ -26,11 +26,10 @@ export async function fetchApi<TResponse>(url: string, options: RequestInit = {}
     return res.json() as Promise<TResponse>;
 }
 
-// ---- Bales ----
-
 export interface BaleDto {
     id: number;
     reference: string;
+    category_id: number;
     purchase_price: number;
     total_items: number;
     created_at: string;
@@ -39,9 +38,9 @@ export interface BaleDto {
 
 export interface CreateBaleInput {
     reference: string;
+    category_id: number;
     purchase_price: number;
     total_items: number;
-    category: string;
 }
 
 export function listBales() {
@@ -53,4 +52,17 @@ export function createBale(input: CreateBaleInput) {
         method: "POST",
         body: JSON.stringify(input),
     });
+}
+
+// ---- Categories ----
+
+export interface CategoryDto {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export function listCategories() {
+    return fetchApi<CategoryDto[]>("/categories/");
 }
