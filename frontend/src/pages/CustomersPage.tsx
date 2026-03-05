@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useOverlayTriggerState } from "react-stately";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Users, DollarSign, AlertCircle } from "lucide-react";
 import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
-import { createCustomer, listCustomers, type CustomerDto } from "@/lib/api";
+import { listCustomers, type CustomerDto } from "@/lib/api";
+import CustomerActions from "@/components/customers/customer-actions";
+import { CustomerForm } from "@/components/customers/customer-form";
+import SheetDrawer from "@/components/ui/sheet-drawer";
+import { currency } from "@/lib/utils";
 
 type CustomerRow = {
     id: string;
@@ -38,27 +41,11 @@ function apiToUiIdentifierType(t: CustomerDto["identifier_type"]): IdentifierTyp
     }
 }
 
-function uiToApiIdentifierType(t: IdentifierType): CustomerDto["identifier_type"] {
-    switch (t) {
-        case "tiktok":
-            return "TIKTOK";
-        case "instagram":
-            return "INSTAGRAM";
-        case "street":
-            return "STREET";
-        case "app":
-            return "APP_USER";
-    }
-}
-
 export default function CustomersPage() {
-    const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const addState = useOverlayTriggerState({});
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState<string>("all");
-    const [modalOpen, setModalOpen] = useState(false);
-    const [form, setForm] = useState({ displayName: "", identifierType: "instagram" as IdentifierType, identifier: "", phone: "" });
-    const [error, setError] = useState("");
 
     const { data: customerDtos = [], isLoading, isError } = useQuery({
         queryKey: ["customers"],
@@ -86,37 +73,6 @@ export default function CustomersPage() {
     const totalCustomers = customers.length;
     const withBalance = customers.filter((c) => c.outstandingBalance > 0).length;
 
-    const createMutation = useMutation({
-        mutationFn: async () => {
-            setError("");
-            if (!form.displayName.trim() || !form.identifier.trim()) {
-                throw new Error("Name and identifier are required.");
-            }
-
-            const payload = {
-                display_name: form.displayName.trim(),
-                identifier: form.identifier.trim(),
-                identifier_type: uiToApiIdentifierType(form.identifierType),
-                phone: form.phone.trim() || null,
-            };
-
-            return createCustomer(payload);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["customers"] });
-            setForm({ displayName: "", identifierType: "instagram", identifier: "", phone: "" });
-            setModalOpen(false);
-        },
-        onError: (err: unknown) => {
-            const message = err instanceof Error ? err.message : "Failed to create customer";
-            setError(message);
-        },
-    });
-
-    const handleAdd = () => {
-        createMutation.mutate();
-    };
-
     const typeIcon = (type: IdentifierType) => {
         const colors: Record<IdentifierType, string> = {
             tiktok: "bg-foreground/10 text-foreground",
@@ -135,67 +91,18 @@ export default function CustomersPage() {
                     <h1 className="page-header">Customers</h1>
                     <p className="page-subtitle">Manage your customer base and track balances</p>
                 </div>
-                <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-                    <DialogTrigger asChild>
+                <SheetDrawer
+                    open={addState.isOpen}
+                    title="Add New Customer"
+                    trigger={
                         <Button>
                             <Plus className="h-4 w-4 mr-2" /> Add Customer
                         </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle className="font-heading">Add New Customer</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div>
-                                <Label>Display Name</Label>
-                                <Input
-                                    value={form.displayName}
-                                    onChange={(e) => setForm((p) => ({ ...p, displayName: e.target.value }))}
-                                    placeholder="e.g. Sarah Kimani"
-                                />
-                            </div>
-                            <div>
-                                <Label>Identifier Type</Label>
-                                <Select
-                                    value={form.identifierType}
-                                    onValueChange={(v: IdentifierType) => setForm((p) => ({ ...p, identifierType: v }))}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {(Object.entries(identifierTypeLabels) as [IdentifierType, string][]).map(([k, v]) => (
-                                            <SelectItem key={k} value={k}>
-                                                {v}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Identifier</Label>
-                                <Input
-                                    value={form.identifier}
-                                    onChange={(e) => setForm((p) => ({ ...p, identifier: e.target.value }))}
-                                    placeholder={
-                                        form.identifierType === "tiktok" || form.identifierType === "instagram" ? "@handle" : "Nickname or username"
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Phone (optional)</Label>
-                                <Input value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} placeholder="+254..." />
-                            </div>
-                            {error && <p className="text-sm text-destructive">{error}</p>}
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setModalOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button onClick={handleAdd}>Save Customer</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                    }
+                    onOpenChange={addState.setOpen}
+                >
+                    <CustomerForm type="create" onClose={addState.close} />
+                </SheetDrawer>
             </div>
 
             {/* Stats */}
@@ -229,7 +136,7 @@ export default function CustomersPage() {
                         </div>
                         <div>
                             <p className="metric-label">Total Outstanding</p>
-                            <p className="metric-value text-xl text-destructive">${totalOutstanding}</p>
+                            <p className="metric-value text-xl text-destructive">{currency(totalOutstanding)}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -269,33 +176,40 @@ export default function CustomersPage() {
                                     <th className="text-left p-3 font-medium text-muted-foreground">Total Purchases</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Outstanding</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Last Purchase</th>
+                                    <th className="text-left p-3 font-medium text-muted-foreground w-24">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.map((c) => (
-                                    <tr
-                                        key={c.id}
-                                        className="border-b last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
-                                        onClick={() => navigate(`/customers/${c.id}`)}
-                                    >
-                                        <td className="p-3 font-medium">{c.displayName}</td>
-                                        <td className="p-3 font-mono text-xs">{c.identifier}</td>
-                                        <td className="p-3">
-                                            <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                                {identifierTypeLabels[c.identifierType]}
-                                            </Badge>
-                                        </td>
-                                        <td className="p-3 font-medium">${c.totalPurchases}</td>
-                                        <td className="p-3">
-                                            {c.outstandingBalance > 0 ? (
-                                                <span className="font-semibold text-destructive">${c.outstandingBalance}</span>
-                                            ) : (
-                                                <span className="text-success font-medium">$0</span>
-                                            )}
-                                        </td>
-                                        <td className="p-3 text-muted-foreground text-xs">{c.lastPurchaseDate ?? "—"}</td>
-                                    </tr>
-                                ))}
+                                {filtered.map((c) => {
+                                    const dto = customerDtos.find((d) => d.id === c.id);
+                                    return (
+                                        <tr
+                                            key={c.id}
+                                            className="border-b last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
+                                            onClick={() => navigate(`/customers/${c.id}`)}
+                                        >
+                                            <td className="p-3 font-medium">{c.displayName}</td>
+                                            <td className="p-3 font-mono text-xs">{c.identifier}</td>
+                                            <td className="p-3">
+                                                <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
+                                                    {identifierTypeLabels[c.identifierType]}
+                                                </Badge>
+                                            </td>
+                                            <td className="p-3 font-medium">{currency(c.totalPurchases)}</td>
+                                            <td className="p-3">
+                                                {c.outstandingBalance > 0 ? (
+                                                    <span className="font-semibold text-destructive">{currency(c.outstandingBalance)}</span>
+                                                ) : (
+                                                    <span className="text-success font-medium">{currency(0)}</span>
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-muted-foreground text-xs">{c.lastPurchaseDate ?? "—"}</td>
+                                            <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                                                {dto && <CustomerActions customer={dto} />}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </CardContent>
@@ -304,27 +218,33 @@ export default function CustomersPage() {
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-3">
-                {filtered.map((c) => (
-                    <Card key={c.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/customers/${c.id}`)}>
-                        <CardContent className="p-4 space-y-2">
-                            <div className="flex items-center justify-between">
-                                <span className="font-medium">{c.displayName}</span>
-                                <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                    {identifierTypeLabels[c.identifierType]}
-                                </Badge>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="font-mono text-xs text-muted-foreground">{c.identifier}</span>
-                                <div className="text-right">
-                                    <p className="font-heading font-bold">${c.totalPurchases}</p>
+                {filtered.map((c) => {
+                    const dto = customerDtos.find((d) => d.id === c.id);
+                    return (
+                        <Card key={c.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/customers/${c.id}`)}>
+                            <CardContent className="p-4 space-y-2">
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                        <span className="font-medium block truncate">{c.displayName}</span>
+                                        <span className="font-mono text-xs text-muted-foreground">{c.identifier}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
+                                            {identifierTypeLabels[c.identifierType]}
+                                        </Badge>
+                                        {dto && <CustomerActions customer={dto} />}
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <p className="font-heading font-bold">{currency(c.totalPurchases)}</p>
                                     {c.outstandingBalance > 0 && (
-                                        <p className="text-xs text-destructive font-semibold">Bal: ${c.outstandingBalance}</p>
+                                        <p className="text-xs text-destructive font-semibold">Bal: {currency(c.outstandingBalance)}</p>
                                     )}
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
         </div>
     );
