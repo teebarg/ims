@@ -18,28 +18,37 @@ class Sale(Base):
     customer_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("customer.id"), index=True
     )
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("category.id"), nullable=False, index=True
+    )
 
-    category: Mapped[str] = mapped_column(String(50))
     total_quantity: Mapped[int] = mapped_column(Integer)
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
 
     channel: Mapped[SalesChannel] = mapped_column(
         Enum(SalesChannel, name="sales_channel", native_enum=False), nullable=False
     )
-    user_id: Mapped[UUIDType | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("user.id"),
-        nullable=True,
-        index=True,
+    staff_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default="PENDING"
     )
 
-    sale_date: Mapped[date] = mapped_column(Date, nullable=False)
+    sale_date: Mapped[date] = mapped_column(
+        Date, nullable=False, server_default=func.current_date()
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
     bale: Mapped["Bale"] = relationship("Bale", back_populates="sales")
     customer: Mapped["Customer"] = relationship("Customer", back_populates="sales")
+    category: Mapped["Category"] = relationship("Category", back_populates="sales")
     payments: Mapped[list["Payment"]] = relationship(
         "Payment", back_populates="sale", cascade="all, delete-orphan"
     )

@@ -1,14 +1,13 @@
-"""initial core tables
+"""initial core tables with categories table
 
 Revision ID: 0001_initial
-Revises:
-Create Date: 2026-03-04
+Revises: 
+Create Date: 2026-03-05
 """
 
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
-
 
 revision = "0001_initial"
 down_revision = None
@@ -17,34 +16,11 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Categories table
     op.create_table(
-        "user",
-        sa.Column(
-            "id",
-            postgresql.UUID(as_uuid=True),
-            primary_key=True,
-        ),
-        sa.Column("email", sa.String(length=255), nullable=False, unique=True),
-        sa.Column("full_name", sa.String(length=255), nullable=False),
-        sa.Column("hashed_password", sa.String(length=255), nullable=False),
-        sa.Column(
-            "role",
-            sa.Enum(
-                "SUPER_ADMIN",
-                "ADMIN",
-                "STAFF",
-                name="user_role",
-                native_enum=False,
-            ),
-            nullable=False,
-            server_default="STAFF",
-        ),
-        sa.Column(
-            "is_active",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.sql.expression.true(),
-        ),
+        "category",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("name", sa.String(length=50), nullable=False, unique=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -59,86 +35,48 @@ def upgrade() -> None:
         ),
     )
 
+    # Bale table
     op.create_table(
         "bale",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("reference", sa.String(length=50), nullable=False, unique=True),
-        sa.Column("category", sa.String(length=50), nullable=False),
+        sa.Column("category_id", sa.Integer(), sa.ForeignKey("category.id"), nullable=False),
         sa.Column("purchase_price", sa.Numeric(12, 2), nullable=False),
         sa.Column("total_items", sa.Integer(), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
 
+    # Customer table
     op.create_table(
         "customer",
-        sa.Column(
-            "id",
-            postgresql.UUID(as_uuid=True),
-            primary_key=True,
-        ),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("display_name", sa.String(length=255), nullable=False),
         sa.Column("identifier", sa.String(length=255), nullable=False, unique=True),
         sa.Column("identifier_type", sa.String(length=50), nullable=False),
         sa.Column("phone", sa.String(length=50), nullable=True),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
 
+    # Sale table
     op.create_table(
         "sale",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("bale_id", sa.Integer(), sa.ForeignKey("bale.id"), nullable=False),
-        sa.Column(
-            "customer_id",
-            postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("customer.id"),
-            nullable=False,
-        ),
-        sa.Column("category", sa.String(length=50), nullable=False),
+        sa.Column("customer_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("customer.id"), nullable=False),
+        sa.Column("category_id", sa.Integer(), sa.ForeignKey("category.id"), nullable=False),
         sa.Column("total_quantity", sa.Integer(), nullable=False),
         sa.Column("total_amount", sa.Numeric(12, 2), nullable=False),
-        sa.Column("channel", sa.String(length=50), nullable=False),
-        sa.Column(
-            "user_id",
-            postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("user.id"),
-            nullable=True,
-        ),
-        sa.Column(
-            "sale_date",
-            sa.Date(),
-            nullable=False,
-            server_default=sa.func.current_date(),
-        ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
+        sa.Column("channel", sa.String(length=50), nullable=False),  # Shop / Social / Website
+        sa.Column("staff_id", sa.String(length=255), nullable=False),  # Clerk user ID
+        sa.Column("status", sa.String(length=20), nullable=False, server_default="PENDING"),  # PENDING / PARTIAL / PAID
+        sa.Column("sale_date", sa.Date(), nullable=False, server_default=sa.func.current_date()),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
     )
 
+    # Payment table
     op.create_table(
         "payment",
         sa.Column("id", sa.Integer(), primary_key=True),
@@ -146,33 +84,20 @@ def upgrade() -> None:
         sa.Column("amount", sa.Numeric(12, 2), nullable=False),
         sa.Column("method", sa.String(length=50), nullable=False),
         sa.Column("reference", sa.String(length=100), nullable=True),
-        sa.Column(
-            "payment_date",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
+        sa.Column("payment_date", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
 
+    # Inventory stock table
     op.create_table(
         "inventorystock",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("bale_id", sa.Integer(), sa.ForeignKey("bale.id"), nullable=True),
-        sa.Column("category", sa.String(length=50), nullable=False),
+        sa.Column("sale_id", sa.Integer(), sa.ForeignKey("sale.id"), nullable=True),
+        sa.Column("category_id", sa.Integer(), sa.ForeignKey("category.id"), nullable=False),
         sa.Column("quantity_change", sa.Integer(), nullable=False),
         sa.Column("reason", sa.String(length=50), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
 
 
@@ -182,5 +107,4 @@ def downgrade() -> None:
     op.drop_table("sale")
     op.drop_table("customer")
     op.drop_table("bale")
-    op.drop_table("user")
-
+    op.drop_table("category")

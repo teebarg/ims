@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserButton } from "@clerk/react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -16,6 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <Bell className="h-4 w-4" />
                             <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive" />
                         </Button>
+                        <UserButton />
                     </header>
                     <main className="flex-1 p-4 md:p-6 overflow-auto">
                         {children}

@@ -1,82 +1,153 @@
-version: "3.9"
-
 services:
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: thrift
-      POSTGRES_PASSWORD: thrift
-      POSTGRES_DB: thrift_db
+  traefik:
+    image: traefik:v3.6.1
+    command:
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - --providers.docker
+      # Add a constraint to only use services with the label for this stack
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      # - --log.level=DEBUG  # Debug logging
     ports:
-      - "5432:5432"
+      - 6000:80 # HTTP entrypoint
+      - 6001:8080 # Traefik dashboard
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - web
+      - traefik-public
+      - default
+    labels:
+      # Enable Traefik
+      - traefik.enable=true
+      - traefik.constraint-label=traefik-public
+      # Dashboard route setup
+      - traefik.http.routers.traefik-dashboard.entrypoints=http
+      - traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik-dashboard.service=api@internal
+      - traefik.http.middlewares.https-redirect.contenttype.autodetect=false
+
+  # frontend:
+  #   image: node:20
+  #   working_dir: /app
+  #   build: ./frontend
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+  #   depends_on:
+  #     - api
+  #   env_file:
+  #     - ./frontend/.env
+  #   ports:
+  #     - "6002:5173"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - traefik.docker.network=traefik-public
+  #     - traefik.constraint-label=traefik-public
+
+  #     - "traefik.http.routers.ims-frontend.rule=Host(`ims.localhost`)"
+  #     - "traefik.http.routers.ims-frontend.entrypoints=http"
+  #     - "traefik.http.services.ims-frontend.loadbalancer.server.port=5173"
+  #   networks:
+  #     - traefik-public
+  #     - default
 
   api:
-    build: .
-    depends_on:
-      - db
+    image: 'ims:${TAG-latest}'
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+
+      - traefik.http.services.ims-backend.loadbalancer.server.port=8000
+
+      - traefik.http.routers.ims-backend-http.rule=Host(`api.localhost`)
+      - traefik.http.routers.ims-backend-http.entrypoints=http
+    ports:
+      - "6003:8000"
+    networks:
+      - traefik-public
+      - default
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql+psycopg2://thrift:thrift@db:5432/thrift_db
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ims.rule=Host(`ims.localhost`)"
-      - "traefik.http.routers.ims.entrypoints=web"
-      - "traefik.http.services.ims.loadbalancer.server.port=8000"
-    networks:
-      - web
-
-  frontend:
-    image: node:20
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+      DATABASE_URL: postgresql+psycopg2://admin:password@db:5432/ims
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-false}
+    platform: linux/amd64 # Patch for M1 Mac
     depends_on:
-      - api
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ims-frontend.rule=Host(`ims-ui.localhost`)"
-      - "traefik.http.routers.ims-frontend.entrypoints=web"
-      - "traefik.http.services.ims-frontend.loadbalancer.server.port=5173"
+      db:
+        condition: service_healthy
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    # command:
+    #   - fastapi
+    #   - run
+    #   - --reload
+    #   - "app/main.py"
+    develop:
+      watch:
+        - path: ./
+          action: sync
+          target: /app
+          ignore:
+            - ./.venv
+            - .venv
+        - path: ./pyproject.toml
+          action: rebuild
+    volumes:
+      - ./:/app
+      - /app/.venv
+
+  db:
+    image: postgres:15
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d ims" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    ports:
+      - "6004:5432"
     networks:
-      - web
+      - traefik-public
+      - default
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ims
+    volumes:
+      - db-data:/var/lib/postgresql/data
 
   adminer:
-    image: adminer:latest
-    restart: always
-    environment:
-      ADMINER_DEFAULT_SERVER: db
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.adminer.rule=Host(`adminer.localhost`)"
-      - "traefik.http.routers.adminer.entrypoints=web"
-      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
-    networks:
-      - web
-
-  traefik:
-    image: traefik:v2.11
-    command:
-      - "--api.dashboard=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
+    image: adminer:5.3.0
     ports:
-      - "6000:80"        # access via http://ims.localhost:6000 and http://adminer.localhost:6000
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "6005:8080"
     networks:
-      - web
+      - traefik-public
+      - default
+    depends_on:
+      - db
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+
+      - traefik.http.services.adminer.loadbalancer.server.port=8080
+
+      - traefik.http.routers.adminer-http.rule=Host(`adminer.localhost`)
+      - traefik.http.routers.adminer-http.entrypoints=http
 
 volumes:
-  postgres_data:
+  db-data:
 
 networks:
-  web:
-    driver: bridge
-
+  traefik-public:
+    external: false

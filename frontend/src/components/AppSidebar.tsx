@@ -39,7 +39,7 @@ export function AppSidebar() {
                     </div>
                     {!collapsed && (
                         <div className="flex flex-col">
-                            <span className="font-heading text-sm font-bold text-sidebar-foreground">ThriftStock</span>
+                            <span className="font-heading text-sm font-bold text-sidebar-foreground">IMS</span>
                             <span className="text-xs text-sidebar-muted">Inventory Manager</span>
                         </div>
                     )}
