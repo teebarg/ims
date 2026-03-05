@@ -148,6 +148,28 @@ export interface SaleDto {
     balance: number;
 }
 
+export function listSales() {
+    return fetchApi<SaleDto[]>("/sales");
+}
+
+export interface CreateSaleInput {
+    bale_id: number;
+    customer_id: string;
+    category_id: number;
+    total_quantity: number;
+    unit_price: number;
+    channel: ApiSalesChannel;
+    user_id?: string | null;
+    sale_date?: string | null;
+}
+
+export function createSale(input: CreateSaleInput) {
+    return fetchApi<SaleDto>("/sales", {
+        method: "POST",
+        body: JSON.stringify(input),
+    });
+}
+
 export function getCustomerSales(customerId: string) {
     return fetchApi<SaleDto[]>(`/customers/${customerId}/sales`);
 }

@@ -4,7 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { cn } from "@/lib/utils";
 
 interface OverlayProps {
-    trigger: React.ReactNode;
+    trigger?: React.ReactNode;
     children: React.ReactNode;
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -30,7 +30,7 @@ const SheetDrawer: React.FC<OverlayProps> = ({
     if (isMobile) {
         return (
             <Drawer open={open} onOpenChange={onOpenChange}>
-                <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+                {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
                 <DrawerContent aria-describedby={undefined} className={cn("data-[vaul-drawer-direction=bottom]:max-h-[95vh]", drawerClassName)}>
                     <DrawerHeader>
                         <DrawerTitle>{title}</DrawerTitle>
@@ -42,7 +42,7 @@ const SheetDrawer: React.FC<OverlayProps> = ({
     }
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetTrigger asChild>{trigger}</SheetTrigger>
+            {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
             <SheetContent
                 aria-describedby={undefined}
                 side={side}

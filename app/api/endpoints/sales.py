@@ -4,10 +4,15 @@ from sqlalchemy.orm import Session
 from app.core.security import UserRole, require_roles
 from app.db.session import get_db
 from app.schemas.sale import SaleCreate, SaleRead
-from app.services.sales import create_sale
+from app.services.sales import create_sale, list_sales
 
 
 router = APIRouter()
+
+
+@router.get("/", response_model=list[SaleRead])
+def get_sales(db: Session = Depends(get_db)) -> list[SaleRead]:
+    return list_sales(db)
 
 
 @router.post("/", response_model=SaleRead, status_code=status.HTTP_201_CREATED)

@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { StoreProvider } from "@/contexts/StoreContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/components/DashboardLayout";
 import DashboardPage from "@/pages/DashboardPage";
@@ -29,8 +28,7 @@ const App = () => (
             path="/*"
             element={
               <ProtectedRoute>
-                <StoreProvider>
-                  <DashboardLayout>
+                <DashboardLayout>
                     <Routes>
                       <Route path="/" element={<DashboardPage />} />
                       <Route
@@ -52,7 +50,6 @@ const App = () => (
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </DashboardLayout>
-                </StoreProvider>
               </ProtectedRoute>
             }
           />

@@ -84,6 +84,12 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
     )
 
 
+def list_sales(db: Session) -> list[SaleRead]:
+    stmt = select(Sale).order_by(Sale.created_at.desc())
+    sales = db.scalars(stmt).all()
+    return enrich_sales_with_payments(db, sales)
+
+
 def enrich_sales_with_payments(db: Session, sales: list[Sale]) -> list[SaleRead]:
     sale_ids = [s.id for s in sales]
     payments_by_sale = _compute_payment_totals(db, sale_ids)

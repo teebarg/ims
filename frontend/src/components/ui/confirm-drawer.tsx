@@ -9,7 +9,7 @@ interface Props {
     content?: string | React.ReactNode;
     onConfirm?: () => void;
     onClose?: () => void;
-    trigger: React.ReactNode;
+    trigger?: React.ReactNode | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     title?: string | React.ReactNode;
@@ -50,7 +50,7 @@ const ConfirmDrawer: React.FC<Props> = ({
     if (isMobile) {
         return (
             <Drawer open={open} onOpenChange={onOpenChange}>
-                <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+                {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
                 <DrawerContent aria-describedby={undefined}>
                     <DrawerHeader className="pb-4">
                         <DrawerTitle>{title || "Confirm?"}</DrawerTitle>
@@ -69,7 +69,7 @@ const ConfirmDrawer: React.FC<Props> = ({
                                 {isLoading ? "Processing..." : confirmText}
                             </button>
                             <button
-                                onClick={onClose}
+                                onClick={handleCancel}
                                 className="w-full py-4 text-center font-medium text-muted-foreground hover:bg-secondary/50 active:bg-secondary transition-colors"
                             >
                                 {cancelText}
@@ -83,7 +83,7 @@ const ConfirmDrawer: React.FC<Props> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogTrigger asChild>{trigger}</DialogTrigger>
+            {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold tracking-tight">{title || "Confirm?"}</DialogTitle>
