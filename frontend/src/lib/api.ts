@@ -66,3 +66,124 @@ export interface CategoryDto {
 export function listCategories() {
     return fetchApi<CategoryDto[]>("/categories/");
 }
+
+// ---- Customers ----
+
+export type ApiIdentifierType = "TIKTOK" | "INSTAGRAM" | "STREET" | "APP_USER";
+
+export interface CustomerDto {
+    id: string;
+    display_name: string;
+    identifier: string;
+    identifier_type: ApiIdentifierType;
+    phone: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateCustomerInput {
+    display_name: string;
+    identifier: string;
+    identifier_type: ApiIdentifierType;
+    phone?: string | null;
+}
+
+export interface UpdateCustomerInput extends CreateCustomerInput {}
+
+export function listCustomers() {
+    return fetchApi<CustomerDto[]>("/customers");
+}
+
+export function createCustomer(input: CreateCustomerInput) {
+    return fetchApi<CustomerDto>("/customers", {
+        method: "POST",
+        body: JSON.stringify(input),
+    });
+}
+
+export function updateCustomer(id: string, input: UpdateCustomerInput) {
+    return fetchApi<CustomerDto>(`/customers/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(input),
+    });
+}
+
+export function deleteCustomer(id: string) {
+    return fetchApi<{ details: string }>(`/customers/${id}`, {
+        method: "DELETE",
+    });
+}
+
+export function getCustomer(id: string) {
+    return fetchApi<CustomerDto>(`/customers/${id}`);
+}
+
+export interface CustomerProfileDto {
+    customer: CustomerDto;
+    sales: SaleDto[];
+    balance: number;
+    lifetime_value: number;
+    payments: PaymentDto[];
+}
+
+export function getCustomerProfile(id: string) {
+    return fetchApi<CustomerProfileDto>(`/customers/${id}/profile`);
+}
+
+export type ApiSalesChannel = "SHOP" | "SOCIAL_MEDIA" | "WEBSITE";
+
+export interface SaleDto {
+    id: number;
+    bale_id: number;
+    customer_id: string;
+    category_id: number;
+    total_quantity: number;
+    unit_price: number;
+    channel: ApiSalesChannel;
+    user_id: string | null;
+    sale_date: string;
+    created_at: string;
+    total_amount: number;
+    total_paid: number;
+    balance: number;
+}
+
+export function getCustomerSales(customerId: string) {
+    return fetchApi<SaleDto[]>(`/customers/${customerId}/sales`);
+}
+
+export function getCustomerBalance(customerId: string) {
+    return fetchApi<{ customer_id: string; balance: number }>(`/customers/${customerId}/balance`);
+}
+
+export function getCustomerLtv(customerId: string) {
+    return fetchApi<{ customer_id: string; lifetime_value: number }>(`/customers/${customerId}/lifetime_value`);
+}
+
+export interface PaymentDto {
+    id: number;
+    sale_id: number;
+    amount: number;
+    method: string;
+    reference: string | null;
+    payment_date: string;
+    created_at: string;
+}
+
+export function getCustomerPayments(customerId: string) {
+    return fetchApi<PaymentDto[]>(`/customers/${customerId}/payments`);
+}
+
+export interface CreatePaymentInput {
+    sale_id: number;
+    amount: number;
+    method: string;
+    reference?: string | null;
+}
+
+export function createPayment(input: CreatePaymentInput) {
+    return fetchApi<PaymentDto>("/payments", {
+        method: "POST",
+        body: JSON.stringify(input),
+    });
+}

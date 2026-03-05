@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useStore } from "@/contexts/StoreContext";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,15 +10,71 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Users, DollarSign, AlertCircle } from "lucide-react";
 import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
+import { createCustomer, listCustomers, type CustomerDto } from "@/lib/api";
+
+type CustomerRow = {
+    id: string;
+    displayName: string;
+    identifierType: IdentifierType;
+    identifier: string;
+    phone?: string;
+    totalPurchases: number;
+    outstandingBalance: number;
+    lastPurchaseDate: string | null;
+};
+
+function apiToUiIdentifierType(t: CustomerDto["identifier_type"]): IdentifierType {
+    switch (t) {
+        case "TIKTOK":
+            return "tiktok";
+        case "INSTAGRAM":
+            return "instagram";
+        case "STREET":
+            return "street";
+        case "APP_USER":
+            return "app";
+        default:
+            return "instagram";
+    }
+}
+
+function uiToApiIdentifierType(t: IdentifierType): CustomerDto["identifier_type"] {
+    switch (t) {
+        case "tiktok":
+            return "TIKTOK";
+        case "instagram":
+            return "INSTAGRAM";
+        case "street":
+            return "STREET";
+        case "app":
+            return "APP_USER";
+    }
+}
 
 export default function CustomersPage() {
-    const { customers, addCustomer } = useStore();
+    const queryClient = useQueryClient();
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState<string>("all");
     const [modalOpen, setModalOpen] = useState(false);
     const [form, setForm] = useState({ displayName: "", identifierType: "instagram" as IdentifierType, identifier: "", phone: "" });
     const [error, setError] = useState("");
+
+    const { data: customerDtos = [], isLoading, isError } = useQuery({
+        queryKey: ["customers"],
+        queryFn: listCustomers,
+    });
+
+    const customers: CustomerRow[] = customerDtos.map((c) => ({
+        id: c.id,
+        displayName: c.display_name,
+        identifier: c.identifier,
+        identifierType: apiToUiIdentifierType(c.identifier_type),
+        phone: c.phone ?? undefined,
+        totalPurchases: 0,
+        outstandingBalance: 0,
+        lastPurchaseDate: null,
+    }));
 
     const filtered = customers.filter((c) => {
         const matchSearch = c.displayName.toLowerCase().includes(search.toLowerCase()) || c.identifier.toLowerCase().includes(search.toLowerCase());
@@ -30,25 +86,35 @@ export default function CustomersPage() {
     const totalCustomers = customers.length;
     const withBalance = customers.filter((c) => c.outstandingBalance > 0).length;
 
+    const createMutation = useMutation({
+        mutationFn: async () => {
+            setError("");
+            if (!form.displayName.trim() || !form.identifier.trim()) {
+                throw new Error("Name and identifier are required.");
+            }
+
+            const payload = {
+                display_name: form.displayName.trim(),
+                identifier: form.identifier.trim(),
+                identifier_type: uiToApiIdentifierType(form.identifierType),
+                phone: form.phone.trim() || null,
+            };
+
+            return createCustomer(payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["customers"] });
+            setForm({ displayName: "", identifierType: "instagram", identifier: "", phone: "" });
+            setModalOpen(false);
+        },
+        onError: (err: unknown) => {
+            const message = err instanceof Error ? err.message : "Failed to create customer";
+            setError(message);
+        },
+    });
+
     const handleAdd = () => {
-        setError("");
-        if (!form.displayName.trim() || !form.identifier.trim()) {
-            setError("Name and identifier are required.");
-            return;
-        }
-        const exists = customers.some((c) => c.identifier.toLowerCase() === form.identifier.toLowerCase());
-        if (exists) {
-            setError("This identifier is already taken.");
-            return;
-        }
-        addCustomer({
-            displayName: form.displayName.trim(),
-            identifierType: form.identifierType,
-            identifier: form.identifier.trim(),
-            phone: form.phone.trim() || undefined,
-        });
-        setForm({ displayName: "", identifierType: "instagram", identifier: "", phone: "" });
-        setModalOpen(false);
+        createMutation.mutate();
     };
 
     const typeIcon = (type: IdentifierType) => {
