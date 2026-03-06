@@ -136,7 +136,7 @@ export function getCustomerProfile(id: string) {
     return fetchApi<CustomerProfileDto>(`/customers/${id}/profile`);
 }
 
-export type ApiSalesChannel = "SHOP" | "SOCIAL_MEDIA" | "WEBSITE";
+export type ApiSalesChannel = "SHOP" | "TIKTOK" | "INSTAGRAM" | "WEBSITE";
 
 export interface SaleDto {
     id: number;
@@ -159,14 +159,17 @@ export function listSales() {
 }
 
 export interface CreateSaleInput {
-    bale_id: number;
     customer_id: string;
-    category_id: number;
     total_quantity: number;
     unit_price: number;
     channel: ApiSalesChannel;
     user_id?: string | null;
     sale_date?: string | null;
+    items: Array<{
+        category_id: string;
+        quantity: number;
+        amount: number;
+    }>;
 }
 
 export function createSale(input: CreateSaleInput) {

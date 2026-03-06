@@ -15,7 +15,7 @@ import {
     type SaleDto,
     type ApiSalesChannel,
 } from "@/lib/api";
-import { channelLabels } from "@/types/customer";
+import { Channel, channelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
 import { AlertTriangle, DollarSign, Package, ShoppingCart } from "lucide-react";
 
@@ -23,10 +23,11 @@ const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "S
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
 const LOW_STOCK_THRESHOLD = 15;
 
-function apiToUiChannel(ch: ApiSalesChannel): "shop" | "social" | "website" {
+function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
         case "SHOP": return "shop";
-        case "SOCIAL_MEDIA": return "social";
+        case "TIKTOK": return "tiktok";
+        case "INSTAGRAM": return "instagram";
         case "WEBSITE": return "website";
         default: return "shop";
     }

@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field
 
 class SalesChannel(str, Enum):
     SHOP = "SHOP"
-    SOCIAL_MEDIA = "SOCIAL_MEDIA"
+    TIKTOK = "TIKTOK"
+    INSTAGRAM = "INSTAGRAM"
     WEBSITE = "WEBSITE"
 
 

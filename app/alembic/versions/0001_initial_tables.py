@@ -98,7 +98,7 @@ def upgrade() -> None:
         ),
         sa.Column("total_amount", sa.Numeric(12, 2), nullable=False),
         sa.Column("channel", sa.String(length=50),
-                  nullable=False),  # Shop / Social / Website
+                  nullable=False),  # Shop / tiktok / instagram / website
         sa.Column("staff_id", sa.String(length=255),
                   nullable=False),  # Clerk user ID
         sa.Column(

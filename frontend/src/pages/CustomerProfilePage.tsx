@@ -18,15 +18,18 @@ import {
 } from "@/lib/api";
 import { toast } from "sonner";
 import { currency } from "@/lib/utils";
+import { Channel } from "@/types/customer";
 
 const CHANNEL_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)"];
 
-function apiToUiChannel(ch: ApiSalesChannel): "shop" | "social" | "website" {
+function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
         case "SHOP":
             return "shop";
-        case "SOCIAL_MEDIA":
-            return "social";
+        case "TIKTOK":
+            return "tiktok";
+        case "INSTAGRAM":
+            return "instagram";
         case "WEBSITE":
             return "website";
         default:

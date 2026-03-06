@@ -20,7 +20,8 @@ class IdentifierType(str, enum.Enum):
 
 class SalesChannel(str, enum.Enum):
     SHOP = "SHOP"
-    SOCIAL_MEDIA = "SOCIAL_MEDIA"
+    TIKTOK = "TIKTOK"
+    INSTAGRAM = "INSTAGRAM"
     WEBSITE = "WEBSITE"
 
 

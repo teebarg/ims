@@ -53,8 +53,9 @@ const topCustomers = [
 
 const channelPie = [
     { name: "Shop", value: 55, color: "hsl(25, 75%, 47%)" },
-    { name: "Social Media", value: 28, color: "hsl(152, 60%, 40%)" },
-    { name: "Website", value: 17, color: "hsl(38, 92%, 50%)" },
+    { name: "Tiktok", value: 28, color: "hsl(152, 60%, 40%)" },
+    { name: "Instagram", value: 12, color: "hsl(38, 92%, 50%)" },
+    { name: "Website", value: 5, color: "hsl(210, 60%, 50%)" },
 ];
 
 const tooltipStyle = {

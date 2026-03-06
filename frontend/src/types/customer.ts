@@ -1,4 +1,12 @@
 export type IdentifierType = "tiktok" | "instagram" | "street" | "app";
+export const CHANNELS = {
+  SHOP: "shop",
+  TIKTOK: "tiktok",
+  INSTAGRAM: "instagram",
+  WEBSITE: "website",
+} as const;
+
+export type Channel = typeof CHANNELS[keyof typeof CHANNELS];
 
 export interface Customer {
   id: string;
@@ -11,14 +19,20 @@ export interface Customer {
   lastPurchaseDate: string | null;
 }
 
+export interface SaleLineItem {
+  category: string;
+  quantity: number;
+  amount: number;
+}
+
 export interface Sale {
   id: string;
   date: string;
   customerId: string;
-  items: number;
+  items: SaleLineItem[];
   total: number;
   paid: number;
-  channel: "shop" | "social" | "website";
+  channel: Channel;
   status: "paid" | "partial" | "unpaid";
 }
 
@@ -45,6 +59,7 @@ export const identifierTypePrefixes: Record<IdentifierType, string> = {
 
 export const channelLabels: Record<string, string> = {
   shop: "Shop",
-  social: "Social Media",
+  tiktok: "TikTok",
+  instagram: "Instagram",
   website: "Website",
 };
