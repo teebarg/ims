@@ -8,20 +8,20 @@ import { ThemeProvider } from "@/components/theme-provider";
 const rootElement = document.getElementById("root") as HTMLElement;
 
 const AppWrapper = () => {
-  const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  if (!PUBLISHABLE_KEY) throw new Error("Add your Clerk Publishable Key");
+    const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+    if (!PUBLISHABLE_KEY) throw new Error("Add your Clerk Publishable Key");
 
-  return (
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <ThemeProvider defaultTheme="system" enableSystem>
-        <App />
-      </ThemeProvider>
-    </ClerkProvider>
-  );
+    return (
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+            <ThemeProvider defaultTheme="system" enableSystem>
+                <App />
+            </ThemeProvider>
+        </ClerkProvider>
+    );
 };
 
 ReactDOM.createRoot(rootElement).render(
-  <React.StrictMode>
-    <AppWrapper />
-  </React.StrictMode>,
+    <React.StrictMode>
+        <AppWrapper />
+    </React.StrictMode>
 );

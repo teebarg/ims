@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     debug: bool = Field(default=True)
 
     database_url: str = Field(alias="DATABASE_URL")
+    CLERK_JWKS_URL: str = ""
+    CLERK_ISSUER_URL: str = ""
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost"]'

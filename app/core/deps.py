@@ -6,7 +6,7 @@ import httpx
 from jose import jwt
 from fastapi import Request, HTTPException
 
-CLERK_JWKS_URL = "https://pretty-shrew-80.clerk.accounts.dev/.well-known/jwks.json"
+CLERK_JWKS_URL = settings.CLERK_JWKS_URL
 
 JWKS_CACHE = None
 JWKS_CACHE_EXP = 0
@@ -41,14 +41,10 @@ async def get_current_user(request: Request):
             token,
             jwks,
             algorithms=["RS256"],
-            issuer="https://pretty-shrew-80.clerk.accounts.dev",
+            issuer=settings.CLERK_ISSUER_URL,
             options={"verify_aud": False},
         )
     except Exception:
         raise HTTPException(401, "Invalid or expired token")
 
     return payload
-
-# CurrentUser = Depends(get_current_user)
-# AdminUser = Depends(require_roles(["admin", "super-admin"]))
-# SuperAdminUser = Depends(require_roles(["super-admin"]))

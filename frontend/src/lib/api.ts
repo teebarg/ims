@@ -225,9 +225,6 @@ export function createPayment(input: CreatePaymentInput) {
 
 export interface AnalyticsSummaryDto {
     total_revenue: number;
-    total_profit: number;
-    turnover_rate: number;
-    profit_per_bale: { bale_id: number; reference: string; profit: number }[];
 }
 
 export interface SalesTrendPointDto {

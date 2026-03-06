@@ -1,17 +1,13 @@
-from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import cast, func, select
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.orm import Session
 
-from app.models.bale import Bale
 from app.models.category import Category
 from app.models.inventory import InventoryStock
 from app.models.sale import Sale
-from app.models.sale_item import SaleItem
 from app.schemas.analytics import (
     AnalyticsSummary,
-    ProfitPerBale,
     SalesTrendPoint,
     SalesTrendResponse,
     StockCategory,
@@ -46,7 +42,8 @@ def get_sales_trends(db: Session, period: str = "weekly") -> SalesTrendResponse:
         trunc_expr = func.date_trunc("week", Sale.sale_date)
     else:
         trunc_expr = func.date_trunc("month", Sale.sale_date)
-    period_col = cast(trunc_expr, date).label("period_start")
+    # Cast to SQLAlchemy Date type, not Python's datetime.date
+    period_col = cast(trunc_expr, Date).label("period_start")
 
     stmt = (
         select(
@@ -66,49 +63,11 @@ def get_sales_trends(db: Session, period: str = "weekly") -> SalesTrendResponse:
 
 
 def get_analytics_summary(db: Session) -> AnalyticsSummary:
-    # total revenue
     revenue_stmt = select(func.coalesce(func.sum(Sale.total_amount), 0)).select_from(
         Sale
     )
     total_revenue = Decimal(db.execute(revenue_stmt).scalar_one())
 
-    # profit per bale = sum(sale revenue) - purchase_price
-    bale_profit_stmt = (
-        select(
-            Bale.id,
-            Bale.reference,
-            (func.coalesce(func.sum(Sale.total_amount), 0) - Bale.purchase_price).label(
-                "profit"
-            ),
-        )
-        .join(Sale, Sale.bale_id == Bale.id, isouter=True)
-        .group_by(Bale.id, Bale.reference, Bale.purchase_price)
-    )
-    bale_rows = db.execute(bale_profit_stmt).all()
-    profit_per_bale = [
-        ProfitPerBale(
-            bale_id=bale_id,
-            reference=reference,
-            profit=Decimal(profit),
-        )
-        for bale_id, reference, profit in bale_rows
-    ]
-    total_profit = sum(p.profit for p in profit_per_bale)
-
-    # simple turnover: total items sold / max(current stock, 1)
-    sold_items_stmt = select(
-        func.coalesce(func.sum(SaleItem.quantity), 0)
-    ).select_from(SaleItem)
-    sold_items = int(db.execute(sold_items_stmt).scalar_one())
-
-    stock_snapshot = get_stock_snapshot(db)
-    current_stock = max(stock_snapshot.total_stock, 1)
-    turnover_rate = sold_items / float(current_stock)
-
     return AnalyticsSummary(
         total_revenue=total_revenue,
-        total_profit=total_profit,
-        turnover_rate=turnover_rate,
-        profit_per_bale=profit_per_bale,
     )
-
