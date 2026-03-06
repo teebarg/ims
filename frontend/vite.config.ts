@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["robots.txt", "icon-512.png"],
       manifest: {
-        name: "Inventory Management",
+        name: "Revoque IMS",
         short_name: "IMS",
         description: "Inventory Management System – bales, sales, customers & analytics",
         theme_color: "#0f172a",

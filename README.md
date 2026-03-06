@@ -1,6 +1,6 @@
-## Thrift Shop Inventory API
+## Revoque IMS API
 
-FastAPI microservice for managing thrift shop bales, sales, payments, inventory stock, and analytics.
+FastAPI microservice for managing Revoquue bales, sales, payments, inventory stock, and analytics.
 
 ### Features
 
@@ -56,7 +56,7 @@ cp .env.example .env
 
 2. Adjust values as needed:
 
-- **DATABASE_URL** – e.g. `postgresql+psycopg2://thrift:thrift@localhost:5432/thrift_db`
+- **DATABASE_URL** – e.g. `postgresql+psycopg2://admin:password@localhost:5432/shop`
 
 ---
 

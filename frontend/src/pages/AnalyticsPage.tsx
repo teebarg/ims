@@ -1,22 +1,10 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select";
-import { Download, TrendingUp, TrendingDown } from "lucide-react";
-import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area
-} from "recharts";
-
-const weeklyData = [
-    { week: "W1", sales: 42, revenue: 1260 },
-    { week: "W2", sales: 58, revenue: 1740 },
-    { week: "W3", sales: 35, revenue: 1050 },
-    { week: "W4", sales: 72, revenue: 2160 },
-];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Download } from "lucide-react";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
+import { currency } from "@/lib/utils";
 
 const monthlyTrend = [
     { month: "Oct", revenue: 3200, cost: 1800, profit: 1400 },
@@ -59,10 +47,10 @@ const channelPie = [
 ];
 
 const tooltipStyle = {
-    backgroundColor: 'hsl(40, 25%, 99%)',
-    border: '1px solid hsl(35, 18%, 88%)',
-    borderRadius: '0.75rem',
-    fontSize: '0.75rem',
+    backgroundColor: "hsl(40, 25%, 99%)",
+    border: "1px solid hsl(35, 18%, 88%)",
+    borderRadius: "0.75rem",
+    fontSize: "0.75rem",
 };
 
 export default function AnalyticsPage() {
@@ -70,13 +58,13 @@ export default function AnalyticsPage() {
 
     const handleExport = () => {
         const headers = ["Bale", "Cost", "Revenue", "Profit", "Margin"];
-        const rows = baleProfit.map(b => [b.bale, b.cost, b.revenue, b.profit, b.margin]);
-        const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+        const rows = baleProfit.map((b) => [b.bale, b.cost, b.revenue, b.profit, b.margin]);
+        const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "thriftstock-report.csv";
+        a.download = "ims-report.csv";
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -90,7 +78,9 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                     <Select value={period} onValueChange={setPeriod}>
-                        <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-32">
+                            <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="weekly">Weekly</SelectItem>
                             <SelectItem value="monthly">Monthly</SelectItem>
@@ -123,8 +113,8 @@ export default function AnalyticsPage() {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                                <XAxis dataKey="month" tick={{ fill: 'hsl(30, 8%, 46%)', fontSize: 12 }} />
-                                <YAxis tick={{ fill: 'hsl(30, 8%, 46%)', fontSize: 12 }} />
+                                <XAxis dataKey="month" tick={{ fill: "hsl(30, 8%, 46%)", fontSize: 12 }} />
+                                <YAxis tick={{ fill: "hsl(30, 8%, 46%)", fontSize: 12 }} />
                                 <Tooltip contentStyle={tooltipStyle} />
                                 <Area type="monotone" dataKey="revenue" stroke="hsl(25, 75%, 47%)" fill="url(#gradRevenue)" strokeWidth={2} />
                                 <Area type="monotone" dataKey="profit" stroke="hsl(152, 60%, 40%)" fill="url(#gradProfit)" strokeWidth={2} />
@@ -146,8 +136,8 @@ export default function AnalyticsPage() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={categoryTrend}>
                                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                                    <XAxis dataKey="month" tick={{ fill: 'hsl(30, 8%, 46%)', fontSize: 12 }} />
-                                    <YAxis tick={{ fill: 'hsl(30, 8%, 46%)', fontSize: 12 }} />
+                                    <XAxis dataKey="month" tick={{ fill: "hsl(30, 8%, 46%)", fontSize: 12 }} />
+                                    <YAxis tick={{ fill: "hsl(30, 8%, 46%)", fontSize: 12 }} />
                                     <Tooltip contentStyle={tooltipStyle} />
                                     <Line type="monotone" dataKey="shirts" stroke="hsl(25, 75%, 47%)" strokeWidth={2} dot={false} />
                                     <Line type="monotone" dataKey="pants" stroke="hsl(152, 60%, 40%)" strokeWidth={2} dot={false} />
@@ -162,7 +152,7 @@ export default function AnalyticsPage() {
                                 { label: "Pants", color: "hsl(152, 60%, 40%)" },
                                 { label: "Jackets", color: "hsl(38, 92%, 50%)" },
                                 { label: "Others", color: "hsl(30, 8%, 46%)" },
-                            ].map(l => (
+                            ].map((l) => (
                                 <div key={l.label} className="flex items-center gap-1.5 text-xs">
                                     <div className="h-2 w-2 rounded-full" style={{ backgroundColor: l.color }} />
                                     <span className="text-muted-foreground">{l.label}</span>
@@ -183,14 +173,16 @@ export default function AnalyticsPage() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie data={channelPie} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
-                                        {channelPie.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                                        {channelPie.map((entry, i) => (
+                                            <Cell key={i} fill={entry.color} />
+                                        ))}
                                     </Pie>
                                     <Tooltip contentStyle={tooltipStyle} />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
                         <div className="flex justify-center gap-6 mt-2">
-                            {channelPie.map(ch => (
+                            {channelPie.map((ch) => (
                                 <div key={ch.name} className="flex items-center gap-1.5 text-xs">
                                     <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ch.color }} />
                                     <span className="text-muted-foreground">{ch.name}</span>
@@ -203,35 +195,6 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Bale Profitability */}
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-heading">Bale Profitability</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                            {baleProfit.map(b => (
-                                <div key={b.bale} className="flex items-center justify-between p-3 rounded-lg bg-muted/40">
-                                    <div>
-                                        <p className="font-mono text-xs font-medium">{b.bale}</p>
-                                        <p className="text-xs text-muted-foreground">Cost: ${b.cost} → Rev: ${b.revenue}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`font-heading font-bold text-sm ${b.profit >= 0 ? "status-success" : "status-danger"}`}>
-                                            {b.profit >= 0 ? "+" : ""}${b.profit}
-                                        </span>
-                                        {b.profit >= 0 ? (
-                                            <TrendingUp className="h-3.5 w-3.5 text-success" />
-                                        ) : (
-                                            <TrendingDown className="h-3.5 w-3.5 text-destructive" />
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
                 {/* Top Customers */}
                 <Card>
                     <CardHeader className="pb-2">
@@ -250,7 +213,7 @@ export default function AnalyticsPage() {
                                             <p className="text-xs text-muted-foreground">{c.purchases} purchases</p>
                                         </div>
                                     </div>
-                                    <span className="font-heading font-bold text-sm">${c.spent}</span>
+                                    <span className="font-heading font-bold text-sm">{currency(c.spent)}</span>
                                 </div>
                             ))}
                         </div>

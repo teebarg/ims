@@ -85,7 +85,7 @@ const CategoryForm = forwardRef<ChildRef, Props>(({ type = "create", onClose, cu
     return (
         <Form {...form}>
             <form className="flex-1 flex flex-col overflow-hidden" onSubmit={handleSubmit(onSubmit)}>
-                <div className="space-y-6 flex-1 overflow-scroll px-2 pb-4">
+                <div className="space-y-6 flex-1 overflow-auto px-2 pb-4">
                     <FormField
                         control={control}
                         name="name"

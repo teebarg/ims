@@ -2,7 +2,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -10,15 +9,11 @@ import { ArrowLeft, CreditCard, DollarSign, Loader2, ShoppingCart, TrendingUp } 
 import { identifierTypeLabels, channelLabels } from "@/types/customer";
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import {
-    getCustomerProfile,
-    createPayment,
-    type ApiIdentifierType,
-    type ApiSalesChannel,
-} from "@/lib/api";
+import { getCustomerProfile, createPayment, type ApiIdentifierType, type ApiSalesChannel } from "@/lib/api";
 import { toast } from "sonner";
 import { currency } from "@/lib/utils";
 import { Channel } from "@/types/customer";
+import CustomerSalesDetails from "@/components/customers/customers-sales-details";
 
 const CHANNEL_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)"];
 
@@ -93,7 +88,7 @@ export default function CustomerProfilePage() {
 
     const totalPaid = lifetimeValue - outstandingBalance;
 
-    const channelData = ["shop", "social", "website"]
+    const channelData = ["shop", "tiktok", "instagram", "website"]
         .map((ch) => ({
             name: channelLabels[ch],
             value: sales.filter((s) => apiToUiChannel(s.channel as ApiSalesChannel) === ch).reduce((a, s) => a + Number(s.total_amount), 0),
@@ -232,64 +227,7 @@ export default function CustomerProfilePage() {
                 </Card>
 
                 {/* Sales History */}
-                <Card className="lg:col-span-2">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-heading">Sales History</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/30">
-                                    <th className="text-left p-3 font-medium text-muted-foreground">ID</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Channel</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Total</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Paid</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sales.map((s) => {
-                                    const status = Number(s.balance) <= 0 ? "paid" : Number(s.total_paid) > 0 ? "partial" : "unpaid";
-                                    const channelUi = apiToUiChannel(s.channel as ApiSalesChannel);
-                                    return (
-                                        <tr key={s.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                            <td className="p-3 font-mono text-xs">{s.id}</td>
-                                            <td className="p-3 text-xs">{s.sale_date}</td>
-                                            <td className="p-3 text-xs">{channelLabels[channelUi]}</td>
-                                            <td className="p-3 font-medium">{currency(s.total_amount)}</td>
-                                            <td className="p-3">{currency(s.total_paid)}</td>
-                                            <td className="p-3">
-                                                <Badge
-                                                    variant={status === "paid" ? "default" : status === "partial" ? "secondary" : "destructive"}
-                                                    className="text-xs font-normal"
-                                                >
-                                                    {status}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-3">
-                                                {status !== "paid" && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="text-xs h-7"
-                                                        onClick={() => {
-                                                            setSelectedSaleId(s.id);
-                                                            setPaymentOpen(true);
-                                                        }}
-                                                    >
-                                                        <CreditCard className="h-3 w-3 mr-1" /> Pay
-                                                    </Button>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </CardContent>
-                </Card>
+                <CustomerSalesDetails sales={sales} />
             </div>
 
             {/* Payment History */}

@@ -16,7 +16,7 @@ def parse_cors(v: Any) -> list[str] | str:
     raise ValueError(v)
 
 class Settings(BaseSettings):
-    app_name: str = "Thrift Shop Inventory API"
+    app_name: str = "Revoque IMS"
     environment: str = Field(default="development")
     debug: bool = Field(default=True)
 

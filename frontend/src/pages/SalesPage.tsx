@@ -12,6 +12,7 @@ import { currency } from "@/lib/utils";
 import SalesForm from "@/components/sales/sales-form";
 import { Channel } from "@/types/customer";
 import PaymentForm from "@/components/sales/payment-form";
+import SalesDetails from "@/components/sales/sales-details";
 
 function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
@@ -176,7 +177,11 @@ export default function SalesPage() {
                                             </td>
                                             <td className="p-3 text-xs">{channelLabels[ch]}</td>
                                             <td className="p-3">
-                                                {sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0}
+                                                <SalesDetails
+                                                    label={`${sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0} items`}
+                                                    items={sale.items || []}
+                                                    total={sale.total_amount}
+                                                />
                                             </td>
                                             <td className="p-3 font-medium">{currency(sale.total_amount)}</td>
                                             <td className="p-3">{currency(sale.total_paid)}</td>
@@ -223,7 +228,9 @@ export default function SalesPage() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-medium">{c?.display_name}</p>
+                                        <button className="text-left hover:underline" onClick={() => navigate(`/customers/${sale.customer_id}`)}>
+                                            <span className="font-medium">{c?.display_name}</span>
+                                        </button>
                                         <p className="text-xs text-muted-foreground font-mono">
                                             {c?.identifier} · {channelLabels[ch]}
                                         </p>
@@ -233,6 +240,11 @@ export default function SalesPage() {
                                         {status !== "paid" && <p className="text-xs text-destructive">Bal: {currency(bal)}</p>}
                                     </div>
                                 </div>
+                                <SalesDetails
+                                    label={`${sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0} items`}
+                                    items={sale.items || []}
+                                    total={sale.total_amount}
+                                />
                                 {status !== "paid" && <PaymentForm sale={sale} displayName={c?.display_name || ""} />}
                             </CardContent>
                         </Card>

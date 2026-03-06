@@ -16,10 +16,10 @@ from starlette.middleware.cors import CORSMiddleware
 
 def create_application() -> FastAPI:
     app = FastAPI(
-        title="Thrift Shop Inventory API",
+        title="Revoque IMS",
         version="0.1.0",
         description=(
-            "FastAPI microservice for thrift shop inventory, bales, sales, "
+            "FastAPI microservice for Revoque inventory, bales, sales, "
             "customers, payments, categories, and analytics."
         ),
     )
