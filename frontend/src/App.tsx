@@ -14,49 +14,48 @@ import AnalyticsPage from "@/pages/AnalyticsPage";
 import NotFound from "./pages/NotFound";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import CategoriesPage from "./pages/CategoriesPage";
+import AccessDeniedPage from "./pages/AccessDeniedPage";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                    <Routes>
-                      <Route path="/" element={<DashboardPage />} />
-                      <Route
-                        path="/bales"
+    <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+                <Routes>
+                    <Route
+                        path="/*"
                         element={
-                          <RoleProtectedRoute allowedRoles={["super-admin"]}>
-                            <BalesPage />
-                          </RoleProtectedRoute>
+                            <ProtectedRoute>
+                                <DashboardLayout>
+                                    <Routes>
+                                        <Route path="/" element={<DashboardPage />} />
+                                        <Route
+                                            path="/bales"
+                                            element={
+                                                <RoleProtectedRoute allowedRoles={["super-admin"]}>
+                                                    <BalesPage />
+                                                </RoleProtectedRoute>
+                                            }
+                                        />
+                                        <Route path="/customers" element={<CustomersPage />} />
+                                        <Route path="/customers/:id" element={<CustomerProfilePage />} />
+                                        <Route path="/sales" element={<SalesPage />} />
+                                        <Route path="/analytics" element={<AnalyticsPage />} />
+                                        <Route path="/categories" element={<CategoriesPage />} />
+                                        <Route path="/no-access" element={<AccessDeniedPage />} />
+                                        <Route path="*" element={<NotFound />} />
+                                    </Routes>
+                                </DashboardLayout>
+                            </ProtectedRoute>
                         }
-                      />
-                      <Route path="/customers" element={<CustomersPage />} />
-                      <Route
-                        path="/customers/:id"
-                        element={<CustomerProfilePage />}
-                      />
-                      <Route path="/sales" element={<SalesPage />} />
-                      <Route path="/analytics" element={<AnalyticsPage />} />
-                      <Route path="/categories" element={<CategoriesPage />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+                    />
+                </Routes>
+            </BrowserRouter>
+        </TooltipProvider>
+    </QueryClientProvider>
 );
 
 export default App;
