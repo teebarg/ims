@@ -34,6 +34,8 @@ export interface BaleDto {
     total_items: number;
     created_at: string;
     updated_at: string;
+    /** Items left (total_items minus quantity sold from this bale). Present when listing bales. */
+    remaining_items?: number;
 }
 
 export interface CreateBaleInput {
@@ -212,4 +214,40 @@ export function createPayment(input: CreatePaymentInput) {
         method: "POST",
         body: JSON.stringify(input),
     });
+}
+
+// ---- Analytics (dashboard) ----
+
+export interface AnalyticsSummaryDto {
+    total_revenue: number;
+    total_profit: number;
+    turnover_rate: number;
+    profit_per_bale: { bale_id: number; reference: string; profit: number }[];
+}
+
+export interface SalesTrendPointDto {
+    period_start: string;
+    total_amount: number;
+}
+
+export interface SalesTrendResponseDto {
+    period: string;
+    points: SalesTrendPointDto[];
+}
+
+export interface StockSnapshotDto {
+    total_stock: number;
+    categories: { category: string; quantity: number }[];
+}
+
+export function getAnalyticsSummary() {
+    return fetchApi<AnalyticsSummaryDto>("/analytics/");
+}
+
+export function getAnalyticsTrends(period: "weekly" | "monthly" = "monthly") {
+    return fetchApi<SalesTrendResponseDto>(`/analytics/trends?period=${period}`);
+}
+
+export function getAnalyticsStock() {
+    return fetchApi<StockSnapshotDto>("/analytics/stock");
 }

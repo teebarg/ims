@@ -23,3 +23,9 @@ class BaleRead(BaleBase):
     class Config:
         from_attributes = True
 
+
+class BaleListRead(BaleRead):
+    """Bale with remaining items (total_items minus quantity sold)."""
+
+    remaining_items: int = 0
+

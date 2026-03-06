@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import UserRole, require_roles
 from app.db.session import get_db
-from app.schemas.bale import BaleCreate, BaleRead
+from app.schemas.bale import BaleCreate, BaleListRead, BaleRead
 from app.services.bales import create_bale, list_bales
 
 
@@ -22,7 +22,7 @@ def add_bale(
     return bale
 
 
-@router.get("/", response_model=list[BaleRead])
-def get_bales(db: Session = Depends(get_db)) -> list[BaleRead]:
+@router.get("/", response_model=list[BaleListRead])
+def get_bales(db: Session = Depends(get_db)) -> list[BaleListRead]:
     return list_bales(db)
 

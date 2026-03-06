@@ -40,15 +40,22 @@ def get_stock_snapshot(db: Session) -> StockSnapshot:
 
 
 def get_sales_trends(db: Session, period: str = "weekly") -> SalesTrendResponse:
+    # Use sale_date so revenue is grouped by when the sale happened, not when it was recorded
     if period == "weekly":
-        trunc_expr = func.date_trunc("week", Sale.created_at)
+        trunc_expr = func.date_trunc("week", Sale.sale_date)
     else:
-        trunc_expr = func.date_trunc("month", Sale.created_at)
+        trunc_expr = func.date_trunc("month", Sale.sale_date)
+    period_col = cast(trunc_expr, date).label("period_start")
 
-    stmt = select(
-        cast(trunc_expr, date).label("period_start"),
-        func.coalesce(func.sum(Sale.total_amount), 0).label("total_amount"),
-    ).group_by("period_start").order_by("period_start")
+    stmt = (
+        select(
+            period_col,
+            func.coalesce(func.sum(Sale.total_amount), 0).label("total_amount"),
+        )
+        .select_from(Sale)
+        .group_by(period_col)
+        .order_by(period_col)
+    )
     rows = db.execute(stmt).all()
     points = [
         SalesTrendPoint(period_start=period_start, total_amount=Decimal(total_amount))

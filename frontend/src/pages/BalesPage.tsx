@@ -91,8 +91,7 @@ export default function BalesPage() {
             reference: b.reference,
             purchaseDate: b.created_at?.slice(0, 10) ?? "",
             totalItems: b.total_items,
-            // Until we have per-bale stock tracking, assume all items are currently in stock
-            remainingItems: b.total_items,
+            remainingItems: b.remaining_items ?? b.total_items,
             totalCost: b.purchase_price,
         })) ?? [];
 
