@@ -89,15 +89,20 @@ export default function SalesForm() {
             if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(total) || total <= 0) {
                 throw new Error("Enter valid quantity and total");
             }
-            const unitPrice = total / qty;
+            // Map selected category names to their IDs from the API
+            const categoryByName = new Map(categories.map((c) => [c.name, c.id]));
             const payload = {
                 customer_id: selectedCustomerId,
-                total_quantity: qty,
-                unit_price: unitPrice,
                 channel: uiToApiChannel(saleChannel),
                 sale_date: saleDate || null,
                 items: lineItems.map((li) => ({
-                    category_id: li.category,
+                    category_id: (() => {
+                        const id = categoryByName.get(li.category);
+                        if (!id) {
+                            throw new Error(`Unknown category: ${li.category}`);
+                        }
+                        return id;
+                    })(),
                     quantity: li.quantity,
                     amount: li.amount,
                 })),

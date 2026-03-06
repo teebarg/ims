@@ -96,7 +96,7 @@ export default function CustomerProfilePage() {
     const channelData = ["shop", "social", "website"]
         .map((ch) => ({
             name: channelLabels[ch],
-            value: sales.filter((s) => apiToUiChannel(s.channel) === ch).reduce((a, s) => a + Number(s.total_amount), 0),
+            value: sales.filter((s) => apiToUiChannel(s.channel as ApiSalesChannel) === ch).reduce((a, s) => a + Number(s.total_amount), 0),
         }))
         .filter((d) => d.value > 0);
 
@@ -252,7 +252,7 @@ export default function CustomerProfilePage() {
                             <tbody>
                                 {sales.map((s) => {
                                     const status = Number(s.balance) <= 0 ? "paid" : Number(s.total_paid) > 0 ? "partial" : "unpaid";
-                                    const channelUi = apiToUiChannel(s.channel);
+                                    const channelUi = apiToUiChannel(s.channel as ApiSalesChannel);
                                     return (
                                         <tr key={s.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
                                             <td className="p-3 font-mono text-xs">{s.id}</td>

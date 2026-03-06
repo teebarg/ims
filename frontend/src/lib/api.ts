@@ -138,20 +138,24 @@ export function getCustomerProfile(id: string) {
 
 export type ApiSalesChannel = "SHOP" | "TIKTOK" | "INSTAGRAM" | "WEBSITE";
 
+export interface SaleItemDto {
+    id: number;
+    category_id: number;
+    quantity: number;
+    amount: number;
+}
+
 export interface SaleDto {
     id: number;
-    bale_id: number;
     customer_id: string;
-    category_id: number;
-    total_quantity: number;
-    unit_price: number;
-    channel: ApiSalesChannel;
+    channel: ApiSalesChannel | string;
     user_id: string | null;
     sale_date: string;
     created_at: string;
     total_amount: number;
     total_paid: number;
     balance: number;
+    items: SaleItemDto[];
 }
 
 export function listSales() {
@@ -160,13 +164,11 @@ export function listSales() {
 
 export interface CreateSaleInput {
     customer_id: string;
-    total_quantity: number;
-    unit_price: number;
-    channel: ApiSalesChannel;
+    channel: ApiSalesChannel | string;
     user_id?: string | null;
     sale_date?: string | null;
     items: Array<{
-        category_id: string;
+        category_id: number;
         quantity: number;
         amount: number;
     }>;

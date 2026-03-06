@@ -52,7 +52,7 @@ export default function SalesPage() {
         const ident = c?.identifier ?? "";
         const matchSearch =
             name.toLowerCase().includes(search.toLowerCase()) || ident.toLowerCase().includes(search.toLowerCase()) || String(s.id).includes(search);
-        const ch = apiToUiChannel(s.channel);
+        const ch = apiToUiChannel(s.channel as ApiSalesChannel);
         const matchChannel = filterChannel === "all" || ch === filterChannel;
         const status = saleStatus(s);
         const matchStatus = filterStatus === "all" || status === filterStatus;
@@ -160,7 +160,7 @@ export default function SalesPage() {
                                 {filtered.map((sale) => {
                                     const c = customerMap.get(sale.customer_id);
                                     const status = saleStatus(sale);
-                                    const ch = apiToUiChannel(sale.channel);
+                                    const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
                                     return (
                                         <tr key={sale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
                                             <td className="p-3 font-mono text-xs">{sale.id}</td>
@@ -175,7 +175,9 @@ export default function SalesPage() {
                                                 </button>
                                             </td>
                                             <td className="p-3 text-xs">{channelLabels[ch]}</td>
-                                            <td className="p-3">{sale.total_quantity}</td>
+                                            <td className="p-3">
+                                                {sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0}
+                                            </td>
                                             <td className="p-3 font-medium">{currency(sale.total_amount)}</td>
                                             <td className="p-3">{currency(sale.total_paid)}</td>
                                             <td className="p-3">
@@ -202,7 +204,7 @@ export default function SalesPage() {
                 {filtered.map((sale) => {
                     const c = customerMap.get(sale.customer_id);
                     const status = saleStatus(sale);
-                    const ch = apiToUiChannel(sale.channel);
+                    const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
                     const bal = Number(sale.total_amount) - Number(sale.total_paid);
                     return (
                         <Card key={sale.id}>

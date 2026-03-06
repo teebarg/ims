@@ -10,9 +10,6 @@ from app.db.base import Base
 
 class InventoryStock(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    bale_id: Mapped[int | None] = mapped_column(
-        ForeignKey("bale.id"), nullable=True, index=True
-    )
     sale_id: Mapped[int | None] = mapped_column(
         ForeignKey("sale.id"), nullable=True, index=True
     )
@@ -26,7 +23,6 @@ class InventoryStock(Base):
         DateTime(timezone=True), server_default=func.now(), index=True
     )
 
-    bale: Mapped["Bale"] = relationship("Bale")
     sale: Mapped["Sale"] = relationship("Sale")
     category: Mapped["Category"] = relationship(
         "Category", back_populates="inventory_stocks"

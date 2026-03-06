@@ -105,7 +105,7 @@ export default function DashboardPage() {
             website: { sales: 0, revenue: 0 },
         };
         sales.forEach((s) => {
-            const ch = apiToUiChannel(s.channel);
+            const ch = apiToUiChannel(s.channel as ApiSalesChannel);
             if (!byChannel[ch]) byChannel[ch] = { sales: 0, revenue: 0 };
             byChannel[ch].sales += 1;
             byChannel[ch].revenue += Number(s.total_amount);
@@ -121,13 +121,14 @@ export default function DashboardPage() {
         const sorted = [...sales].sort((a, b) => (b.sale_date || b.created_at).localeCompare(a.sale_date || a.created_at));
         return sorted.slice(0, 8).map((s) => {
             const c = customerMap.get(s.customer_id);
+            const itemsCount = s.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0;
             return {
                 id: s.id,
                 customer: c?.display_name ?? "—",
-                items: s.total_quantity,
+                items: itemsCount,
                 amount: Number(s.total_amount),
                 status: saleStatus(s),
-                channel: channelLabels[apiToUiChannel(s.channel)],
+                channel: channelLabels[apiToUiChannel(s.channel as ApiSalesChannel)],
             };
         });
     }, [sales, customerMap]);

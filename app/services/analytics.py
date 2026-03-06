@@ -8,6 +8,7 @@ from app.models.bale import Bale
 from app.models.category import Category
 from app.models.inventory import InventoryStock
 from app.models.sale import Sale
+from app.models.sale_item import SaleItem
 from app.schemas.analytics import (
     AnalyticsSummary,
     ProfitPerBale,
@@ -96,8 +97,8 @@ def get_analytics_summary(db: Session) -> AnalyticsSummary:
 
     # simple turnover: total items sold / max(current stock, 1)
     sold_items_stmt = select(
-        func.coalesce(func.sum(Sale.total_quantity), 0)
-    ).select_from(Sale)
+        func.coalesce(func.sum(SaleItem.quantity), 0)
+    ).select_from(SaleItem)
     sold_items = int(db.execute(sold_items_stmt).scalar_one())
 
     stock_snapshot = get_stock_snapshot(db)

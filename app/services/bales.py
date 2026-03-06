@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.bale import Bale
 from app.models.category import Category
 from app.models.inventory import InventoryStock
-from app.models.sale import Sale
+from app.models.sale_item import SaleItem
 from app.schemas.bale import BaleCreate, BaleListRead, BaleRead
 
 
@@ -25,10 +25,9 @@ def create_bale(db: Session, bale_in: BaleCreate) -> BaleRead:
     db.flush()
 
     stock = InventoryStock(
-        bale_id=bale.id,
         category_id=bale.category_id,
         quantity_change=bale.total_items,
-        reason="bale_in",
+        reason="BALE_IN",
     )
     db.add(stock)
     db.commit()
@@ -42,14 +41,14 @@ def list_bales(db: Session) -> list[BaleListRead]:
     if not bales:
         return []
 
-    bale_ids = [b.id for b in bales]
+    category_ids = {b.category_id for b in bales}
     sold_stmt = (
-        select(Sale.bale_id, func.coalesce(func.sum(Sale.total_quantity), 0).label("sold"))
-        .where(Sale.bale_id.in_(bale_ids))
-        .group_by(Sale.bale_id)
+        select(SaleItem.category_id, func.coalesce(func.sum(SaleItem.quantity), 0).label("sold"))
+        .where(SaleItem.category_id.in_(category_ids))
+        .group_by(SaleItem.category_id)
     )
     sold_rows = db.execute(sold_stmt).all()
-    sold_by_bale = {row.bale_id: int(row.sold) for row in sold_rows}
+    sold_by_category = {row.category_id: int(row.sold) for row in sold_rows}
 
     return [
         BaleListRead(
@@ -60,7 +59,7 @@ def list_bales(db: Session) -> list[BaleListRead]:
             total_items=b.total_items,
             created_at=b.created_at,
             updated_at=b.updated_at,
-            remaining_items=max(0, b.total_items - sold_by_bale.get(b.id, 0)),
+            remaining_items=max(0, b.total_items - sold_by_category.get(b.category_id, 0)),
         )
         for b in bales
     ]

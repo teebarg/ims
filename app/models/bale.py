@@ -28,7 +28,4 @@ class Bale(Base):
     )
 
     category: Mapped["Category"] = relationship("Category", back_populates="bales")
-    sales: Mapped[list["Sale"]] = relationship(
-        "Sale", back_populates="bale", cascade="all, delete-orphan"
-    )
 

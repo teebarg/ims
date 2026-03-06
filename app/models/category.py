@@ -23,7 +23,9 @@ class Category(Base):
     )
 
     bales: Mapped[list["Bale"]] = relationship("Bale", back_populates="category")
-    sales: Mapped[list["Sale"]] = relationship("Sale", back_populates="category")
+    sale_items: Mapped[list["SaleItem"]] = relationship(
+        "SaleItem", back_populates="category"
+    )
     inventory_stocks: Mapped[list["InventoryStock"]] = relationship(
         "InventoryStock", back_populates="category"
     )
