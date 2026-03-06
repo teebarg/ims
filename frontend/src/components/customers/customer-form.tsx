@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -17,7 +18,19 @@ const CustomerFormSchema = z.object({
     display_name: z.string().min(1, "Display name is required"),
     identifier: z.string().min(1, "Identifier is required"),
     identifier_type: z.enum(["tiktok", "instagram", "street", "app"]),
-    phone: z.string().optional(),
+    phone: z
+        .string()
+        .trim()
+        .optional()
+        .refine(
+            (val) => {
+                if (!val || val.length === 0) return true;
+                return isValidPhoneNumber(val);
+            },
+            {
+                message: "Enter a valid phone number with country code (e.g. +234...)",
+            }
+        ),
 });
 
 export type CustomerFormValues = z.infer<typeof CustomerFormSchema>;
@@ -155,11 +168,7 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Identifier Type</FormLabel>
-                                <Select
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                    disabled={isPending}
-                                >
+                                <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue />
@@ -197,22 +206,16 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
                             <FormItem>
                                 <FormLabel>Phone (optional)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="+254..." {...field} disabled={isPending} />
+                                    <Input type="tel" inputMode="tel" placeholder="+2348012345678" {...field} disabled={isPending} />
                                 </FormControl>
+                                <p className="text-xs text-muted-foreground">Include country code (e.g. +234, +254, +44)</p>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                 </div>
                 <div className="sheet-footer">
-                    <Button
-                        aria-label="cancel"
-                        className="min-w-32"
-                        disabled={isPending}
-                        type="button"
-                        variant="destructive"
-                        onClick={onClose}
-                    >
+                    <Button aria-label="cancel" className="min-w-32" disabled={isPending} type="button" variant="destructive" onClick={onClose}>
                         Cancel
                     </Button>
                     <Button aria-label="submit" className="min-w-32" isLoading={isPending} type="submit">

@@ -20,10 +20,10 @@ import {
 import { Channel, channelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
 import { AlertTriangle, DollarSign, Package, ShoppingCart } from "lucide-react";
+import CategoryPerformance from "@/components/dashboard/category-performance";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
-const LOW_STOCK_THRESHOLD = 15;
 
 function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
@@ -157,27 +157,6 @@ export default function DashboardPage() {
         };
     }, [sales, categories]);
 
-    const channelData = useMemo(() => {
-        const byChannel: Record<string, { sales: number; revenue: number }> = {
-            shop: { sales: 0, revenue: 0 },
-            tiktok: { sales: 0, revenue: 0 },
-            instagram: { sales: 0, revenue: 0 },
-            website: { sales: 0, revenue: 0 },
-        };
-        sales.forEach((s) => {
-            const ch = apiToUiChannel(s.channel as ApiSalesChannel);
-            if (!byChannel[ch]) byChannel[ch] = { sales: 0, revenue: 0 };
-            byChannel[ch].sales += 1;
-            byChannel[ch].revenue += Number(s.total_amount);
-        });
-        return [
-            { channel: channelLabels.shop, sales: byChannel.shop.sales, revenue: byChannel.shop.revenue },
-            { channel: channelLabels.tiktok, sales: byChannel.tiktok.sales, revenue: byChannel.tiktok.revenue },
-            { channel: channelLabels.instagram, sales: byChannel.instagram.sales, revenue: byChannel.instagram.revenue },
-            { channel: channelLabels.website, sales: byChannel.website.sales, revenue: byChannel.website.revenue },
-        ];
-    }, [sales]);
-
     const recentTransactions = useMemo(() => {
         const sorted = [...sales].sort((a, b) => (b.sale_date || b.created_at).localeCompare(a.sale_date || a.created_at));
         return sorted.slice(0, 8).map((s) => {
@@ -194,13 +173,6 @@ export default function DashboardPage() {
             };
         });
     }, [sales, customerMap]);
-
-    const lowStockAlerts = useMemo(() => {
-        if (!stock?.categories?.length) return [];
-        return stock.categories
-            .filter((cat) => cat.quantity < LOW_STOCK_THRESHOLD)
-            .map((cat) => ({ category: cat.category, remaining: cat.quantity, threshold: LOW_STOCK_THRESHOLD }));
-    }, [stock]);
 
     return (
         <div className="space-y-6">
@@ -237,25 +209,6 @@ export default function DashboardPage() {
                     iconColor="bg-warning/10 text-warning"
                 />
             </div>
-
-            {/* Low Stock Alerts */}
-            {lowStockAlerts.length > 0 && (
-                <Card className="border-destructive/30 bg-destructive/5">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <AlertTriangle className="h-4 w-4 text-destructive" />
-                            <span className="font-heading font-semibold text-sm">Low Stock Alerts</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {lowStockAlerts.map((alert) => (
-                                <Badge key={alert.category} variant="destructive" className="font-normal">
-                                    {alert.category}: {alert.remaining} left (min: {alert.threshold})
-                                </Badge>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
 
             {/* Charts Row: Category Revenue Bar + Category Pie */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -332,76 +285,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Category Detail Table + Channel */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Category Detail Table */}
-                <Card className="lg:col-span-2">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-heading">Category Performance</CardTitle>
-                        <CardDescription>Detailed breakdown per category</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/30">
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Category</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Revenue</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Qty Sold</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Avg / Item</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Share</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {categoryBreakdown.map((cat) => {
-                                    const share = stats.totalRevenue > 0 ? ((cat.value / stats.totalRevenue) * 100).toFixed(1) : "0";
-                                    const avgPerItem = cat.quantity > 0 ? (cat.value / cat.quantity).toFixed(0) : "0";
-                                    return (
-                                        <tr key={cat.name} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                            <td className="p-3">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                                                    <span className="font-medium">{cat.name}</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-3 font-medium">{currency(cat.value) || 0}</td>
-                                            <td className="p-3">{cat.quantity}</td>
-                                            <td className="p-3 text-muted-foreground">{currency(Number(avgPerItem)) || 0}</td>
-                                            <td className="p-3">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="h-1.5 w-16 rounded-full bg-muted overflow-hidden">
-                                                        <div
-                                                            className="h-full rounded-full"
-                                                            style={{ width: `${share}%`, backgroundColor: cat.color }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs text-muted-foreground">{share}%</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </CardContent>
-                </Card>
-                {/* Channel breakdown */}
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-heading">Sales by Channel</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                        {channelData.map((ch) => (
-                            <div key={ch.channel} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                                <div>
-                                    <p className="text-sm font-medium">{ch.channel}</p>
-                                    <p className="text-xs text-muted-foreground">{ch.sales} sales</p>
-                                </div>
-                                <p className="font-heading font-bold text-sm">{currency(ch.revenue)}</p>
-                            </div>
-                        ))}
-                        {channelData.every((ch) => ch.sales === 0) && <p className="text-sm text-muted-foreground py-2">No sales by channel yet</p>}
-                    </CardContent>
-                </Card>
-            </div>
+            <CategoryPerformance />
 
             {/* Recent Transactions */}
             <Card>

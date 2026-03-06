@@ -138,10 +138,10 @@ export default function SalesForm() {
     const totalNum = Number(computedTotal) || 0;
     const paidNum = Number(salePaid) || 0;
     const balancePreview = totalNum - paidNum;
+    const paymentExceedsTotal = paidNum > totalNum;
 
     return (
         <>
-            {/* Record Sale - SheetDrawer */}
             <SheetDrawer
                 open={saleState.isOpen}
                 onOpenChange={saleState.setOpen}
@@ -355,14 +355,34 @@ export default function SalesForm() {
                                         min={0}
                                         step="0.01"
                                         value={salePaid}
-                                        onChange={(e) => setSalePaid(e.target.value)}
+                                        onChange={(e) => {
+                                            const val = Number(e.target.value);
+                                            if (val > totalNum) {
+                                                setSalePaid(String(totalNum));
+                                                return;
+                                            }
+
+                                            setSalePaid(e.target.value);
+                                        }}
                                         placeholder="0"
                                         max={computedTotal}
+                                        className={paymentExceedsTotal ? "border-destructive focus-visible:ring-destructive" : ""}
                                     />
+
+                                    {paymentExceedsTotal && <p className="text-xs text-destructive mt-1">Payment cannot exceed total sale amount.</p>}
                                 </div>
+                                <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => setSalePaid(String(totalNum))}>
+                                    Pay Full Amount
+                                </Button>
                                 {computedTotal > 0 && (
                                     <div
-                                        className={`p-3 rounded-lg text-sm font-medium flex justify-between ${balancePreview <= 0 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}
+                                        className={`p-3 rounded-lg text-sm font-medium flex justify-between ${
+                                            paymentExceedsTotal
+                                                ? "bg-destructive/10 text-destructive"
+                                                : balancePreview <= 0
+                                                  ? "bg-success/10 text-success"
+                                                  : "bg-muted"
+                                        }`}
                                     >
                                         <span>Balance after payment</span>
                                         <span>{currency(Math.max(0, balancePreview))}</span>
@@ -399,7 +419,7 @@ export default function SalesForm() {
                                     Next <ArrowRight className="h-3 w-3 ml-1" />
                                 </Button>
                             ) : (
-                                <Button onClick={handleConfirmSale} disabled={createSaleMutation.isPending}>
+                                <Button onClick={handleConfirmSale} disabled={createSaleMutation.isPending || paymentExceedsTotal}>
                                     <Check className="h-4 w-4 mr-1" /> Record Sale
                                 </Button>
                             )}
