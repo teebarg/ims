@@ -22,35 +22,65 @@ export default function PaymentForm({ sale, displayName }: PaymentFormProps) {
     const paymentState = useOverlayTriggerState({});
     const confirmPaymentState = useOverlayTriggerState({});
 
-    const [paymentSaleId, setPaymentSaleId] = useState<number | null>(null);
-    const [paymentAmount, setPaymentAmount] = useState("");
+    const balance = Number(sale.balance);
+
+    const [paymentAmount, setPaymentAmount] = useState(String(balance));
+
+    const validatePayment = () => {
+        const amt = Number(paymentAmount);
+
+        if (!Number.isFinite(amt) || amt <= 0) {
+            toast.error("Enter a valid payment amount");
+            return false;
+        }
+
+        if (amt > balance) {
+            toast.error(`Payment cannot exceed balance (${currency(balance)})`);
+            return false;
+        }
+
+        return true;
+    };
 
     const createPaymentMutation = useMutation({
         mutationFn: async () => {
-            if (paymentSaleId == null || !paymentAmount) throw new Error("Select sale and amount");
             const amt = Number(paymentAmount);
-            if (!Number.isFinite(amt) || amt <= 0) throw new Error("Enter valid amount");
-            return createPayment({ sale_id: paymentSaleId, amount: amt, method: "cash" });
+
+            if (!validatePayment()) throw new Error("Invalid payment");
+
+            return createPayment({
+                sale_id: sale.id,
+                amount: amt,
+                method: "cash",
+            });
         },
+
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["sales"] });
+
             confirmPaymentState.close();
             paymentState.close();
-            setPaymentSaleId(null);
-            setPaymentAmount("");
+
+            setPaymentAmount(String(balance));
+
             toast.success("Payment recorded");
         },
+
         onError: (err: unknown) => {
             toast.error(err instanceof Error ? err.message : "Failed to record payment");
         },
     });
 
     const handleConfirmPayment = () => {
+        if (!validatePayment()) return;
         confirmPaymentState.open();
     };
+
     const handlePayment = () => {
         createPaymentMutation.mutate();
     };
+
+    const remainingAfterPayment = balance - (Number(paymentAmount) || 0);
 
     return (
         <>
@@ -60,64 +90,109 @@ export default function PaymentForm({ sale, displayName }: PaymentFormProps) {
                 title="Record Payment"
                 trigger={
                     <Button size="sm" variant="outline" className="text-xs h-7">
-                        <CreditCard className="h-3 w-3 mr-1" /> Pay
+                        <CreditCard className="h-3 w-3 mr-1" />
+                        Pay
                     </Button>
                 }
             >
-                <div className="flex flex-col gap-4 px-4 pb-4">
-                    <div className="space-y-4">
-                        <div className="flex justify-between text-sm">
+                <div className="flex flex-col gap-5 px-4 pb-4">
+                    {/* Sale summary */}
+                    <div className="rounded-lg border bg-muted/20 p-4 space-y-2 text-sm">
+                        <div className="flex justify-between">
                             <span className="text-muted-foreground">Sale</span>
                             <span className="font-medium">{sale.id}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
+
+                        <div className="flex justify-between">
                             <span className="text-muted-foreground">Total</span>
-                            <span className="font-medium">{currency(sale.total_amount)}</span>
+                            <span>{currency(sale.total_amount)}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
+
+                        <div className="flex justify-between">
                             <span className="text-muted-foreground">Paid</span>
-                            <span className="font-medium">{currency(sale.total_paid)}</span>
+                            <span>{currency(sale.total_paid)}</span>
                         </div>
-                        <div className="flex justify-between text-sm font-medium">
-                            <span className="text-destructive">Balance</span>
-                            <span className="text-destructive">{currency(sale.balance)}</span>
-                        </div>
-                        <div>
-                            <Label>Payment Amount</Label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                min={0}
-                                max={Number(sale.balance)}
-                                value={paymentAmount}
-                                onChange={(e) => setPaymentAmount(e.target.value)}
-                            />
+
+                        <div className="flex justify-between font-semibold text-destructive">
+                            <span>Balance</span>
+                            <span>{currency(balance)}</span>
                         </div>
                     </div>
+
+                    <div className="space-y-2">
+                        <Label>Quick Amount</Label>
+
+                        <div className="grid grid-cols-3 gap-2">
+                            <Button variant="secondary" onClick={() => setPaymentAmount(String(balance))}>
+                                Full
+                            </Button>
+
+                            <Button variant="secondary" onClick={() => setPaymentAmount(String((balance / 2).toFixed(2)))}>
+                                Half
+                            </Button>
+
+                            <Button variant="secondary" onClick={() => setPaymentAmount("")}>
+                                Custom
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Payment Amount</Label>
+
+                        <Input
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            max={balance}
+                            value={paymentAmount}
+                            onChange={(e) => setPaymentAmount(e.target.value)}
+                        />
+
+                        <div className="text-xs text-muted-foreground flex justify-between">
+                            <span>Balance</span>
+                            <span>{currency(balance)}</span>
+                        </div>
+
+                        {Number(paymentAmount) > 0 && (
+                            <div className="text-xs flex justify-between font-medium">
+                                <span>Remaining after payment</span>
+
+                                <span className={remainingAfterPayment <= 0 ? "text-success" : "text-muted-foreground"}>
+                                    {currency(Math.max(remainingAfterPayment, 0))}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex gap-2 justify-end border-t pt-4">
                         <Button variant="outline" onClick={() => paymentState.close()}>
                             Cancel
                         </Button>
-                        <Button onClick={handleConfirmPayment} disabled={createPaymentMutation.isPending || !paymentAmount}>
+
+                        <Button
+                            onClick={handleConfirmPayment}
+                            disabled={createPaymentMutation.isPending || !paymentAmount || Number(paymentAmount) <= 0}
+                        >
                             Apply Payment
                         </Button>
                     </div>
                 </div>
             </SheetDrawer>
 
-            {/* Payment confirmation */}
             <ConfirmDrawer
                 open={confirmPaymentState.isOpen}
                 onOpenChange={confirmPaymentState.setOpen}
                 trigger={null}
                 title="Confirm Payment"
-                description={`Apply payment to sale`}
+                description="Apply payment to sale"
                 content={
-                    <div className="space-y-2 text-sm mt-4 px-4">
+                    <div className="space-y-2 text-sm mt-4 px-4 pb-4">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Customer</span>
                             <span className="font-medium">{displayName}</span>
                         </div>
+
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Amount</span>
                             <span className="font-heading font-bold text-success">{currency(Number(paymentAmount) || 0)}</span>

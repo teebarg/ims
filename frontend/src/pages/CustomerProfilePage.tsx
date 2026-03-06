@@ -227,7 +227,7 @@ export default function CustomerProfilePage() {
                 </Card>
 
                 {/* Sales History */}
-                <CustomerSalesDetails sales={sales} />
+                <CustomerSalesDetails sales={sales} displayName={customer.display_name} />
             </div>
 
             {/* Payment History */}

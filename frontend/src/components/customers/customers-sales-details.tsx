@@ -21,7 +21,7 @@ function apiToUiChannel(ch: ApiSalesChannel): Channel {
     }
 }
 
-export default function CustomerSalesDetails({ sales }: { sales: SaleDto[] }) {
+export default function CustomerSalesDetails({ sales, displayName }: { sales: SaleDto[], displayName: string }) {
     return (
         <Card className="lg:col-span-2">
             <CardHeader className="pb-2">
@@ -81,12 +81,7 @@ export default function CustomerSalesDetails({ sales }: { sales: SaleDto[] }) {
                         return (
                             <div key={s.id} className="p-4 space-y-3">
                                 <div className="flex justify-between items-start">
-                                    <div className="space-y-1">
-                                        <div className="font-mono text-xs text-muted-foreground">{s.id}</div>
-
-                                        <div className="text-xs text-muted-foreground">{s.sale_date}</div>
-                                    </div>
-
+                                    <div className="text-xs text-muted-foreground">{s.sale_date}</div>
                                     <Badge
                                         variant={status === "paid" ? "default" : status === "partial" ? "secondary" : "destructive"}
                                         className="text-xs"
