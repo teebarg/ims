@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const AccessDeniedPage = () => {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div className="flex min-h-screenp items-center justify-center bg-background p-4">
             {/* Ambient glow effect */}
             <div className="pointer-events-none fixed inset-0 overflow-hidden">
                 <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]" />
@@ -30,7 +30,7 @@ const AccessDeniedPage = () => {
                     <div className="text-center">
                         <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">No Access Granted</h1>
                         <p className="mb-8 text-muted-foreground leading-relaxed">
-                            Your account doesn't have permission to use this POS terminal. Please contact your system administrator to request access.
+                            Your account doesn't have permission. Please contact your system administrator to request access.
                         </p>
                     </div>
 

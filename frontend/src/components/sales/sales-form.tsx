@@ -223,7 +223,7 @@ export default function SalesForm() {
                                 </p>
                             </div>
                         )}
-                        {/* Step 2: Line Items (POS-style) */}
+                        {/* Step 2 */}
                         {step === 2 && (
                             <div className="space-y-4">
                                 {selectedCustomer && (

@@ -1,7 +1,7 @@
 """initial core tables with categories table
 
 Revision ID: 0001_initial
-Revises: 
+Revises:
 Create Date: 2026-03-05
 """
 
@@ -35,16 +35,38 @@ def upgrade() -> None:
         ),
     )
 
-    # Bale table
+    # Bale table (metadata)
     op.create_table(
         "bale",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("reference", sa.String(length=50), nullable=False, unique=True),
-        sa.Column("category_id", sa.Integer(), sa.ForeignKey("category.id"), nullable=False),
         sa.Column("purchase_price", sa.Numeric(12, 2), nullable=False),
-        sa.Column("total_items", sa.Integer(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+    )
+
+    # Bale items
+    op.create_table(
+        "baleitem",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("bale_id", sa.Integer(), sa.ForeignKey("bale.id"), nullable=False),
+        sa.Column(
+            "category_id",
+            sa.Integer(),
+            sa.ForeignKey("category.id"),
+            nullable=False,
+        ),
+        sa.Column("quantity", sa.Integer(), nullable=False),
     )
 
     # Customer table
@@ -55,8 +77,18 @@ def upgrade() -> None:
         sa.Column("identifier", sa.String(length=255), nullable=False, unique=True),
         sa.Column("identifier_type", sa.String(length=50), nullable=False),
         sa.Column("phone", sa.String(length=50), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
     )
 
     # Sale table
@@ -72,24 +104,61 @@ def upgrade() -> None:
         sa.Column("total_amount", sa.Numeric(12, 2), nullable=False),
         sa.Column("channel", sa.String(length=50), nullable=False),
         sa.Column("staff_id", sa.String(length=255), nullable=False),
+
+        # Payment status
         sa.Column(
             "status",
             sa.String(length=20),
             nullable=False,
             server_default="PENDING",
-        ),  # PENDING / PARTIAL / PAID
+        ),
+
+        # Delivery tracking
+        sa.Column(
+            "delivery_status",
+            sa.String(length=30),
+            nullable=False,
+            server_default="PROCESSING",
+        ),  # PROCESSING / OUT_FOR_DELIVERY / DELIVERED
+
+        sa.Column(
+            "delivery_assigned_to",
+            sa.String(length=255),
+            nullable=True,
+        ),
+
+        sa.Column(
+            "delivery_notes",
+            sa.Text(),
+            nullable=True,
+        ),
+
+        sa.Column(
+            "out_for_delivery_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+        ),
+
+        sa.Column(
+            "delivered_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+        ),
+
         sa.Column(
             "sale_date",
             sa.Date(),
             nullable=False,
             server_default=sa.func.current_date(),
         ),
+
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
             server_default=sa.func.now(),
             nullable=False,
         ),
+
         sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
@@ -99,7 +168,7 @@ def upgrade() -> None:
         ),
     )
 
-    # Sale items table (line items per sale)
+    # Sale items table
     op.create_table(
         "saleitem",
         sa.Column("id", sa.Integer(), primary_key=True),
@@ -122,8 +191,18 @@ def upgrade() -> None:
         sa.Column("amount", sa.Numeric(12, 2), nullable=False),
         sa.Column("method", sa.String(length=50), nullable=False),
         sa.Column("reference", sa.String(length=100), nullable=True),
-        sa.Column("payment_date", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "payment_date",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
     )
 
     # Inventory stock table
@@ -150,9 +229,10 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("inventorystock")
-    op.drop_table("saleitem")
     op.drop_table("payment")
+    op.drop_table("saleitem")
     op.drop_table("sale")
     op.drop_table("customer")
+    op.drop_table("baleitem")
     op.drop_table("bale")
     op.drop_table("category")
