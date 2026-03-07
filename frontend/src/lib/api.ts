@@ -26,23 +26,35 @@ export async function fetchApi<TResponse>(url: string, options: RequestInit = {}
     return res.json() as Promise<TResponse>;
 }
 
+export interface BaleItemDto {
+    id: number;
+    bale_id: number;
+    category_id: number;
+    quantity: number;
+}
+
 export interface BaleDto {
     id: number;
     reference: string;
-    category_id: number;
     purchase_price: number;
-    total_items: number;
     created_at: string;
     updated_at: string;
-    /** Items left (total_items minus quantity sold from this bale). Present when listing bales. */
+    items: BaleItemDto[];
+    /** Sum of item quantities. Derived from items when not provided. */
+    total_items?: number;
+    /** Items left. Present when listing bales. */
     remaining_items?: number;
+}
+
+export interface CreateBaleItemInput {
+    category_id: number;
+    quantity: number;
 }
 
 export interface CreateBaleInput {
     reference: string;
-    category_id: number;
     purchase_price: number;
-    total_items: number;
+    items: CreateBaleItemInput[];
 }
 
 export function listBales() {
@@ -65,8 +77,19 @@ export interface CategoryDto {
     updated_at: string;
 }
 
+export interface CreateCategoryInput {
+    name: string;
+}
+
 export function listCategories() {
     return fetchApi<CategoryDto[]>("/categories/");
+}
+
+export function createCategory(input: CreateCategoryInput) {
+    return fetchApi<CategoryDto>("/categories/", {
+        method: "POST",
+        body: JSON.stringify(input),
+    });
 }
 
 // ---- Customers ----

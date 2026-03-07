@@ -35,14 +35,17 @@ export default function BalesPage() {
     const [search, setSearch] = useState("");
 
     const bales: BaleRow[] =
-        baleDtos?.map((b: BaleDto) => ({
-            id: b.id,
-            reference: b.reference,
-            purchaseDate: b.created_at?.slice(0, 10) ?? "",
-            totalItems: b.total_items,
-            remainingItems: b.remaining_items ?? b.total_items,
-            totalCost: b.purchase_price,
-        })) ?? [];
+        baleDtos?.map((b: BaleDto) => {
+            const totalItems = b.items?.reduce((sum, i) => sum + i.quantity, 0) ?? b.total_items ?? 0;
+            return {
+                id: b.id,
+                reference: b.reference,
+                purchaseDate: b.created_at?.slice(0, 10) ?? "",
+                totalItems,
+                remainingItems: b.remaining_items ?? totalItems,
+                totalCost: b.purchase_price,
+            };
+        }) ?? [];
 
     const filteredBales = bales.filter((b) => b.reference.toLowerCase().includes(search.toLowerCase()));
 

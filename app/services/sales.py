@@ -1,6 +1,6 @@
 from collections import defaultdict
 from decimal import Decimal
-from datetime import date
+from datetime import date, datetime, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -11,7 +11,7 @@ from app.models.inventory import InventoryStock
 from app.models.payment import Payment
 from app.models.sale import Sale
 from app.models.sale_item import SaleItem
-from app.schemas.sale import SaleCreate, SaleItemRead, SaleRead
+from app.schemas.sale import SaleCreate, SaleDeliveryUpdate, SaleItemRead, SaleRead
 
 
 def _compute_payment_totals(db: Session, sale_ids: list[int]) -> dict[int, Decimal]:
@@ -117,6 +117,11 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
         total_paid=total_paid,
         balance=balance,
         items=items_read,
+        delivery_status=sale.delivery_status,
+        delivery_assigned_to=sale.delivery_assigned_to,
+        delivery_notes=sale.delivery_notes,
+        out_for_delivery_at=sale.out_for_delivery_at,
+        delivered_at=sale.delivered_at,
     )
 
 
@@ -160,7 +165,35 @@ def enrich_sales_with_payments(db: Session, sales: list[Sale]) -> list[SaleRead]
                 total_paid=total_paid,
                 balance=balance,
                 items=items_read,
+                delivery_status=sale.delivery_status,
+                delivery_assigned_to=sale.delivery_assigned_to,
+                delivery_notes=sale.delivery_notes,
+                out_for_delivery_at=sale.out_for_delivery_at,
+                delivered_at=sale.delivered_at,
             )
         )
     return result
+
+
+def get_sale(db: Session, sale_id: int) -> Sale | None:
+    return db.get(Sale, sale_id)
+
+
+def update_sale_delivery(
+    db: Session, sale_id: int, delivery_in: SaleDeliveryUpdate
+) -> SaleRead:
+    sale = db.get(Sale, sale_id)
+    if sale is None:
+        raise ValueError("Sale not found")
+    payload = delivery_in.model_dump(exclude_unset=True)
+    for key, value in payload.items():
+        setattr(sale, key, value)
+    if sale.delivery_status == "OUT_FOR_DELIVERY" and sale.out_for_delivery_at is None:
+        sale.out_for_delivery_at = datetime.now(timezone.utc)
+    if sale.delivery_status == "DELIVERED" and sale.delivered_at is None:
+        sale.delivered_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(sale)
+    sales_read = enrich_sales_with_payments(db, [sale])
+    return sales_read[0]
 

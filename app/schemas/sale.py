@@ -30,6 +30,14 @@ class SaleCreate(BaseModel):
     )
 
 
+class SaleDeliveryUpdate(BaseModel):
+    delivery_status: str | None = Field(
+        default=None, max_length=30, description="e.g. PENDING, OUT_FOR_DELIVERY, DELIVERED"
+    )
+    delivery_assigned_to: str | None = Field(default=None, max_length=255)
+    delivery_notes: str | None = Field(default=None, max_length=500)
+
+
 class SaleRead(BaseModel):
     id: int
     customer_id: UUID
@@ -41,6 +49,11 @@ class SaleRead(BaseModel):
     total_paid: Decimal
     balance: Decimal
     items: list[SaleItemRead]
+    delivery_status: str | None = None
+    delivery_assigned_to: str | None = None
+    delivery_notes: str | None = None
+    out_for_delivery_at: datetime | None = None
+    delivered_at: datetime | None = None
 
     class Config:
         from_attributes = True

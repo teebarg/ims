@@ -22,7 +22,9 @@ class Category(Base):
         nullable=False,
     )
 
-    bales: Mapped[list["Bale"]] = relationship("Bale", back_populates="category")
+    bale_items: Mapped[list["BaleItem"]] = relationship(
+        "BaleItem", back_populates="category"
+    )
     sale_items: Mapped[list["SaleItem"]] = relationship(
         "SaleItem", back_populates="category"
     )
