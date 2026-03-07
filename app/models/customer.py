@@ -15,7 +15,7 @@ class IdentifierType(str, enum.Enum):
     TIKTOK = "TIKTOK"
     INSTAGRAM = "INSTAGRAM"
     STREET = "STREET"
-    APP_USER = "APP_USER"
+    WEBSITE = "WEBSITE"
 
 
 class SalesChannel(str, enum.Enum):

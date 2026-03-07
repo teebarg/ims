@@ -34,8 +34,8 @@ function apiToUiIdentifierType(t: CustomerDto["identifier_type"]): IdentifierTyp
             return "instagram";
         case "STREET":
             return "street";
-        case "APP_USER":
-            return "app";
+        case "WEBSITE":
+            return "website";
         default:
             return "instagram";
     }
@@ -78,7 +78,7 @@ export default function CustomersPage() {
             tiktok: "bg-foreground/10 text-foreground",
             instagram: "bg-primary/10 text-primary",
             street: "bg-warning/20 text-warning",
-            app: "bg-success/20 text-success",
+            website: "bg-success/20 text-success",
         };
         return colors[type];
     };

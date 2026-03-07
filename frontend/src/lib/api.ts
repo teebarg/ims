@@ -93,8 +93,7 @@ export function createCategory(input: CreateCategoryInput) {
 }
 
 // ---- Customers ----
-
-export type ApiIdentifierType = "TIKTOK" | "INSTAGRAM" | "STREET" | "APP_USER";
+export type ApiIdentifierType = "TIKTOK" | "INSTAGRAM" | "STREET" | "WEBSITE";
 
 export interface CustomerDto {
     id: string;
@@ -170,6 +169,7 @@ export interface SaleItemDto {
 
 export interface SaleDto {
     id: number;
+    reference: string;
     customer_id: string;
     channel: ApiSalesChannel | string;
     user_id: string | null;
@@ -179,6 +179,12 @@ export interface SaleDto {
     total_paid: number;
     balance: number;
     items: SaleItemDto[];
+
+    delivery_status?: string | null;
+    delivery_assigned_to?: string | null;
+    delivery_notes?: string | null;
+    out_for_delivery_at?: string | null;
+    delivered_at?: string | null;
 }
 
 export function listSales() {
@@ -200,6 +206,19 @@ export interface CreateSaleInput {
 export function createSale(input: CreateSaleInput) {
     return fetchApi<SaleDto>("/sales", {
         method: "POST",
+        body: JSON.stringify(input),
+    });
+}
+
+export interface UpdateSaleDeliveryInput {
+    delivery_status?: string;
+    delivery_assigned_to?: string | null;
+    delivery_notes?: string | null;
+}
+
+export function updateSaleDelivery(saleId: number, input: UpdateSaleDeliveryInput) {
+    return fetchApi<SaleDto>(`/sales/${saleId}/delivery`, {
+        method: "PATCH",
         body: JSON.stringify(input),
     });
 }

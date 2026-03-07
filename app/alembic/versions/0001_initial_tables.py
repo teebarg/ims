@@ -95,6 +95,7 @@ def upgrade() -> None:
     op.create_table(
         "sale",
         sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("reference", sa.String(length=50), nullable=False, unique=True),
         sa.Column(
             "customer_id",
             postgresql.UUID(as_uuid=True),

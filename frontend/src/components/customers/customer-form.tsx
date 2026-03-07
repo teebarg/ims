@@ -12,12 +12,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCustomer, updateCustomer, type CustomerDto, type ApiIdentifierType } from "@/lib/api";
 import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
 
-const IDENTIFIER_TYPES: IdentifierType[] = ["tiktok", "instagram", "street", "app"];
+const IDENTIFIER_TYPES: IdentifierType[] = ["tiktok", "instagram", "street", "website"];
 
 const CustomerFormSchema = z.object({
     display_name: z.string().min(1, "Display name is required"),
     identifier: z.string().min(1, "Identifier is required"),
-    identifier_type: z.enum(["tiktok", "instagram", "street", "app"]),
+    identifier_type: z.enum(["tiktok", "instagram", "street", "website"]),
     phone: z
         .string()
         .trim()
@@ -43,8 +43,8 @@ function uiToApiIdentifierType(t: IdentifierType): ApiIdentifierType {
             return "INSTAGRAM";
         case "street":
             return "STREET";
-        case "app":
-            return "APP_USER";
+        case "website":
+            return "WEBSITE";
     }
 }
 
@@ -66,8 +66,8 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
                 return "instagram";
             case "STREET":
                 return "street";
-            case "APP_USER":
-                return "app";
+            case "WEBSITE":
+                return "website";
             default:
                 return "instagram";
         }
@@ -148,7 +148,7 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
     return (
         <Form {...form}>
             <form className="flex-1 flex flex-col overflow-hidden" onSubmit={handleSubmit(onSubmit)}>
-                <div className="space-y-6 flex-1 overflow-auto px-2 pb-4">
+                <div className="space-y-6 flex-1 overflow-auto px-4 pb-4">
                     <FormField
                         control={control}
                         name="display_name"

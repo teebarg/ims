@@ -71,6 +71,7 @@ export default function SalesForm() {
     const removeLineItem = (index: number) => setLineItems((prev) => prev.filter((_, i) => i !== index));
 
     const lineItemsValid = lineItems.length > 0 && lineItems.every((li) => li.category && li.quantity > 0 && li.amount > 0);
+    const canAddMore = lineItems.length < categories.length;
 
     const resetSaleForm = () => {
         setStep(1);
@@ -233,67 +234,6 @@ export default function SalesForm() {
                                     </div>
                                 )}
 
-                                {/* Line items */}
-                                <div className="space-y-2">
-                                    <div className="grid grid-cols-[1fr_70px_90px_32px] gap-2 text-xs font-medium text-muted-foreground px-1">
-                                        <span>Category</span>
-                                        <span>Qty</span>
-                                        <span>Amount ($)</span>
-                                        <span></span>
-                                    </div>
-                                    {lineItems.map((li, i) => (
-                                        <div key={i} className="grid grid-cols-[1fr_70px_90px_32px] gap-2 items-center">
-                                            <Select value={li.category} onValueChange={(v) => updateLineItem(i, "category", v)}>
-                                                <SelectTrigger className="h-9 text-xs">
-                                                    <SelectValue placeholder="Select..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {categories.map((cat: Category) => (
-                                                        <SelectItem key={cat.id} value={cat.name}>
-                                                            {cat.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <Input
-                                                type="number"
-                                                min={1}
-                                                className="h-9 text-xs"
-                                                value={li.quantity}
-                                                onChange={(e) => updateLineItem(i, "quantity", Math.max(1, Number(e.target.value)))}
-                                            />
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                className="h-9 text-xs"
-                                                value={li.amount || ""}
-                                                onChange={(e) => updateLineItem(i, "amount", Math.max(0, Number(e.target.value)))}
-                                                placeholder="0"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-9 w-9"
-                                                disabled={lineItems.length <= 1}
-                                                onClick={() => removeLineItem(i)}
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <Button type="button" variant="outline" size="sm" className="w-full" onClick={addLineItem}>
-                                    <Plus className="h-3 w-3 mr-1" /> Add Item
-                                </Button>
-
-                                {/* Computed total */}
-                                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 flex justify-between items-center">
-                                    <span className="text-sm font-medium">Total ({totalItemCount} items)</span>
-                                    <span className="font-heading text-lg font-bold text-primary">{currency(computedTotal)}</span>
-                                </div>
-
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <Label className="text-xs">Channel</Label>
@@ -313,6 +253,79 @@ export default function SalesForm() {
                                         <Label className="text-xs">Date</Label>
                                         <Input type="date" className="h-9" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} />
                                     </div>
+                                </div>
+
+                                {/* Line items */}
+                                <div className="space-y-2">
+                                    <div className="grid grid-cols-[1fr_70px_90px_32px] gap-2 text-xs font-medium text-muted-foreground px-1">
+                                        <span>Category</span>
+                                        <span>Qty</span>
+                                        <span>Amount ($)</span>
+                                        <span></span>
+                                    </div>
+                                    {lineItems.map((li, i) => {
+                                        const selectedCategories = lineItems.map((item) => item.category).filter(Boolean);
+
+                                        const availableCategories = categories.filter(
+                                            (cat: Category) => !selectedCategories.includes(cat.name) || cat.name === li.category
+                                        );
+
+                                        return (
+                                            <div key={i} className="grid grid-cols-[1fr_70px_90px_32px] gap-2 items-center">
+                                                <Select value={li.category} onValueChange={(v) => updateLineItem(i, "category", v)}>
+                                                    <SelectTrigger className="h-9 text-xs">
+                                                        <SelectValue placeholder="Select..." />
+                                                    </SelectTrigger>
+
+                                                    <SelectContent>
+                                                        {availableCategories.map((cat: Category) => (
+                                                            <SelectItem key={cat.id} value={cat.name}>
+                                                                {cat.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+
+                                                <Input
+                                                    type="number"
+                                                    min={1}
+                                                    className="h-9 text-xs"
+                                                    value={li.quantity}
+                                                    onChange={(e) => updateLineItem(i, "quantity", Math.max(1, Number(e.target.value)))}
+                                                />
+
+                                                <Input
+                                                    type="number"
+                                                    min={0}
+                                                    className="h-9 text-xs"
+                                                    value={li.amount || ""}
+                                                    onChange={(e) => updateLineItem(i, "amount", Math.max(0, Number(e.target.value)))}
+                                                    placeholder="0"
+                                                />
+
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-9 w-9"
+                                                    disabled={lineItems.length <= 1}
+                                                    onClick={() => removeLineItem(i)}
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <Button type="button" disabled={!canAddMore} variant="outline" size="sm" className="w-full" onClick={addLineItem}>
+                                    <Plus className="h-3 w-3 mr-1" /> Add Item
+                                </Button>
+
+                                {/* Computed total */}
+                                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 flex justify-between items-center">
+                                    <span className="text-sm font-medium">Total ({totalItemCount} items)</span>
+                                    <span className="font-heading text-lg font-bold text-primary">{currency(computedTotal)}</span>
                                 </div>
                             </div>
                         )}

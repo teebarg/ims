@@ -331,7 +331,7 @@ export default function DashboardPage() {
                                         <td className="py-2.5 font-medium">{currency(txn.amount)}</td>
                                         <td className="py-2.5">
                                             <Badge
-                                                variant={txn.status === "paid" ? "default" : txn.status === "partial" ? "secondary" : "destructive"}
+                                                variant={txn.status === "paid" ? "success" : txn.status === "partial" ? "default" : "destructive"}
                                                 className="text-xs font-normal"
                                             >
                                                 {txn.status}

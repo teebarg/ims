@@ -59,8 +59,11 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
 
     created_items: list[SaleItem] = []
     try:
+        next_id = (db.scalars(select(func.max(Sale.id))).first() or 0) + 1
+        reference: str = f"SL-{next_id:03d}"
         sale = Sale(
             customer_id=sale_in.customer_id,
+            reference=reference,
             total_amount=total_amount,
             channel=sale_in.channel,
             staff_id=sale_in.user_id or "",
@@ -108,6 +111,7 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
 
     return SaleRead(
         id=sale.id,
+        reference=sale.reference,
         customer_id=sale.customer_id,
         channel=sale.channel,
         user_id=sale.staff_id,
@@ -156,6 +160,7 @@ def enrich_sales_with_payments(db: Session, sales: list[Sale]) -> list[SaleRead]
         result.append(
             SaleRead(
                 id=sale.id,
+                reference=sale.reference,
                 customer_id=sale.customer_id,
                 channel=sale.channel,
                 user_id=sale.staff_id,

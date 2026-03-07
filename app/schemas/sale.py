@@ -40,6 +40,7 @@ class SaleDeliveryUpdate(BaseModel):
 
 class SaleRead(BaseModel):
     id: int
+    reference: str
     customer_id: UUID
     channel: str
     user_id: str | None

@@ -16,6 +16,8 @@ class Sale(Base):
         UUID(as_uuid=True), ForeignKey("customer.id"), index=True
     )
 
+    reference: Mapped[str] = mapped_column(String(50), nullable=False, unique=True, index=True)
+
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
 
     channel: Mapped[str] = mapped_column(String(50), nullable=False)

@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Package, Search } from "lucide-react";
-import { listBales, type BaleDto } from "@/lib/api";
+import { listBales, listCategories, type BaleDto, type BaleItemDto } from "@/lib/api";
 import { currency } from "@/lib/utils";
 import { useOverlayTriggerState } from "react-stately";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import BaleForm from "@/components/bales/bale-form";
+import { ZeroState } from "@/components/ZeroState";
 
 interface BaleRow {
     id: number;
@@ -18,6 +19,7 @@ interface BaleRow {
     totalItems: number;
     remainingItems: number;
     totalCost: number;
+    items: BaleItemDto[];
 }
 
 export default function BalesPage() {
@@ -32,11 +34,24 @@ export default function BalesPage() {
         queryFn: listBales,
     });
 
+    const { data: categories = [] } = useQuery({
+        queryKey: ["categories"],
+        queryFn: listCategories,
+    });
+
+    const categoryNameById = useMemo(
+        () => new Map(categories.map((c) => [c.id, c.name])),
+        [categories],
+    );
+
     const [search, setSearch] = useState("");
 
     const bales: BaleRow[] =
         baleDtos?.map((b: BaleDto) => {
-            const totalItems = b.items?.reduce((sum, i) => sum + i.quantity, 0) ?? b.total_items ?? 0;
+            const items = b.items ?? [];
+            const totalItems = items.length
+                ? items.reduce((sum, i) => sum + i.quantity, 0)
+                : (b as BaleDto & { total_items?: number }).total_items ?? 0;
             return {
                 id: b.id,
                 reference: b.reference,
@@ -44,6 +59,7 @@ export default function BalesPage() {
                 totalItems,
                 remainingItems: b.remaining_items ?? totalItems,
                 totalCost: b.purchase_price,
+                items,
             };
         }) ?? [];
 
@@ -80,6 +96,9 @@ export default function BalesPage() {
             <div className="grid gap-4">
                 {isLoading && <p className="text-sm text-muted-foreground">Loading bales...</p>}
                 {isError && <p className="text-sm text-destructive">Failed to load bales. Please try again.</p>}
+                {filteredBales.length === 0 && !isLoading && !isError && (
+                    <ZeroState title="No bales found" description="Add your first bale to get started" />
+                )}
 
                 {/* Mobile cards + Desktop table */}
                 <div className="hidden md:block">
@@ -93,16 +112,28 @@ export default function BalesPage() {
                                             <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Items</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Cost</th>
+                                            <th className="text-left p-3 font-medium text-muted-foreground">Categories</th>
                                             <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredBales.map((bale) => (
+                                        {filteredBales.map((bale: any) => (
                                             <tr key={bale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
                                                 <td className="p-3 font-mono text-xs font-medium">{bale.reference}</td>
                                                 <td className="p-3">{bale.purchaseDate || "—"}</td>
                                                 <td className="p-3">{bale.totalItems}</td>
                                                 <td className="p-3 font-medium">{currency(bale.totalCost)}</td>
+                                                <td className="p-3">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {bale.items?.length
+                                                            ? bale.items.map((item: BaleItemDto, index: number) => (
+                                                                  <Badge key={item.id ?? index} variant="outline" className="text-xs font-normal">
+                                                                      {categoryNameById.get(item.category_id) ?? `Category ${item.category_id}`} × {item.quantity}
+                                                                  </Badge>
+                                                              ))
+                                                            : "—"}
+                                                    </div>
+                                                </td>
                                                 <td className="p-3">
                                                     <Badge
                                                         variant={
@@ -128,13 +159,13 @@ export default function BalesPage() {
 
                 {/* Mobile cards */}
                 <div className="md:hidden space-y-3">
-                    {filteredBales.map((bale) => (
+                    {filteredBales.map((bale: any) => (
                         <Card key={bale.id} className="animate-slide-in">
                             <CardContent className="p-4 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Package className="h-4 w-4 text-primary" />
-                                        <span className="font-mono text-sm font-medium">{bale.reference}</span>
+                                        <span className="font-mono text-sm font-medium">{bale.id}</span>
                                     </div>
                                     <Badge
                                         variant={bale.remainingItems === 0 ? "destructive" : bale.remainingItems < 20 ? "secondary" : "default"}
@@ -153,6 +184,15 @@ export default function BalesPage() {
                                         <p className="font-medium">{currency(bale.totalCost)}</p>
                                     </div>
                                 </div>
+                                <div className="flex flex-wrap gap-1">
+                                    {bale.items?.length
+                                        ? bale.items.map((item: BaleItemDto, i: number) => (
+                                              <Badge key={item.id ?? i} variant="outline" className="text-xs">
+                                                  {categoryNameById.get(item.category_id) ?? `Category ${item.category_id}`} × {item.quantity}
+                                              </Badge>
+                                          ))
+                                        : null}
+                                </div>
                                 <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
                                     <div
                                         className="h-full rounded-full"
@@ -160,10 +200,10 @@ export default function BalesPage() {
                                             width: `${stockPercent(bale)}%`,
                                             backgroundColor:
                                                 stockPercent(bale) > 30
-                                                    ? "hsl(152, 60%, 40%)"
+                                                    ? "hsl(var(--primary))"
                                                     : stockPercent(bale) > 0
                                                       ? "hsl(38, 92%, 50%)"
-                                                      : "hsl(0, 72%, 51%)",
+                                                      : "hsl(var(--destructive))",
                                         }}
                                     />
                                 </div>

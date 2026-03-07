@@ -32,7 +32,7 @@ function apiToUiChannel(ch: ApiSalesChannel): Channel {
     }
 }
 
-function apiToUiIdentifierType(t: ApiIdentifierType): "tiktok" | "instagram" | "street" | "app" {
+function apiToUiIdentifierType(t: ApiIdentifierType): "tiktok" | "instagram" | "street" | "website" {
     switch (t) {
         case "TIKTOK":
             return "tiktok";
@@ -40,8 +40,8 @@ function apiToUiIdentifierType(t: ApiIdentifierType): "tiktok" | "instagram" | "
             return "instagram";
         case "STREET":
             return "street";
-        case "APP_USER":
-            return "app";
+        case "WEBSITE":
+            return "website";
         default:
             return "instagram";
     }

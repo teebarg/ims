@@ -5,14 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CreditCard, ShoppingCart, DollarSign } from "lucide-react";
-import { channelLabels } from "@/types/customer";
+import { Search, CreditCard, ShoppingCart, DollarSign, Truck } from "lucide-react";
+import { apiToDeliveryStatus, channelLabels, type DeliveryStatus } from "@/types/customer";
 import { listSales, listCustomers, type SaleDto, type ApiSalesChannel } from "@/lib/api";
-import { currency } from "@/lib/utils";
+import { currency, formatDate } from "@/lib/utils";
 import SalesForm from "@/components/sales/sales-form";
 import { Channel } from "@/types/customer";
-import PaymentForm from "@/components/sales/payment-form";
 import SalesDetails from "@/components/sales/sales-details";
+import DeliveryBadge from "@/components/sales/delivery-badge";
+import SalesActions from "@/components/sales/sales-actions";
+import { ZeroState } from "@/components/ZeroState";
 
 function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
@@ -41,13 +43,14 @@ export default function SalesPage() {
     const [search, setSearch] = useState("");
     const [filterChannel, setFilterChannel] = useState<string>("all");
     const [filterStatus, setFilterStatus] = useState<string>("all");
+    const [filterDelivery, setFilterDelivery] = useState<string>("all");
 
-    const { data: sales = [] } = useQuery({ queryKey: ["sales"], queryFn: listSales });
+    const { data: sales = [], isLoading, isError } = useQuery({ queryKey: ["sales"], queryFn: listSales });
     const { data: customers = [] } = useQuery({ queryKey: ["customers"], queryFn: listCustomers });
 
     const customerMap = new Map(customers.map((c) => [c.id, c]));
 
-    const filtered = sales.filter((s) => {
+    const filtered = sales.filter((s: SaleDto) => {
         const c = customerMap.get(s.customer_id);
         const name = c?.display_name ?? "";
         const ident = c?.identifier ?? "";
@@ -56,8 +59,10 @@ export default function SalesPage() {
         const ch = apiToUiChannel(s.channel as ApiSalesChannel);
         const matchChannel = filterChannel === "all" || ch === filterChannel;
         const status = saleStatus(s);
+        const delivery = apiToDeliveryStatus(s.delivery_status);
         const matchStatus = filterStatus === "all" || status === filterStatus;
-        return matchSearch && matchChannel && matchStatus;
+        const matchDelivery = filterDelivery === "all" || delivery === filterDelivery;
+        return matchSearch && matchChannel && matchStatus && matchDelivery;
     });
 
     const totalRevenue = sales.reduce((a, s) => a + Number(s.total_amount), 0);
@@ -122,8 +127,7 @@ export default function SalesPage() {
                     <SelectContent>
                         <SelectItem value="all">All Channels</SelectItem>
                         <SelectItem value="shop">Shop</SelectItem>
-                        <SelectItem value="tiktok">Tiktok</SelectItem>
-                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="social">Social Media</SelectItem>
                         <SelectItem value="website">Website</SelectItem>
                     </SelectContent>
                 </Select>
@@ -138,7 +142,20 @@ export default function SalesPage() {
                         <SelectItem value="unpaid">Unpaid</SelectItem>
                     </SelectContent>
                 </Select>
+                <Select value={filterDelivery} onValueChange={setFilterDelivery}>
+                    <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Delivery" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Delivery</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
+
+            {sales.length === 0 && !isLoading && !isError && <ZeroState title="No sales found" description="Add your first sale to get started" />}
 
             <div className="hidden md:block">
                 <Card>
@@ -146,7 +163,7 @@ export default function SalesPage() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b bg-muted/30">
-                                    <th className="text-left p-3 font-medium text-muted-foreground">ID</th>
+                                    <th className="text-left p-3 font-medium text-muted-foreground">Ref</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Customer</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Channel</th>
@@ -154,17 +171,18 @@ export default function SalesPage() {
                                     <th className="text-left p-3 font-medium text-muted-foreground">Total</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Paid</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
+                                    <th className="text-left p-3 font-medium text-muted-foreground">Delivery</th>
                                     <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.map((sale) => {
+                                {filtered.map((sale: SaleDto) => {
                                     const c = customerMap.get(sale.customer_id);
                                     const status = saleStatus(sale);
                                     const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
                                     return (
                                         <tr key={sale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                            <td className="p-3 font-mono text-xs">{sale.id}</td>
+                                            <td className="p-3 font-mono text-xs">{sale.reference}</td>
                                             <td className="p-3 text-xs">{sale.sale_date}</td>
                                             <td className="p-3">
                                                 <button
@@ -194,7 +212,10 @@ export default function SalesPage() {
                                                 </Badge>
                                             </td>
                                             <td className="p-3">
-                                                {status !== "paid" && <PaymentForm sale={sale} displayName={c?.display_name || ""} />}
+                                                <DeliveryBadge status={apiToDeliveryStatus(sale.delivery_status)} />
+                                            </td>
+                                            <td className="p-3">
+                                                <SalesActions sale={sale} displayName={c?.display_name || ""} status={status} />
                                             </td>
                                         </tr>
                                     );
@@ -206,46 +227,69 @@ export default function SalesPage() {
             </div>
 
             <div className="md:hidden space-y-3">
-                {filtered.map((sale) => {
+                {filtered.map((sale: SaleDto) => {
                     const c = customerMap.get(sale.customer_id);
                     const status = saleStatus(sale);
                     const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
                     const bal = Number(sale.total_amount) - Number(sale.total_paid);
+                    const itemsCount = sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0;
+
+                    const deliveryStatus = (sale.delivery_status as DeliveryStatus)?.toLowerCase() || "processing";
+
                     return (
-                        <Card key={sale.id}>
-                            <CardContent className="p-4 space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-mono text-xs font-medium">{sale.id}</span>
-                                        <Badge
-                                            variant={status === "paid" ? "default" : status === "partial" ? "secondary" : "destructive"}
-                                            className="text-xs"
-                                        >
-                                            {status}
-                                        </Badge>
+                        <Card key={sale.id} className="cursor-pointer">
+                            <CardContent className="px-4 py-4 space-y-3">
+                                <div className="flex items-start justify-between">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-mono text-sm font-semibold">{sale.reference}</span>
+                                            <Badge
+                                                variant={status === "paid" ? "success" : status === "partial" ? "default" : "destructive"}
+                                                className="text-[10px]"
+                                            >
+                                                {status}
+                                            </Badge>
+                                        </div>
+                                        <p className="text-[11px] text-muted-foreground">{formatDate(sale.created_at)}</p>
                                     </div>
-                                    <span className="text-xs text-muted-foreground">{sale.sale_date}</span>
+                                    <DeliveryBadge status={(deliveryStatus as DeliveryStatus) || ("processing" as DeliveryStatus)} />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <button className="text-left hover:underline" onClick={() => navigate(`/customers/${sale.customer_id}`)}>
-                                            <span className="font-medium">{c?.display_name}</span>
+                                        <button
+                                            className="text-sm font-medium text-left hover:underline"
+                                            onClick={() => navigate(`/customers/${sale.customer_id}`)}
+                                        >
+                                            {c?.display_name}
                                         </button>
+
                                         <p className="text-xs text-muted-foreground font-mono">
                                             {c?.identifier} · {channelLabels[ch]}
                                         </p>
                                     </div>
+
                                     <div className="text-right">
-                                        <p className="font-heading font-bold">{currency(sale.total_amount)}</p>
+                                        <p className="font-semibold text-sm">{currency(sale.total_amount)}</p>
+
                                         {status !== "paid" && <p className="text-xs text-destructive">Bal: {currency(bal)}</p>}
                                     </div>
                                 </div>
-                                <SalesDetails
-                                    label={`${sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0} items`}
-                                    items={sale.items || []}
-                                    total={sale.total_amount}
-                                />
-                                {status !== "paid" && <PaymentForm sale={sale} displayName={c?.display_name || ""} />}
+
+                                {deliveryStatus !== "processing" && (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Truck className="h-3 w-3" />
+                                        <span>
+                                            {deliveryStatus === "out_for_delivery"
+                                                ? `Out for delivery • ${sale.delivery_assigned_to || "Unassigned"}`
+                                                : "Delivered"}
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="flex justify-between items-center">
+                                    <SalesDetails label={`${itemsCount} items`} items={sale.items || []} total={sale.total_amount} />
+                                    <SalesActions sale={sale} displayName={c?.display_name || ""} status={status} />
+                                </div>
                             </CardContent>
                         </Card>
                     );

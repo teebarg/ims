@@ -4,7 +4,7 @@ import { channelLabels } from "@/types/customer";
 import { type ApiSalesChannel, SaleDto } from "@/lib/api";
 import { currency } from "@/lib/utils";
 import { Channel } from "@/types/customer";
-import PaymentForm from "../sales/payment-form";
+import PaymentFormTrigger from "../sales/payment-form-trigger";
 
 function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
@@ -33,7 +33,7 @@ export default function CustomerSalesDetails({ sales, displayName }: { sales: Sa
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b bg-muted/30">
-                                <th className="text-left p-3 font-medium text-muted-foreground">ID</th>
+                                <th className="text-left p-3 font-medium text-muted-foreground">Ref</th>
                                 <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
                                 <th className="text-left p-3 font-medium text-muted-foreground">Channel</th>
                                 <th className="text-left p-3 font-medium text-muted-foreground">Total</th>
@@ -51,7 +51,7 @@ export default function CustomerSalesDetails({ sales, displayName }: { sales: Sa
 
                                 return (
                                     <tr key={s.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                        <td className="p-3 font-mono text-xs">{s.id}</td>
+                                        <td className="p-3 font-mono text-xs">{s.reference}</td>
                                         <td className="p-3 text-xs">{s.sale_date}</td>
                                         <td className="p-3 text-xs">{channelLabels[channelUi]}</td>
                                         <td className="p-3 font-medium">{currency(s.total_amount)}</td>
@@ -64,7 +64,7 @@ export default function CustomerSalesDetails({ sales, displayName }: { sales: Sa
                                                 {status}
                                             </Badge>
                                         </td>
-                                        <td className="p-3">{status !== "paid" && <PaymentForm sale={s} displayName={""} />}</td>
+                                        <td className="p-3">{status !== "paid" && <PaymentFormTrigger sale={s} displayName={""} />}</td>
                                     </tr>
                                 );
                             })}
@@ -105,7 +105,7 @@ export default function CustomerSalesDetails({ sales, displayName }: { sales: Sa
                                     <span>{currency(s.total_paid)}</span>
                                 </div>
 
-                                {status !== "paid" && <PaymentForm sale={s} displayName={""} />}
+                                {status !== "paid" && <PaymentFormTrigger sale={s} displayName={""} />}
                             </div>
                         );
                     })}
