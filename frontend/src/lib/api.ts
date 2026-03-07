@@ -272,6 +272,8 @@ export interface AnalyticsSummaryDto {
 export interface SalesTrendPointDto {
     period_start: string;
     total_amount: number;
+    total_cost?: number;
+    total_profit?: number;
 }
 
 export interface SalesTrendResponseDto {
@@ -294,4 +296,26 @@ export function getAnalyticsTrends(period: "weekly" | "monthly" = "monthly") {
 
 export function getAnalyticsStock() {
     return fetchApi<StockSnapshotDto>("/analytics/stock");
+}
+
+export interface TopCustomerDto {
+    customer_id: string;
+    display_name: string;
+    purchases: number;
+    spent: number;
+}
+
+export function getTopCustomers(limit: number = 5) {
+    return fetchApi<TopCustomerDto[]>(`/analytics/top-customers?limit=${limit}`);
+}
+
+export interface ChannelStatDto {
+    channel: string;
+    count: number;
+    revenue: number;
+    percentage: number;
+}
+
+export function getChannelStats() {
+    return fetchApi<ChannelStatDto[]>("/analytics/channels");
 }

@@ -8,7 +8,7 @@ FastAPI microservice for managing Revoquue bales, sales, payments, inventory sto
 - **Sales**: record sales by bale, category, channel, and user or guest.
 - **Payments**: support partial and full payments with automatic balance calculation.
 - **Inventory stock**: category-level and total stock using inventory movements.
-- **Analytics**: profit per bale, weekly/monthly sales trends, and simple stock turnover.
+- **Analytics**: weekly/monthly sales trends, cost vs revenue, and simple stock turnover.
 
 ---
 
@@ -178,8 +178,13 @@ docker-compose exec api alembic upgrade head
 - **POST `/sales`** – Record a sale (registered user via `user_id` or guest via `guest_name`/`guest_contact`).
 - **POST `/payments`** – Record a partial or full payment towards a sale.
 - **GET `/stock`** – Retrieve current stock (total + category level).
-- **GET `/analytics`** – Summary (profit, turnover, profit per bale).
+- **GET `/analytics`** – Summary (profit, turnover).
 - **GET `/analytics/trends?period=weekly|monthly`** – Sales trends over time.
+ - **GET `/analytics`** – Summary (total revenue and optional profit).
+ - **GET `/analytics/trends?period=weekly|monthly`** – Sales trends over time (includes cost field for drilldown).
+ - **GET `/analytics/stock`** – Current stock snapshot by category.
+ - **GET `/analytics/top-customers`** – List of highest-spending customers.
+ - **GET `/analytics/channels`** – Distribution of sales across channels.
 
 Partial payments and balances are handled automatically based on the total sale amount and cumulative payments. Payments that exceed the remaining balance are rejected.
 

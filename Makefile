@@ -59,6 +59,10 @@ migrate:
 downgrade:
 	alembic downgrade -1
 
+.PHONY: seed
+seed:
+	python app/db/seed.py
+
 .PHONY: build
 build:
 	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
