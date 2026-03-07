@@ -15,47 +15,51 @@ import NotFound from "./pages/NotFound";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import CategoriesPage from "./pages/CategoriesPage";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
+import PWABadge from "./PWABadge";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-    <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-                <Routes>
-                    <Route
-                        path="/*"
-                        element={
-                            <ProtectedRoute>
-                                <DashboardLayout>
-                                    <Routes>
-                                        <Route path="/" element={<DashboardPage />} />
-                                        <Route
-                                            path="/bales"
-                                            element={
-                                                <RoleProtectedRoute allowedRoles={["super-admin"]}>
-                                                    <BalesPage />
-                                                </RoleProtectedRoute>
-                                            }
-                                        />
-                                        <Route path="/customers" element={<CustomersPage />} />
-                                        <Route path="/customers/:id" element={<CustomerProfilePage />} />
-                                        <Route path="/sales" element={<SalesPage />} />
-                                        <Route path="/analytics" element={<AnalyticsPage />} />
-                                        <Route path="/categories" element={<CategoriesPage />} />
-                                        <Route path="/no-access" element={<AccessDeniedPage />} />
-                                        <Route path="*" element={<NotFound />} />
-                                    </Routes>
-                                </DashboardLayout>
-                            </ProtectedRoute>
-                        }
-                    />
-                </Routes>
-            </BrowserRouter>
-        </TooltipProvider>
-    </QueryClientProvider>
+    <>
+        <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                    <Routes>
+                        <Route
+                            path="/*"
+                            element={
+                                <ProtectedRoute>
+                                    <DashboardLayout>
+                                        <Routes>
+                                            <Route path="/" element={<DashboardPage />} />
+                                            <Route
+                                                path="/bales"
+                                                element={
+                                                    <RoleProtectedRoute allowedRoles={["super-admin"]}>
+                                                        <BalesPage />
+                                                    </RoleProtectedRoute>
+                                                }
+                                            />
+                                            <Route path="/customers" element={<CustomersPage />} />
+                                            <Route path="/customers/:id" element={<CustomerProfilePage />} />
+                                            <Route path="/sales" element={<SalesPage />} />
+                                            <Route path="/analytics" element={<AnalyticsPage />} />
+                                            <Route path="/categories" element={<CategoriesPage />} />
+                                            <Route path="/no-access" element={<AccessDeniedPage />} />
+                                            <Route path="*" element={<NotFound />} />
+                                        </Routes>
+                                    </DashboardLayout>
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Routes>
+                </BrowserRouter>
+            </TooltipProvider>
+        </QueryClientProvider>
+        <PWABadge />
+    </>
 );
 
 export default App;
