@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, CreditCard, DollarSign, Loader2, ShoppingCart, TrendingUp } from "lucide-react";
 import { identifierTypeLabels, channelLabels } from "@/types/customer";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { getCustomerProfile, createPayment, type ApiIdentifierType, type ApiSalesChannel } from "@/lib/api";
 import { toast } from "sonner";
-import { currency } from "@/lib/utils";
+import { currency, formatDate } from "@/lib/utils";
 import { Channel } from "@/types/customer";
 import CustomerSalesDetails from "@/components/customers/customers-sales-details";
 
@@ -96,6 +96,7 @@ export default function CustomerProfilePage() {
         .filter((d) => d.value > 0);
 
     const selectedSale = sales.find((s) => s.id === selectedSaleId);
+    const saleRefById = useMemo(() => new Map(sales.map((s) => [s.id, s.reference])), [sales]);
 
     const handlePay = () => {
         if (selectedSaleId == null || !paymentAmount) return;
@@ -227,7 +228,7 @@ export default function CustomerProfilePage() {
                 </Card>
 
                 {/* Sales History */}
-                <CustomerSalesDetails sales={sales} displayName={customer.display_name} />
+                <CustomerSalesDetails sales={sales} customer={customer} />
             </div>
 
             {/* Payment History */}
@@ -239,7 +240,6 @@ export default function CustomerProfilePage() {
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b bg-muted/30">
-                                <th className="text-left p-3 font-medium text-muted-foreground">Payment ID</th>
                                 <th className="text-left p-3 font-medium text-muted-foreground">Sale</th>
                                 <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
                                 <th className="text-left p-3 font-medium text-muted-foreground">Amount</th>
@@ -255,9 +255,8 @@ export default function CustomerProfilePage() {
                             ) : (
                                 payments.map((p) => (
                                     <tr key={p.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                        <td className="p-3 font-mono text-xs">{p.id}</td>
-                                        <td className="p-3 font-mono text-xs">{p.sale_id}</td>
-                                        <td className="p-3 text-xs">{p.payment_date.slice(0, 10)}</td>
+                                        <td className="p-3 font-mono text-xs">{saleRefById.get(p.sale_id) ?? p.sale_id}</td>
+                                        <td className="p-3 text-xs">{formatDate(p.payment_date)}</td>
                                         <td className="p-3 font-medium text-success">{currency(p.amount)}</td>
                                     </tr>
                                 ))
@@ -277,7 +276,7 @@ export default function CustomerProfilePage() {
                         <div className="space-y-4 py-4">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Sale</span>
-                                <span className="font-medium">{selectedSale.id}</span>
+                                <span className="font-medium font-mono">{selectedSale.reference}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Total</span>

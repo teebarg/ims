@@ -24,6 +24,7 @@ export default function PaymentForm({ sale, status, displayName, onClose }: Paym
     const balance = Number(sale.balance);
 
     const [paymentAmount, setPaymentAmount] = useState(String(balance));
+    const [paymentMethod, setPaymentMethod] = useState<"cash" | "transfer" | "pos">("cash");
 
     const validatePayment = () => {
         const amt = Number(paymentAmount);
@@ -50,15 +51,18 @@ export default function PaymentForm({ sale, status, displayName, onClose }: Paym
             return createPayment({
                 sale_id: sale.id,
                 amount: amt,
-                method: "cash",
+                method: paymentMethod,
             });
         },
 
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["sales"] });
+            queryClient.invalidateQueries({ queryKey: ["customer-payments", sale.customer_id] });
 
             confirmPaymentState.close();
+            onClose?.();
             setPaymentAmount(String(balance));
+            setPaymentMethod("cash");
 
             toast.success("Payment recorded");
         },
@@ -89,11 +93,6 @@ export default function PaymentForm({ sale, status, displayName, onClose }: Paym
                 {/* Sale summary */}
                 <div className="rounded-lg border bg-muted/20 p-4 space-y-2 text-sm">
                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">Sale</span>
-                        <span className="font-medium font-mono">{sale.reference}</span>
-                    </div>
-
-                    <div className="flex justify-between">
                         <span className="text-muted-foreground">Total</span>
                         <span>{currency(sale.total_amount)}</span>
                     </div>
@@ -108,6 +107,33 @@ export default function PaymentForm({ sale, status, displayName, onClose }: Paym
                         <span>{currency(balance)}</span>
                     </div>
                 </div>
+
+                {/* Payment Method */}
+                <div className="space-y-2">
+                    <Label>Payment Method</Label>
+
+                    <div className="grid grid-cols-3 gap-2">
+                        <Button variant={paymentMethod === "cash" ? "default" : "secondary"} onClick={() => setPaymentMethod("cash")}>
+                            Cash
+                        </Button>
+
+                        <Button variant={paymentMethod === "transfer" ? "default" : "secondary"} onClick={() => setPaymentMethod("transfer")}>
+                            Transfer
+                        </Button>
+
+                        <Button variant={paymentMethod === "pos" ? "default" : "secondary"} onClick={() => setPaymentMethod("pos")}>
+                            POS
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Reference */}
+                {/* {paymentMethod !== "cash" && (
+                    <div className="space-y-2">
+                        <Label>Reference</Label>
+                        <Input placeholder="Bank or POS reference" value={reference} onChange={(e) => setReference(e.target.value)} />
+                    </div>
+                )} */}
 
                 <div className="space-y-2">
                     <Label>Quick Amount</Label>
@@ -175,6 +201,11 @@ export default function PaymentForm({ sale, status, displayName, onClose }: Paym
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Amount</span>
                             <span className="font-heading font-bold text-success">{currency(Number(paymentAmount) || 0)}</span>
+                        </div>
+
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Method</span>
+                            <span className="font-medium capitalize">{paymentMethod}</span>
                         </div>
                     </div>
                 }
