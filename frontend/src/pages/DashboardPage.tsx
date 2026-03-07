@@ -21,6 +21,7 @@ import { Channel, channelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
 import { AlertTriangle, DollarSign, Package, ShoppingCart } from "lucide-react";
 import CategoryPerformance from "@/components/dashboard/category-performance";
+import SalesDetails from "@/components/sales/sales-details";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
@@ -166,6 +167,7 @@ export default function DashboardPage() {
                 id: s.id,
                 customerId: s.customer_id,
                 customerName: c?.display_name ?? "—",
+                items: s.items || [],
                 itemsCount,
                 amount: Number(s.total_amount),
                 status: saleStatus(s),
@@ -318,15 +320,17 @@ export default function DashboardPage() {
                                     </tr>
                                 )}
                                 {recentTransactions.map((txn) => (
-                                    <tr
-                                        key={txn.id}
-                                        className="border-b last:border-0 cursor-pointer hover:bg-muted/20"
-                                        onClick={() => txn.customerId && navigate(`/customers/${txn.customerId}`)}
-                                    >
+                                    <tr key={txn.id} className="border-b last:border-0 hover:bg-muted/20">
                                         <td className="py-2.5 font-mono text-xs">{txn.id}</td>
-                                        <td className="py-2.5">{txn.customerName ?? "Unknown"}</td>
+                                        <td className="py-2.5 cursor-pointer" onClick={() => txn.customerId && navigate(`/customers/${txn.customerId}`)}>
+                                            {txn.customerName ?? "Unknown"}
+                                        </td>
                                         <td className="py-2.5 hidden sm:table-cell">
-                                            {txn.itemsCount} item{txn.itemsCount === 1 ? "" : "s"}
+                                            <SalesDetails
+                                                label={`${txn.itemsCount} item${txn.itemsCount === 1 ? "" : "s"}`}
+                                                items={txn.items}
+                                                total={txn.amount}
+                                            />
                                         </td>
                                         <td className="py-2.5 font-medium">{currency(txn.amount)}</td>
                                         <td className="py-2.5">
