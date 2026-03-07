@@ -8,7 +8,28 @@ export function GetAppButton() {
     const installState = usePwaInstall();
     const [iosDrawerOpen, setIosDrawerOpen] = useState(false);
 
-    if (!installState || installState.status === "installed" || installState.status === "unsupported") {
+    if (!installState || installState.status === "installed") {
+        return null;
+    }
+
+    if (installState.status === "unsupported") {
+        const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+        const isDesktopChrome = /Chrome/.test(ua) && !/Mobile/.test(ua) && !/Edg/.test(ua);
+        if (isDesktopChrome) {
+            return (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 rounded-full font-medium"
+                    onClick={() =>
+                        alert('This app can be installed – click the install icon in the address bar (or press Ctrl+Shift+I) and select "Install".')
+                    }
+                >
+                    <Download className="h-4 w-4" />
+                    Install
+                </Button>
+            );
+        }
         return null;
     }
 
