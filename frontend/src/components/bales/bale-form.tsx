@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createBale, createCategory, listCategories } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface Props {
@@ -21,6 +21,7 @@ export default function BaleForm({ onClose }: Props) {
         queryKey: ["categories"],
         queryFn: listCategories,
     });
+
     const [newBale, setNewBale] = useState({
         reference: "",
         categoryId: "",
@@ -29,7 +30,6 @@ export default function BaleForm({ onClose }: Props) {
         purchaseDate: "",
     });
     const [baleCategories, setBaleCategories] = useState<any[]>([{ name: "", quantity: 0 }]);
-
     const createMutation = useMutation({
         mutationFn: async () => {
             const ref = newBale.reference.trim();
@@ -40,16 +40,22 @@ export default function BaleForm({ onClose }: Props) {
                 throw new Error("Please enter a valid total cost");
             }
 
-            const items = baleCategories
-                .map((c) => ({
-                    category_id: Number(typeof c.name === "string" ? c.name : ""),
-                    quantity: Number(c.quantity) || 0,
-                }))
-                .filter((item) => Number.isFinite(item.category_id) && item.category_id > 0 && item.quantity > 0);
+            const usedCategoryIds = new Set<string>();
+            const items = baleCategories.map((c) => {
+                const categoryId = c.name;
+                const quantity = Number(c.quantity) || 0;
 
-            if (items.length === 0) {
-                throw new Error("Add at least one category with quantity");
-            }
+                if (!categoryId) throw new Error("Select a category for all rows");
+                if (usedCategoryIds.has(categoryId)) throw new Error("Duplicate categories are not allowed");
+                if (quantity <= 0) throw new Error("Quantity must be greater than 0 for all categories");
+
+                usedCategoryIds.add(categoryId);
+
+                return {
+                    category_id: Number(categoryId),
+                    quantity,
+                };
+            });
 
             return createBale({
                 reference: ref,
@@ -72,10 +78,14 @@ export default function BaleForm({ onClose }: Props) {
 
     const computedTotal = baleCategories.reduce((sum, c) => sum + (c.quantity || 0), 0);
 
-    const addRow = () => setBaleCategories((prev) => [...prev, { name: "", quantity: 0 }]);
+    const addRow = () => {
+        const usedIds = baleCategories.map((c) => c.name);
+        const remainingCategory = categories.find((c) => !usedIds.includes(c.id.toString()))?.id.toString() || "";
+        if (!remainingCategory) return; // nothing to add
+        setBaleCategories((prev) => [...prev, { name: remainingCategory, quantity: 0 }]);
+    };
 
     const removeRow = (idx: number) => setBaleCategories((prev) => prev.filter((_, i) => i !== idx));
-
     const updateRow = (idx: number, field: keyof (typeof baleCategories)[0], value: string | number) => {
         setBaleCategories((prev) => prev.map((c, i) => (i === idx ? { ...c, [field]: value } : c)));
     };
@@ -99,6 +109,10 @@ export default function BaleForm({ onClose }: Props) {
         if (!name) return;
         createCategoryMutation.mutate(name);
     };
+    const allCategoriesUsed = useMemo(() => {
+        const usedIds = baleCategories.map((c) => c.name);
+        return categories.length > 0 && usedIds.length >= categories.length;
+    }, [baleCategories, categories]);
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -133,7 +147,6 @@ export default function BaleForm({ onClose }: Props) {
                             />
                         </div>
                     </div>
-                    {/* Category Items */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Label className="text-sm font-medium">Category Breakdown</Label>
@@ -151,11 +164,13 @@ export default function BaleForm({ onClose }: Props) {
                                                 <SelectValue placeholder="Category" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {categories.map((k) => (
-                                                    <SelectItem key={k.id} value={k.id.toString()}>
-                                                        {k.name}
-                                                    </SelectItem>
-                                                ))}
+                                                {categories
+                                                    .filter((k) => !baleCategories.some((bc, i) => bc.name === k.id.toString() && i !== idx))
+                                                    .map((k) => (
+                                                        <SelectItem key={k.id} value={k.id.toString()}>
+                                                            {k.name}
+                                                        </SelectItem>
+                                                    ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -182,7 +197,7 @@ export default function BaleForm({ onClose }: Props) {
                         </div>
 
                         <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={addRow} className="text-xs">
+                            <Button variant="outline" size="sm" onClick={addRow} className="text-xs" disabled={allCategoriesUsed}>
                                 <Plus className="h-3 w-3 mr-1" /> Add Row
                             </Button>
                         </div>
