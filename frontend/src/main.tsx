@@ -11,6 +11,13 @@ const AppWrapper = () => {
     const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
     if (!PUBLISHABLE_KEY) throw new Error("Add your Clerk Publishable Key");
 
+    window.addEventListener("beforeinstallprompt", (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        window.deferredPrompt = e;
+    });
+
     return (
         <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
             <ThemeProvider defaultTheme="system" enableSystem>

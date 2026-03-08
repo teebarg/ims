@@ -1,6 +1,6 @@
 import "./PWABadge.css";
-
 import { useRegisterSW } from "virtual:pwa-register/react";
+import { RefreshCw, WifiOff, X } from "lucide-react";
 
 function PWABadge() {
     // periodic sync is disabled, change the value to enable it, the period is in milliseconds
@@ -30,29 +30,30 @@ function PWABadge() {
         setNeedRefresh(false);
     }
 
+    if (!offlineReady && !needRefresh) return null;
+
     return (
-        <div className="PWABadge" role="alert" aria-labelledby="toast-message">
-            {(offlineReady || needRefresh) && (
-                <div className="PWABadge-toast">
-                    <div className="PWABadge-message">
-                        {offlineReady ? (
-                            <span id="toast-message">App ready to work offline</span>
-                        ) : (
-                            <span id="toast-message">New content available, click on reload button to update.</span>
-                        )}
-                    </div>
-                    <div className="PWABadge-buttons">
-                        {needRefresh && (
-                            <button className="PWABadge-toast-button" onClick={() => updateServiceWorker(true)}>
-                                Reload
-                            </button>
-                        )}
-                        <button className="PWABadge-toast-button" onClick={() => close()}>
-                            Close
+        <div className="fixed bottom-4 right-4 z-50">
+            <div className="flex items-center gap-3 rounded-xl bg-background border shadow-lg px-4 py-3 min-w-[260px]">
+                <div className="text-primary">{offlineReady ? <WifiOff size={18} /> : <RefreshCw size={18} />}</div>
+
+                <div className="flex-1 text-sm">{offlineReady ? <span>POS ready for offline use</span> : <span>System update available</span>}</div>
+
+                <div className="flex items-center gap-2">
+                    {needRefresh && (
+                        <button
+                            onClick={() => updateServiceWorker(true)}
+                            className="px-3 py-1 text-xs font-medium rounded-md bg-primary text-white hover:opacity-90"
+                        >
+                            Update
                         </button>
-                    </div>
+                    )}
+
+                    <button onClick={close} className="p-1 rounded-md hover:bg-gray-100">
+                        <X size={16} />
+                    </button>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
