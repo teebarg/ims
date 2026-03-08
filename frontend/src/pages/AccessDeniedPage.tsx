@@ -59,7 +59,7 @@ const AccessDeniedPage = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-foreground">Call Support</p>
-                                <p className="text-xs text-muted-foreground">+1 (234) 567-890</p>
+                                <p className="text-xs text-muted-foreground">+234 (800) 123 4567</p>
                             </div>
                             <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
                         </a>

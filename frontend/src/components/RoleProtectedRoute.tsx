@@ -1,31 +1,19 @@
-import { Loader2 } from "lucide-react";
-import { RedirectToSignIn, useUser } from "@clerk/react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { useUser } from "@clerk/react";
 
-export default function RoleProtectedRoute({
-    children,
-    allowedRoles,
-}: {
-    children: React.ReactNode;
-    allowedRoles: string[]; // ["admin", "super-admin", "user"]
-}) {
-    const { isSignedIn, user, isLoaded } = useUser();
+export default function RoleProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) {
+    const { user } = useUser();
+    const location = useLocation();
 
-    if (!isLoaded) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
+    const role = user?.publicMetadata?.role as string | undefined;
+
+    // super-admin always allowed
+    if (role === "super-admin") {
+        return <>{children}</>;
     }
 
-    if (!isSignedIn) {
-        return <RedirectToSignIn />;
-    }
-
-    const userRole = user?.publicMetadata?.role as string | undefined;
-    if (!userRole || !allowedRoles.includes(userRole)) {
-        return <Navigate to="/no-access" replace />;
+    if (!allowedRoles.includes(role || "")) {
+        return <Navigate to="/no-access" state={{ from: location }} replace />;
     }
 
     return <>{children}</>;

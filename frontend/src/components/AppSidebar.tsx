@@ -1,6 +1,7 @@
 import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, ChevronLeft, Store, Tag } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useUser } from "@clerk/react";
 import {
     Sidebar,
     SidebarContent,
@@ -16,18 +17,22 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainItems = [
-    { title: "Dashboard", url: "/", icon: LayoutDashboard },
-    { title: "Bales", url: "/bales", icon: Package },
-    { title: "Customers", url: "/customers", icon: Users },
-    { title: "Sales", url: "/sales", icon: ShoppingCart },
-    { title: "Categories", url: "/categories", icon: Tag },
-    { title: "Analytics", url: "/analytics", icon: BarChart3 },
+    { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "super-admin"] },
+    { title: "Sales", url: "/sales", icon: ShoppingCart, roles: ["admin", "super-admin"] },
+    { title: "Bales", url: "/bales", icon: Package, roles: ["super-admin"] },
+    { title: "Customers", url: "/customers", icon: Users, roles: ["super-admin", "admin"] },
+    { title: "Categories", url: "/categories", icon: Tag, roles: ["super-admin", "admin"] },
+    { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ["super-admin"] },
 ];
 
 export function AppSidebar() {
     const { state, toggleSidebar } = useSidebar();
     const collapsed = state === "collapsed";
     const location = useLocation();
+    const { user } = useUser();
+
+    const role = user?.publicMetadata?.role as string | undefined;
+    const filteredItems = mainItems.filter((item) => item.roles.includes(role || ""));
 
     const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
 
@@ -52,7 +57,7 @@ export function AppSidebar() {
                     <SidebarGroupLabel className="text-sidebar-muted text-xs uppercase tracking-wider">{!collapsed && "Menu"}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {mainItems.map((item) => (
+                            {filteredItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                                         <NavLink
