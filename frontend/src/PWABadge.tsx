@@ -1,4 +1,3 @@
-import "./PWABadge.css";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { RefreshCw, WifiOff, X } from "lucide-react";
 
