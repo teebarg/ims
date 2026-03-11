@@ -1,12 +1,39 @@
 services:
-  api-ims:
-    image: ims:${TAG-latest}
+  ims-ui:
+    image: ims-ui:${TAG-latest}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     labels:
       - traefik.enable=true
       - traefik.docker.network=dev-net
-      - traefik.http.services.ims-backend.loadbalancer.server.port=8000
-      - traefik.http.routers.ims-backend.rule=Host(`api-ims.localhost`)
-      - traefik.http.routers.ims-backend.entrypoints=http
+      - traefik.http.services.ims-ui.loadbalancer.server.port=5173
+      - traefik.http.routers.ims-ui.rule=Host(`auth.localhost`)
+      - traefik.http.routers.ims-ui.entrypoints=https
+      - traefik.http.routers.ims-ui.tls=true
+      - traefik.http.routers.ims-ui-http.rule=Host(`auth.localhost`)
+      - traefik.http.routers.ims-ui-http.entrypoints=http
+      - traefik.http.routers.ims-ui-http.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+    command: ["npm", "run", "dev"]
+    networks:
+      - dev-net
+    env_file:
+      - .env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - WATCHPACK_POLLING=true
+      - VITE_PORT=5173 # Pass this to ensure Vite respects the port
+  ims-api:
+    image: ims-api:${TAG-latest}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dev-net
+      - traefik.http.services.ims-api.loadbalancer.server.port=8000
+      - traefik.http.routers.ims-api.rule=Host(`api.ims.localhost`)
+      - traefik.http.routers.ims-api.entrypoints=http
     networks:
       - dev-net
     env_file:
@@ -20,15 +47,6 @@ services:
         INSTALL_DEV: ${INSTALL_DEV-false}
     # command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app"]
-    # develop:
-    #   watch:
-    #     - path: .
-    #       action: sync
-    #       target: /app
-    #       ignore:
-    #         - .venv
-    #     - path: ./pyproject.toml
-    #       action: rebuild
     volumes:
       - ./:/app
       - /app/.venv
