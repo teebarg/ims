@@ -57,7 +57,7 @@ export default defineConfig({
                     },
                     {
                         // 2. Local API
-                        urlPattern: /^http:\/\/api-ims\.localhost\/.*/i,
+                        urlPattern: /^http:\/\/api.ims\.lvh.me\/.*/i,
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'local-api-cache'

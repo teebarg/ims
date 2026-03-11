@@ -1,39 +1,17 @@
 services:
-  ims-ui:
-    image: ims-ui:${TAG-latest}
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=dev-net
-      - traefik.http.services.ims-ui.loadbalancer.server.port=5173
-      - traefik.http.routers.ims-ui.rule=Host(`auth.localhost`)
-      - traefik.http.routers.ims-ui.entrypoints=https
-      - traefik.http.routers.ims-ui.tls=true
-      - traefik.http.routers.ims-ui-http.rule=Host(`auth.localhost`)
-      - traefik.http.routers.ims-ui-http.entrypoints=http
-      - traefik.http.routers.ims-ui-http.middlewares=redirect-to-https
-      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-    command: ["npm", "run", "dev"]
-    networks:
-      - dev-net
-    env_file:
-      - .env
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - WATCHPACK_POLLING=true
-      - VITE_PORT=5173 # Pass this to ensure Vite respects the port
   ims-api:
     image: ims-api:${TAG-latest}
     labels:
       - traefik.enable=true
       - traefik.docker.network=dev-net
       - traefik.http.services.ims-api.loadbalancer.server.port=8000
-      - traefik.http.routers.ims-api.rule=Host(`api.ims.localhost`)
-      - traefik.http.routers.ims-api.entrypoints=http
+      - traefik.http.routers.ims-api.rule=Host(`api.ims.lvh.me`)
+      - traefik.http.routers.ims-api.entrypoints=https
+      - traefik.http.routers.ims-api.tls=true
+      - traefik.http.routers.ims-api-http.rule=Host(`api.ims.lvh.me`)
+      - traefik.http.routers.ims-api-http.entrypoints=http
+      - traefik.http.routers.ims-api-http.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
     networks:
       - dev-net
     env_file:
@@ -45,8 +23,7 @@ services:
       dockerfile: Dockerfile.dev
       args:
         INSTALL_DEV: ${INSTALL_DEV-false}
-    # command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app"]
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
       - ./:/app
       - /app/.venv
