@@ -5,10 +5,10 @@ services:
       - traefik.enable=true
       - traefik.docker.network=dev-net
       - traefik.http.services.ims-api.loadbalancer.server.port=8000
-      - traefik.http.routers.ims-api.rule=Host(`api.ims.lvh.me`)
+      - traefik.http.routers.ims-api.rule=Host(`api.ims.localhost`)
       - traefik.http.routers.ims-api.entrypoints=https
       - traefik.http.routers.ims-api.tls=true
-      - traefik.http.routers.ims-api-http.rule=Host(`api.ims.lvh.me`)
+      - traefik.http.routers.ims-api-http.rule=Host(`api.ims.localhost`)
       - traefik.http.routers.ims-api-http.entrypoints=http
       - traefik.http.routers.ims-api-http.middlewares=redirect-to-https
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
