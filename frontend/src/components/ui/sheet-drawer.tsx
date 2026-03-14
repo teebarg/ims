@@ -35,7 +35,7 @@ const SheetDrawer: React.FC<OverlayProps> = ({
                     <DrawerHeader>
                         <DrawerTitle>{title}</DrawerTitle>
                     </DrawerHeader>
-                    {children}
+                    <div className="safe-bottom">{children}</div>
                 </DrawerContent>
             </Drawer>
         );
@@ -51,7 +51,7 @@ const SheetDrawer: React.FC<OverlayProps> = ({
                 <SheetHeader className={showHeader ? "px-4 mt-1" : "sr-only"}>
                     <SheetTitle className="flex items-center gap-3 text-xl">{title}</SheetTitle>
                 </SheetHeader>
-                {children}
+                <div className="safe-bottom">{children}</div>
             </SheetContent>
         </Sheet>
     );
