@@ -1,12 +1,17 @@
 services:
-  api-ims:
-    image: ims:${TAG-latest}
+  ims-api:
+    image: ims-api:${TAG-latest}
     labels:
       - traefik.enable=true
       - traefik.docker.network=dev-net
-      - traefik.http.services.ims-backend.loadbalancer.server.port=8000
-      - traefik.http.routers.ims-backend.rule=Host(`api-ims.localhost`)
-      - traefik.http.routers.ims-backend.entrypoints=http
+      - traefik.http.services.ims-api.loadbalancer.server.port=8000
+      - traefik.http.routers.ims-api.rule=Host(`api.ims.localhost`)
+      - traefik.http.routers.ims-api.entrypoints=https
+      - traefik.http.routers.ims-api.tls=true
+      - traefik.http.routers.ims-api-http.rule=Host(`api.ims.localhost`)
+      - traefik.http.routers.ims-api-http.entrypoints=http
+      - traefik.http.routers.ims-api-http.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
     networks:
       - dev-net
     env_file:
@@ -18,17 +23,7 @@ services:
       dockerfile: Dockerfile.dev
       args:
         INSTALL_DEV: ${INSTALL_DEV-false}
-    # command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app"]
-    # develop:
-    #   watch:
-    #     - path: .
-    #       action: sync
-    #       target: /app
-    #       ignore:
-    #         - .venv
-    #     - path: ./pyproject.toml
-    #       action: rebuild
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
       - ./:/app
       - /app/.venv
