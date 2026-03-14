@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </Button>
                         <UserButton />
                     </header>
-                    <main className="flex-1 p-4 md:p-6 overflow-auto">{children}</main>
+                    <main className="flex-1 p-4 md:p-6 overflow-auto safe-bottom">{children}</main>
                 </div>
             </div>
         </SidebarProvider>
