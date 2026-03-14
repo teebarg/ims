@@ -17,12 +17,12 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainItems = [
-    { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "super-admin"] },
-    { title: "Sales", url: "/sales", icon: ShoppingCart, roles: ["admin", "super-admin"] },
-    { title: "Bales", url: "/bales", icon: Package, roles: ["super-admin"] },
-    { title: "Customers", url: "/customers", icon: Users, roles: ["super-admin", "admin"] },
-    { title: "Categories", url: "/categories", icon: Tag, roles: ["super-admin", "admin"] },
-    { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ["super-admin"] },
+    { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "user"] },
+    { title: "Sales", url: "/sales", icon: ShoppingCart, roles: ["admin", "user"] },
+    { title: "Bales", url: "/bales", icon: Package, roles: ["admin"] },
+    { title: "Customers", url: "/customers", icon: Users, roles: ["admin", "user"] },
+    { title: "Categories", url: "/categories", icon: Tag, roles: ["admin", "user"] },
+    { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ["admin"] },
 ];
 
 export function AppSidebar() {

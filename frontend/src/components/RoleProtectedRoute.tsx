@@ -7,8 +7,8 @@ export default function RoleProtectedRoute({ children, allowedRoles }: { childre
 
     const role = user?.publicMetadata?.role as string | undefined;
 
-    // super-admin always allowed
-    if (role === "super-admin") {
+    // admin always allowed
+    if (role === "admin") {
         return <>{children}</>;
     }
 
