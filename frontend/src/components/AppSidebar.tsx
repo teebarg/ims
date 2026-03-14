@@ -38,8 +38,8 @@ export function AppSidebar() {
 
     return (
         <Sidebar collapsible="icon">
-            <SidebarHeader className="p-4 safe-top h-[calc(56px+env(safe-area-inset-top))]">
-                <div className="flex items-center gap-3">
+            <SidebarHeader className="p-4">
+                <div className="flex items-center gap-3 safe-top">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary">
                         <Store className="h-5 w-5 text-sidebar-primary-foreground" />
                     </div>
