@@ -86,7 +86,7 @@ def update_customer_endpoint(
 def delete_customer_endpoint(
     customer_id: UUID,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN)),
+    _: None = Depends(require_roles(UserRole.ADMIN)),
 ) -> Message:
     try:
         delete_customer(db, customer_id)

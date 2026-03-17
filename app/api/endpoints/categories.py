@@ -25,7 +25,7 @@ def list_categories_endpoint(db: Session = Depends(get_db)) -> list[CategoryRead
 def create_category_endpoint(
     category_in: CategoryCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF)),
 ) -> CategoryRead:
     try:
         return create_category(db, category_in)
@@ -38,7 +38,7 @@ def update_category_endpoint(
     category_id: int,
     category_in: CategoryCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF)),
 ) -> CategoryRead:
     try:
         return update_category(db, category_id, category_in)
@@ -52,7 +52,7 @@ def update_category_endpoint(
 def delete_category_endpoint(
     category_id: int,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN)),
+    _: None = Depends(require_roles(UserRole.ADMIN)),
 ) -> Message:
     try:
         delete_category(db, category_id)
