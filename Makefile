@@ -2,8 +2,8 @@ APP_NAME=ims
 IMAGE_NAME?=$(APP_NAME)
 IMAGE_TAG?=latest
 DOCKER_USER?=beafdocker
-
-PYTHON?=python
+DOCKER_COMPOSE = docker compose
+CONTAINER_NAME = ims-api
 
 .PHONY: help
 help:
@@ -49,19 +49,19 @@ migration:
 		echo "Usage: make migration name=short_description"; \
 		exit 1; \
 	fi
-	alembic revision -m "$(name)"
+	$(DOCKER_COMPOSE) -p $(APP_NAME) exec $(CONTAINER_NAME) alembic revision -m "$(name)"
 
 .PHONY: migrate
 migrate:
-	alembic upgrade head
+	$(DOCKER_COMPOSE) -p $(APP_NAME) exec $(CONTAINER_NAME) alembic upgrade head
 
 .PHONY: downgrade
 downgrade:
-	alembic downgrade -1
+	$(DOCKER_COMPOSE) -p $(APP_NAME) exec $(CONTAINER_NAME) alembic downgrade -1
 
 .PHONY: seed
 seed:
-	python app/db/seed.py
+	$(DOCKER_COMPOSE) -p $(APP_NAME) exec $(CONTAINER_NAME) python app/db/seed.py
 
 .PHONY: build
 build:
@@ -79,6 +79,10 @@ push:
 .PHONY: up
 up:
 	docker compose up --build
+
+.PHONY: update
+update:
+	docker compose -p $(APP_NAME) up -d --force-recreate $(s)
 
 .PHONY: down
 down:

@@ -1,6 +1,6 @@
 import { getToken } from "@clerk/react";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://niyi.dev";
 
 export async function fetchApi<TResponse>(url: string, options: RequestInit = {}): Promise<TResponse> {
     if (!API_URL) {
@@ -40,9 +40,7 @@ export interface BaleDto {
     created_at: string;
     updated_at: string;
     items: BaleItemDto[];
-    /** Sum of item quantities. Derived from items when not provided. */
     total_items?: number;
-    /** Items left. Present when listing bales. */
     remaining_items?: number;
 }
 
@@ -119,11 +117,11 @@ export interface CreateCustomerInput {
 export interface UpdateCustomerInput extends CreateCustomerInput {}
 
 export function listCustomers() {
-    return fetchApi<CustomerDto[]>("/customers");
+    return fetchApi<CustomerDto[]>("/customers/");
 }
 
 export function createCustomer(input: CreateCustomerInput) {
-    return fetchApi<CustomerDto>("/customers", {
+    return fetchApi<CustomerDto>("/customers/", {
         method: "POST",
         body: JSON.stringify(input),
     });
