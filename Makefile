@@ -65,7 +65,7 @@ seed:
 
 .PHONY: build
 build:
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+	docker build --platform linux/amd64 -t $(IMAGE_NAME):$(IMAGE_TAG) .
 
 .PHONY: push
 push:
