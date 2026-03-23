@@ -46,7 +46,7 @@ export interface Payment {
 export const identifierTypeLabels: Record<IdentifierType, string> = {
     tiktok: "TikTok",
     instagram: "Instagram",
-    street: "Street Name",
+    street: "Shop",
     website: "Website",
 };
 
