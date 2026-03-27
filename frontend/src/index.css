@@ -45,6 +45,13 @@
 
         --radius: 0.75rem;
 
+        --sat: env(safe-area-inset-top, 0px);
+        --sab: env(safe-area-inset-bottom, 0px);
+        --sal: env(safe-area-inset-left, 0px);
+        --sar: env(safe-area-inset-right, 0px);
+        /* --sat: 44px;
+        --sab: 34px; */
+
         --sidebar-background: 30 15% 14%;
         --sidebar-foreground: 35 20% 85%;
         --sidebar-primary: 25 75% 52%;
@@ -159,12 +166,6 @@
         @apply text-sm text-muted-foreground;
     }
     .sheet-footer {
-        @apply bg-background/80 backdrop-blur-2xl flex gap-2 justify-end p-4 border-t border-border;
-    }
-    .safe-top {
-        padding-top: env(safe-area-inset-top);
-    }
-    .safe-bottom {
-        padding-bottom: env(safe-area-inset-bottom);
+        @apply bg-background/80 backdrop-blur-2xl flex gap-2 justify-end px-4 pt-4 pb-[calc(var(--sab)+1rem)] border-t border-border;
     }
 }

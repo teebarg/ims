@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { currency } from "@/lib/utils";
 import { Category } from "@/schema/category";
 import { Channel } from "@/types/customer";
+import CategoryInlineForm from "../categories/category-inline-form";
 
 function uiToApiChannel(ch: Channel): ApiSalesChannel {
     switch (ch) {
@@ -260,7 +261,7 @@ export default function SalesForm() {
                                     <div className="grid grid-cols-[1fr_70px_90px_32px] gap-2 text-xs font-medium text-muted-foreground px-1">
                                         <span>Category</span>
                                         <span>Qty</span>
-                                        <span>Amount ($)</span>
+                                        <span>Amount (₦)</span>
                                         <span></span>
                                     </div>
                                     {lineItems.map((li, i) => {
@@ -322,6 +323,8 @@ export default function SalesForm() {
                                     <Plus className="h-3 w-3 mr-1" /> Add Item
                                 </Button>
 
+                                <CategoryInlineForm />
+
                                 {/* Computed total */}
                                 <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 flex justify-between items-center">
                                     <span className="text-sm font-medium">Total ({totalItemCount} items)</span>
@@ -362,7 +365,7 @@ export default function SalesForm() {
                                     </div>
                                 </div>
                                 <div>
-                                    <Label>Payment Amount ($)</Label>
+                                    <Label>Payment Amount (₦)</Label>
                                     <Input
                                         type="number"
                                         min={0}
@@ -404,7 +407,7 @@ export default function SalesForm() {
                             </div>
                         )}
                     </div>
-                    <div className="flex justify-between gap-2 px-4 py-4 border-t">
+                    <div className="sheet-footer">
                         <div>
                             {step > 1 && (
                                 <Button variant="ghost" size="sm" onClick={() => setStep((s) => s - 1)}>

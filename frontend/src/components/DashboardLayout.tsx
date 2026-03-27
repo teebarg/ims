@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="min-h-screen flex w-full">
                 <AppSidebar />
                 <div className="flex-1 flex flex-col min-w-0">
-                    <header className="flex items-center justify-between gap-4 border-b px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-30 pt-[env(safe-area-inset-top)] h-[calc(56px+env(safe-area-inset-top))]">
+                    <header className="flex items-center justify-between gap-4 border-b px-4 pt-[calc(var(--sat)+8px)] pb-2 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
                         <SidebarTrigger className="md:hidden" />
                         <div className="flex-1" />
                         <GetAppButton />
@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </Button>
                         <UserButton />
                     </header>
-                    <main className="flex-1 p-4 md:p-6 overflow-auto pb-[env(safe-area-inset-bottom)]">{children}</main>
+                    <main className="flex-1 px-4 md:px-6 overflow-auto mt-4 mb-[calc(var(--sab)+12px)]">{children}</main>
                 </div>
             </div>
         </SidebarProvider>

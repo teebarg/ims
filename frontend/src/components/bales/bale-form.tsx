@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createBale, createCategory, listCategories } from "@/lib/api";
+import { createBale, listCategories } from "@/lib/api";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "../ui/badge";
+import CategoryInlineForm from "../categories/category-inline-form";
 
 interface Props {
     onClose?: () => void;
@@ -15,7 +16,6 @@ interface Props {
 
 export default function BaleForm({ onClose }: Props) {
     const queryClient = useQueryClient();
-    const [customCategory, setCustomCategory] = useState("");
 
     const { data: categories = [] } = useQuery({
         queryKey: ["categories"],
@@ -90,25 +90,6 @@ export default function BaleForm({ onClose }: Props) {
         setBaleCategories((prev) => prev.map((c, i) => (i === idx ? { ...c, [field]: value } : c)));
     };
 
-    const createCategoryMutation = useMutation({
-        mutationFn: (name: string) => createCategory({ name: name.trim() }),
-        onSuccess: (newCategory) => {
-            queryClient.invalidateQueries({ queryKey: ["categories"] });
-            setBaleCategories((prev) => [...prev, { name: String(newCategory.id), quantity: 0 }]);
-            setCustomCategory("");
-            toast.success(`Category "${newCategory.name}" added`);
-        },
-        onError: (err: unknown) => {
-            const message = err instanceof Error ? err.message : "Failed to create category";
-            toast.error(message);
-        },
-    });
-
-    const addCustomCategory = () => {
-        const name = customCategory.trim();
-        if (!name) return;
-        createCategoryMutation.mutate(name);
-    };
     const allCategoriesUsed = useMemo(() => {
         const usedIds = baleCategories.map((c) => c.name);
         return categories.length > 0 && usedIds.length >= categories.length;
@@ -116,7 +97,7 @@ export default function BaleForm({ onClose }: Props) {
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="space-y-6 flex-1 overflow-auto px-4 pb-24">
+            <div className="space-y-6 flex-1 overflow-y-auto px-4 pb-4">
                 <div className="space-y-4">
                     <div>
                         <Label htmlFor="bale-reference">Reference</Label>
@@ -202,28 +183,11 @@ export default function BaleForm({ onClose }: Props) {
                             </Button>
                         </div>
 
-                        {/* New category creator */}
-                        <div className="border border-dashed border-border rounded-md p-3 space-y-2">
-                            <Label className="text-xs text-muted-foreground">New Category</Label>
-                            <div className="flex gap-2">
-                                <Input
-                                    placeholder="e.g. Scarves"
-                                    className="h-8 text-sm flex-1"
-                                    value={customCategory}
-                                    onChange={(e) => setCustomCategory(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && addCustomCategory()}
-                                />
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    className="h-8 text-xs"
-                                    disabled={!customCategory.trim() || createCategoryMutation.isPending}
-                                    onClick={addCustomCategory}
-                                >
-                                    {createCategoryMutation.isPending ? "Adding…" : "Add"}
-                                </Button>
-                            </div>
-                        </div>
+                        <CategoryInlineForm
+                            onCreate={(category) => {
+                                setBaleCategories((prev) => [...prev, { name: String(category.id), quantity: 0 }]);
+                            }}
+                        />
                     </div>
                 </div>
             </div>

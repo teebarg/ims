@@ -66,6 +66,7 @@ const App = () => (
             </TooltipProvider>
         </QueryClientProvider>
         <PWABadge />
+        {/* <SafeAreaDebug /> */}
     </>
 );
 

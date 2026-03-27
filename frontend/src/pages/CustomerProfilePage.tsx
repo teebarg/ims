@@ -291,7 +291,7 @@ export default function CustomerProfilePage() {
                                 <span className="text-destructive">{currency(selectedSale.balance)}</span>
                             </div>
                             <div>
-                                <Label>Payment Amount ($)</Label>
+                                <Label>Payment Amount (₦)</Label>
                                 <Input
                                     type="number"
                                     step="0.01"
