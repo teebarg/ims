@@ -6,15 +6,23 @@ import { Badge } from "../ui/badge";
 import { useOverlayTriggerState } from "react-stately";
 import SheetDrawer from "../ui/sheet-drawer";
 import { Eye, Receipt } from "lucide-react";
+import { useRef, useState } from "react";
+import { buildInvoiceMessage, formatPhoneForWhatsApp } from "@/lib/invoice";
+import { generateInvoiceImage, shareOrDownloadInvoiceImage } from "@/lib/invoice-image";
 
 interface SalesDetailsProps {
     items: SaleItemDto[];
     label?: string;
     total?: number;
+    customerPhone?: any
 }
 
-export default function SalesDetails({ items, label = "View details", total }: SalesDetailsProps) {
+export default function SalesDetails({ items, label = "View details", total, customerPhone }: SalesDetailsProps) {
     const state = useOverlayTriggerState({});
+    const [copied, setCopied] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const receiptRef = useRef<HTMLDivElement>(null);
 
     const { data: categories = [] } = useQuery({
         queryKey: ["categories"],
@@ -23,6 +31,43 @@ export default function SalesDetails({ items, label = "View details", total }: S
 
     const categoryNameById = new Map<number, string>((categories as CategoryDto[]).map((c) => [c.id, c.name]));
     const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    const getMessage = () => buildInvoiceMessage({ items, categoryNameById, total: total || 0, businessName, saleId, customerName });
+
+    const handleSendWhatsApp = () => {
+        const message = getMessage();
+        const phone = customerPhone ? formatPhoneForWhatsApp(customerPhone) : null;
+        const url = phone
+            ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+            : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        window.open(url, "_blank");
+    };
+
+    const handleShareText = async () => {
+        const message = getMessage();
+        if (navigator.share) {
+            try { await navigator.share({ title: saleId ? `Receipt #${saleId}` : "Sale receipt", text: message }); } catch { }
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(message);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch { }
+    };
+
+    const handleShareImage = async () => {
+        if (!receiptRef.current) return;
+        setIsGenerating(true);
+        try {
+            const blob = await generateInvoiceImage(receiptRef.current);
+            await shareOrDownloadInvoiceImage(blob, `receipt-${saleId ?? Date.now()}.png`, `Your receipt from ${businessName}`);
+        } catch (err) {
+            console.error("Failed to share invoice image", err);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     return (
         <SheetDrawer
@@ -87,8 +132,6 @@ export default function SalesDetails({ items, label = "View details", total }: S
                         <span>{currency(total || 0)}</span>
                     </div>
                 </div>
-
-                {/* Footer */}
                 <div className="sheet-footer">
                     <Button variant="outline" onClick={state.close}>
                         Close
