@@ -26,7 +26,6 @@ export default function SalesDetails({ items, label = "View details", total, cus
     const [previewOpen, setPreviewOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const receiptRef = useRef<HTMLDivElement>(null);
-    console.log("🚀 ~ SalesDetails ~ receiptRef:", receiptRef)
 
     const { data: categories = [] } = useQuery({
         queryKey: ["categories"],
