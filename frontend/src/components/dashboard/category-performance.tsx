@@ -2,25 +2,12 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { listSales, getAnalyticsSummary, listCategories, type ApiSalesChannel, type CategoryDto } from "@/lib/api";
-import { Channel, channelLabels } from "@/types/customer";
+import { channelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
+import { apiToUiChannel } from "@/lib/sales";
 
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
 
-function apiToUiChannel(ch: ApiSalesChannel): Channel {
-    switch (ch) {
-        case "SHOP":
-            return "shop";
-        case "TIKTOK":
-            return "tiktok";
-        case "INSTAGRAM":
-            return "instagram";
-        case "WEBSITE":
-            return "website";
-        default:
-            return "shop";
-    }
-}
 
 export default function CategoryPerformance() {
     const { data: sales = [] } = useQuery({ queryKey: ["sales"], queryFn: listSales });

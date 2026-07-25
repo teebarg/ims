@@ -9,7 +9,6 @@ import { apiToDeliveryStatus, channelLabels } from "@/types/customer";
 import { listSales, listCustomers, type SaleDto, type ApiSalesChannel } from "@/lib/api";
 import { currency } from "@/lib/utils";
 import SalesForm from "@/components/sales/sales-form";
-import { Channel } from "@/types/customer";
 import SalesDetails from "@/components/sales/sales-details";
 import SalePaymentsDetails from "@/components/sales/sale-payments-details";
 import DeliveryBadge from "@/components/sales/delivery-badge";
@@ -17,27 +16,8 @@ import SalesActions from "@/components/sales/sales-actions";
 import { ZeroState } from "@/components/ZeroState";
 import MobileSaleCard from "@/components/sales/mobile-sale-card";
 import { StatCard } from "@/components/StatCard";
+import { apiToUiChannel, saleStatus } from "@/lib/sales";
 
-function apiToUiChannel(ch: ApiSalesChannel): Channel {
-    switch (ch) {
-        case "SHOP":
-            return "shop";
-        case "TIKTOK":
-            return "tiktok";
-        case "INSTAGRAM":
-            return "instagram";
-        case "WEBSITE":
-            return "website";
-        default:
-            return "shop";
-    }
-}
-
-function saleStatus(sale: SaleDto): "paid" | "partial" | "unpaid" {
-    if (Number(sale.balance) <= 0) return "paid";
-    if (Number(sale.total_paid) > 0) return "partial";
-    return "unpaid";
-}
 
 export default function SalesPage() {
     const navigate = useNavigate();

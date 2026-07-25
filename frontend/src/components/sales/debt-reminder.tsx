@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listCategories, type CategoryDto, type SaleDto } from "@/lib/api";
-import { toOutstandingSales, buildDebtReminderMessage, formatPhoneForWhatsApp } from "@/lib/invoice";
+import { toOutstandingSales } from "@/lib/invoice";
 import { generateInvoiceImage, shareOrDownloadInvoiceImage } from "@/lib/invoice-image";
 import { currency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertCircle, ImageDown, Loader2, MessageCircle } from "lucide-react";
+import { AlertCircle, ImageDown, Loader2 } from "lucide-react";
 import DebtStatement from "@/components/invoice/DebtStatement";
 
 export default function CustomerDebtReminder({ sales, customerName, customerPhone }: {
@@ -26,15 +26,6 @@ export default function CustomerDebtReminder({ sales, customerName, customerPhon
 
     if (totalOwed <= 0) return null;
 
-    // const handleSendWhatsApp = () => {
-    //     const message = buildDebtReminderMessage({ customerName, sales: outstanding });
-    //     const phone = customerPhone ? formatPhoneForWhatsApp(customerPhone) : null;
-    //     const url = phone
-    //         ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-    //         : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-    //     window.open(url, "_blank");
-    // };
-
     const handleShareImage = async () => {
         if (!statementRef.current) return;
         setIsGenerating(true);
@@ -50,7 +41,7 @@ export default function CustomerDebtReminder({ sales, customerName, customerPhon
 
     return (
         <>
-            <Button size="sm" variant="destructive" className="gap-2" onClick={() => setPreviewOpen(true)}>
+            <Button size="sm" variant="destructive" className="gap-2 w-full" onClick={() => setPreviewOpen(true)}>
                 <AlertCircle className="h-4 w-4" />
                 Send reminder · {currency(totalOwed)}
             </Button>
@@ -60,21 +51,19 @@ export default function CustomerDebtReminder({ sales, customerName, customerPhon
             </div>
 
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-                <DialogContent className="max-w-fit p-0 overflow-hidden">
+                <DialogContent className="w-full max-w-max p-0">
                     <DialogHeader className="px-4 pt-4">
                         <DialogTitle>Preview</DialogTitle>
                     </DialogHeader>
-                    <DebtStatement customerName={customerName} sales={outstanding} />
+                    <div className="max-h-[80vh] overflow-auto bg-[#3B1220]">
+                        <DebtStatement customerName={customerName} sales={outstanding} />
+                    </div>
                     <div className="flex gap-2 p-4 pt-0">
                         <Button variant="outline" onClick={() => setPreviewOpen(false)}>Close</Button>
                         <Button className="gap-2" onClick={handleShareImage} disabled={isGenerating}>
                             {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageDown className="h-4 w-4" />}
                             Share Image
                         </Button>
-                        {/* <Button className="flex-1 gap-2" onClick={handleSendWhatsApp}>
-                            <MessageCircle className="h-4 w-4" />
-                            {customerPhone ? "Send via WhatsApp" : "Find on WhatsApp"}
-                        </Button> */}
                     </div>
                 </DialogContent>
             </Dialog>

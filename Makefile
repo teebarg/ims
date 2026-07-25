@@ -1,7 +1,6 @@
-# --- Variables ---
 APP_NAME = ims
-IMAGE_TAG ?= latest
 DOCKER_USER ?= beafdocker
+IMAGE_TAG ?= $(shell git rev-parse --short HEAD)
 
 # Use Compose service names here to match your docker-compose.yml
 BACKEND_SERVICE = backend
@@ -65,11 +64,15 @@ seed:
 # --- Production Image Building & Pushing ---
 .PHONY: build-prod
 build-prod:
-	docker build --platform linux/amd64 -t $(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG) ./backend
+	docker build --platform linux/amd64 \
+		-t $(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG) \
+		-t $(DOCKER_USER)/$(APP_NAME)-backend:latest \
+		./backend
 
 .PHONY: push
 push:
 	docker push $(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG)
+	docker push $(DOCKER_USER)/$(APP_NAME)-backend:latest
 
 .PHONY: run-local
 run-local:
