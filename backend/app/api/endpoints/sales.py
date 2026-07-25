@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 
 from app.core.security import UserRole, require_roles
 from app.db.session import get_db
-from app.schemas.sale import SaleCreate, SaleDeliveryUpdate, SaleRead
+from app.schemas.sale import SaleCreate, SaleDeliveryUpdate, SaleItemsUpdate, SaleRead
 from app.services.sales import (
     create_sale,
     enrich_sales_with_payments,
     get_sale,
     list_sales,
     update_sale_delivery,
+    update_sale_items,
 )
 
 
@@ -43,6 +44,21 @@ def record_sale(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return sale
+
+
+@router.patch("/{sale_id}/items", response_model=SaleRead)
+def update_items(
+    sale_id: int,
+    items_in: SaleItemsUpdate,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+) -> SaleRead:
+    try:
+        return update_sale_items(db, sale_id, items_in)
+    except ValueError as exc:
+        detail = str(exc)
+        status_code = 404 if detail == "Sale not found" else 400
+        raise HTTPException(status_code=status_code, detail=detail) from exc
 
 
 @router.patch("/{sale_id}/delivery", response_model=SaleRead)
