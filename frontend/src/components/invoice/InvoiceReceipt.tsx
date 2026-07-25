@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import type { SaleItemDto } from "@/lib/api";
 import { currency } from "@/lib/utils";
-import { TOKENS } from "./shared";
+import { barcodeWidths, TOKENS, TornEdge } from "./shared";
 
 interface InvoiceReceiptProps {
     items: SaleItemDto[];
@@ -9,33 +9,6 @@ interface InvoiceReceiptProps {
     total: number;
     customerName?: string;
     date?: Date;
-}
-
-// Deterministic "barcode" so the same sale always renders the same pattern
-function barcodeWidths(seed: string, count = 46) {
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-    return Array.from({ length: count }, (_, i) => {
-        hash = (hash * 1103515245 + 12345) >>> 0;
-        return 1 + (hash % 4); // widths 1-4px
-    });
-}
-
-function TornEdge({ flip = false }: { flip?: boolean }) {
-    const d =
-        "M0,24 L0,10 L20,18 L38,4 L55,14 L72,2 L90,16 L108,6 L125,20 L143,8 " +
-        "L160,17 L178,3 L195,15 L213,5 L230,19 L248,9 L265,16 L283,2 L300,14 " +
-        "L318,6 L335,20 L353,10 L370,18 L388,4 L400,12 L400,24 Z";
-    return (
-        <svg
-            viewBox="0 0 400 24"
-            preserveAspectRatio="none"
-            className="w-full h-3 block"
-            style={{ transform: flip ? "scaleY(-1)" : undefined }}
-        >
-            <path d={d} fill={TOKENS.paper} />
-        </svg>
-    );
 }
 
 const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
@@ -52,7 +25,6 @@ const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
                 <div className="shadow-2xl" style={{ width: 320 }}>
                     <TornEdge />
                     <div className="px-6 py-6" style={{ backgroundColor: TOKENS.paper, color: TOKENS.ink }}>
-                        {/* Brand header */}
                         <div className="text-center mb-5">
                             <div
                                 className="text-3xl italic"

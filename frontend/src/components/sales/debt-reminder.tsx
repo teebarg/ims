@@ -26,14 +26,14 @@ export default function CustomerDebtReminder({ sales, customerName, customerPhon
 
     if (totalOwed <= 0) return null;
 
-    const handleSendWhatsApp = () => {
-        const message = buildDebtReminderMessage({ customerName, sales: outstanding });
-        const phone = customerPhone ? formatPhoneForWhatsApp(customerPhone) : null;
-        const url = phone
-            ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-            : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-        window.open(url, "_blank");
-    };
+    // const handleSendWhatsApp = () => {
+    //     const message = buildDebtReminderMessage({ customerName, sales: outstanding });
+    //     const phone = customerPhone ? formatPhoneForWhatsApp(customerPhone) : null;
+    //     const url = phone
+    //         ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+    //         : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    //     window.open(url, "_blank");
+    // };
 
     const handleShareImage = async () => {
         if (!statementRef.current) return;
@@ -61,20 +61,20 @@ export default function CustomerDebtReminder({ sales, customerName, customerPhon
 
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
                 <DialogContent className="max-w-fit p-0 overflow-hidden">
-                    <DialogHeader className="px-4 pt-4 sr-only">
-                        <DialogTitle>Debt reminder preview</DialogTitle>
+                    <DialogHeader className="px-4 pt-4">
+                        <DialogTitle>Preview</DialogTitle>
                     </DialogHeader>
                     <DebtStatement customerName={customerName} sales={outstanding} />
                     <div className="flex gap-2 p-4 pt-0">
                         <Button variant="outline" onClick={() => setPreviewOpen(false)}>Close</Button>
-                        <Button variant="secondary" className="gap-2" onClick={handleShareImage} disabled={isGenerating}>
+                        <Button className="gap-2" onClick={handleShareImage} disabled={isGenerating}>
                             {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageDown className="h-4 w-4" />}
-                            Image
+                            Share Image
                         </Button>
-                        <Button className="flex-1 gap-2" onClick={handleSendWhatsApp}>
+                        {/* <Button className="flex-1 gap-2" onClick={handleSendWhatsApp}>
                             <MessageCircle className="h-4 w-4" />
                             {customerPhone ? "Send via WhatsApp" : "Find on WhatsApp"}
-                        </Button>
+                        </Button> */}
                     </div>
                 </DialogContent>
             </Dialog>
