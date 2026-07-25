@@ -1,4 +1,4 @@
-FROM beafdocker/fastapi-base:latest
+FROM --platform=linux/amd64 beafdocker/fastapi-base:latest
 
 WORKDIR /app
 

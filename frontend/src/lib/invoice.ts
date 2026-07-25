@@ -9,12 +9,10 @@ export function formatPhoneForWhatsApp(phone: string): string | null {
     return `234${digits}`;
 }
 
-export function buildInvoiceMessage({ items, categoryNameById, total, businessName, saleId, customerName }: {
+export function buildInvoiceMessage({ items, categoryNameById, total, customerName }: {
     items: SaleItemDto[];
     categoryNameById: Map<number, string>;
     total: number;
-    businessName: string;
-    saleId?: string | number;
     customerName?: string;
 }): string {
     const lines = items.map((item) => {
@@ -23,8 +21,7 @@ export function buildInvoiceMessage({ items, categoryNameById, total, businessNa
     });
 
     return [
-        `*${businessName}*`,
-        saleId ? `Receipt #${saleId}` : undefined,
+        `*${import.meta.env.VITE_APP_NAME}*`,
         customerName ? `Hi ${customerName}, here's your receipt:` : "Here's your receipt:",
         "",
         ...lines,

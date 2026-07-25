@@ -6,10 +6,7 @@ interface InvoiceReceiptProps {
     items: SaleItemDto[];
     categoryNameById: Map<number, string>;
     total: number;
-    businessName?: string;
-    tagline?: string;
     customerName?: string;
-    saleId?: string | number;
     date?: Date;
 }
 
@@ -50,12 +47,13 @@ function TornEdge({ flip = false }: { flip?: boolean }) {
 }
 
 const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
-    ({ items, categoryNameById, total, businessName = "Thriftbyoba", tagline = "Thrift finds, curated.", customerName, saleId, date = new Date() }, ref) => {
+    ({ items, categoryNameById, total, customerName, date = new Date() }, ref) => {
         const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
-        const widths = barcodeWidths(String(saleId ?? "0000"));
+        const widths = barcodeWidths(String("0000"));
 
         return (
             <div
+                ref={ref}
                 className="flex flex-col items-center py-8 px-6"
                 style={{ backgroundColor: TOKENS.backdrop, width: 360 }}
             >
@@ -68,13 +66,7 @@ const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
                                 className="text-3xl italic"
                                 style={{ fontFamily: "'Fraunces', serif", color: TOKENS.ink, fontWeight: 600 }}
                             >
-                                {businessName}
-                            </div>
-                            <div
-                                className="text-[10px] tracking-[0.15em] uppercase mt-1"
-                                style={{ color: TOKENS.gold, fontFamily: "'IBM Plex Mono', monospace" }}
-                            >
-                                {tagline}
+                                {import.meta.env.VITE_APP_NAME}
                             </div>
                         </div>
 
@@ -85,7 +77,7 @@ const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
                             className="flex justify-between text-[10px] uppercase tracking-wide mb-4"
                             style={{ color: TOKENS.inkSoft, fontFamily: "'IBM Plex Mono', monospace" }}
                         >
-                            <span>Receipt {saleId ? `#${saleId}` : ""}</span>
+                            <span>Invoice</span>
                             <span>{date.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</span>
                         </div>
 
@@ -138,7 +130,7 @@ const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
                             className="text-center text-[9px] tracking-[0.3em]"
                             style={{ color: TOKENS.inkSoft, fontFamily: "'IBM Plex Mono', monospace" }}
                         >
-                            {String(saleId ?? "000000").padStart(6, "0")}
+                            {String("000000").padStart(6, "0")}
                         </div>
                     </div>
                     <TornEdge flip />

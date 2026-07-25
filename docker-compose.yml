@@ -48,6 +48,7 @@ services:
       - ./backend:/app
       - backend_venv:/app/.venv
       - backend_uv_cache:/root/.cache/uv
+    platform: linux/amd64
     environment:
       - UV_HTTP_TIMEOUT=60
     healthcheck:
@@ -63,4 +64,4 @@ networks:
 volumes:
   backend_uv_cache:
   backend_venv:
-  node_cache: 
+  node_cache:
