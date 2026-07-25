@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Users, AlertCircle, Banknote } from "lucide-react";
 import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
-import { listCustomers, type CustomerDto } from "@/lib/api";
+import { listCustomers } from "@/lib/api";
 import CustomerActions from "@/components/customers/customer-actions";
 import { CustomerForm } from "@/components/customers/customer-form";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import { currency } from "@/lib/utils";
 import { StatCard } from "@/components/StatCard";
+import { apiToUiIdentifierType } from "@/lib/profile";
 
 type CustomerRow = {
     id: string;
@@ -25,21 +26,6 @@ type CustomerRow = {
     outstandingBalance: number;
     lastPurchaseDate: string | null;
 };
-
-function apiToUiIdentifierType(t: CustomerDto["identifier_type"]): IdentifierType {
-    switch (t) {
-        case "TIKTOK":
-            return "tiktok";
-        case "INSTAGRAM":
-            return "instagram";
-        case "STREET":
-            return "street";
-        case "WEBSITE":
-            return "website";
-        default:
-            return "instagram";
-    }
-}
 
 export default function CustomersPage() {
     const navigate = useNavigate();
@@ -85,7 +71,6 @@ export default function CustomersPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="page-header">Customers</h1>

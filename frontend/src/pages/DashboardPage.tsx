@@ -13,39 +13,19 @@ import {
     getAnalyticsTrends,
     getAnalyticsStock,
     listCategories,
-    type SaleDto,
     type ApiSalesChannel,
     type CategoryDto,
 } from "@/lib/api";
-import { Channel, channelLabels } from "@/types/customer";
+import { channelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
 import { AlertTriangle, Banknote, Package, ShoppingCart } from "lucide-react";
 import CategoryPerformance from "@/components/dashboard/category-performance";
 import SalesDetails from "@/components/sales/sales-details";
+import { apiToUiChannel, saleStatus } from "@/lib/sales";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
 
-function apiToUiChannel(ch: ApiSalesChannel): Channel {
-    switch (ch) {
-        case "SHOP":
-            return "shop";
-        case "TIKTOK":
-            return "tiktok";
-        case "INSTAGRAM":
-            return "instagram";
-        case "WEBSITE":
-            return "website";
-        default:
-            return "shop";
-    }
-}
-
-function saleStatus(sale: SaleDto): "paid" | "partial" | "unpaid" {
-    if (Number(sale.balance) <= 0) return "paid";
-    if (Number(sale.total_paid) > 0) return "partial";
-    return "unpaid";
-}
 
 export default function DashboardPage() {
     const navigate = useNavigate();
@@ -183,7 +163,6 @@ export default function DashboardPage() {
                 <p className="page-subtitle">Overview of your shop performance</p>
             </div>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard label="Total Stock" value={String(totalStock)} change="Current inventory" changeType="positive" icon={Package} />
                 <StatCard

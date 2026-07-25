@@ -12,41 +12,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { getCustomerProfile, createPayment, type ApiIdentifierType, type ApiSalesChannel } from "@/lib/api";
 import { toast } from "sonner";
 import { currency, formatDate } from "@/lib/utils";
-import { Channel } from "@/types/customer";
 import CustomerSalesDetails from "@/components/customers/customers-sales-details";
 import { StatCard } from "@/components/StatCard";
+import { apiToUiChannel } from "@/lib/sales";
+import { apiToUiIdentifierType } from "@/lib/profile";
 
 const CHANNEL_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)"];
-
-function apiToUiChannel(ch: ApiSalesChannel): Channel {
-    switch (ch) {
-        case "SHOP":
-            return "shop";
-        case "TIKTOK":
-            return "tiktok";
-        case "INSTAGRAM":
-            return "instagram";
-        case "WEBSITE":
-            return "website";
-        default:
-            return "shop";
-    }
-}
-
-function apiToUiIdentifierType(t: ApiIdentifierType): "tiktok" | "instagram" | "street" | "website" {
-    switch (t) {
-        case "TIKTOK":
-            return "tiktok";
-        case "INSTAGRAM":
-            return "instagram";
-        case "STREET":
-            return "street";
-        case "WEBSITE":
-            return "website";
-        default:
-            return "instagram";
-    }
-}
 
 export default function CustomerProfilePage() {
     const { id } = useParams<{ id: string }>();
@@ -230,7 +201,6 @@ export default function CustomerProfilePage() {
                 <CustomerSalesDetails sales={sales} customer={customer} />
             </div>
 
-            {/* Payment History */}
             <Card>
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-heading">Payment History</CardTitle>

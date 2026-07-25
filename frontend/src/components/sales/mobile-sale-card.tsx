@@ -2,28 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { channelLabels, type DeliveryStatus } from "@/types/customer";
 import { type SaleDto, type ApiSalesChannel } from "@/lib/api";
 import { currency, formatDate } from "@/lib/utils";
-import { Channel } from "@/types/customer";
 import SalesDetails from "@/components/sales/sales-details";
 import SalePaymentsDetails from "@/components/sales/sale-payments-details";
 import DeliveryBadge from "@/components/sales/delivery-badge";
 import SalesActions from "@/components/sales/sales-actions";
 import { Truck } from "lucide-react";
+import { apiToUiChannel, saleStatus } from "@/lib/sales";
 
-function apiToUiChannel(ch: ApiSalesChannel): Channel {
-    switch (ch) {
-        case "SHOP": return "shop";
-        case "TIKTOK": return "tiktok";
-        case "INSTAGRAM": return "instagram";
-        case "WEBSITE": return "website";
-        default: return "shop";
-    }
-}
-
-function saleStatus(sale: SaleDto): "paid" | "partial" | "unpaid" {
-    if (Number(sale.balance) <= 0) return "paid";
-    if (Number(sale.total_paid) > 0) return "partial";
-    return "unpaid";
-}
 
 const STATUS_STYLES = {
     paid: { border: "border-l-emerald-500", label: "text-emerald-600" },
@@ -51,12 +36,15 @@ export default function MobileSaleCard({ sale, c_display_name, c_identifier }: {
             </div>
 
             <div className="flex items-center justify-between">
-                <button
-                    className="text-sm font-medium text-left hover:underline"
-                    onClick={() => navigate(`/customers/${sale.customer_id}`)}
-                >
-                    {c_display_name}
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        className="text-sm font-medium text-left hover:underline"
+                        onClick={() => navigate(`/customers/${sale.customer_id}`)}
+                    >
+                        {c_display_name}
+                    </button>
+                    <SalePaymentsDetails saleId={sale.id} customerId={sale.customer_id} saleTotal={sale.total_amount} />
+                </div>
                 <span className="text-xs text-muted-foreground font-mono">
                     {c_identifier} · {channelLabels[ch]}
                 </span>
@@ -85,10 +73,7 @@ export default function MobileSaleCard({ sale, c_display_name, c_identifier }: {
             )}
 
             <div className="flex items-center justify-between pt-1 border-t border-dashed">
-                <div className="flex items-center gap-1">
-                    <SalesDetails label={`${itemsCount} items`} items={sale.items || []} total={sale.total_amount} />
-                    <SalePaymentsDetails saleId={sale.id} customerId={sale.customer_id} saleTotal={sale.total_amount} />
-                </div>
+                <SalesDetails label={`${itemsCount} items`} items={sale.items || []} total={sale.total_amount} />
                 <SalesActions sale={sale} displayName={c_display_name || ""} status={status} />
             </div>
         </div>
