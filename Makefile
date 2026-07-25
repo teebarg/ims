@@ -7,7 +7,6 @@ DOCKER_USER ?= beafdocker
 BACKEND_SERVICE = backend
 FRONTEND_SERVICE = frontend
 
-# Standardized compose command with project name flag included
 DOCKER_COMPOSE = docker compose -p $(APP_NAME)
 
 .PHONY: help
@@ -69,15 +68,5 @@ build-prod:
 	docker build --platform linux/amd64 -t $(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG) ./backend
 
 .PHONY: push
-push: build-prod
+push:
 	docker push $(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG)
-
-
-# .PHONY: push
-# push:
-# 	@if [ -z "$(DOCKER_USER)" ]; then \
-# 		echo "Set DOCKER_USER to your Docker Hub username, e.g. 'make push DOCKER_USER=myuser'"; \
-# 		exit 1; \
-# 	fi
-# 	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(DOCKER_USER)/$(IMAGE_NAME):$(IMAGE_TAG)
-# 	docker push $(DOCKER_USER)/$(IMAGE_NAME):$(IMAGE_TAG)

@@ -16,7 +16,7 @@ import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import CategoriesPage from "./pages/CategoriesPage";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
 import PWABadge from "./PWABadge";
-import { SafeAreaDebug } from "./components/SafeAreaDebug";
+// import { SafeAreaDebug } from "./components/SafeAreaDebug";
 
 const queryClient = new QueryClient();
 
@@ -67,7 +67,7 @@ const App = () => (
             </TooltipProvider>
         </QueryClientProvider>
         <PWABadge />
-        <SafeAreaDebug />
+        {/* <SafeAreaDebug /> */}
     </>
 );
 
