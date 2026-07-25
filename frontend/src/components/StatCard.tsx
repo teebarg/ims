@@ -22,8 +22,8 @@ export function StatCard({ label, value, change, changeType = "neutral", icon: I
                         <p
                             className={cn(
                                 "text-xs font-medium",
-                                changeType === "positive" && "status-success",
-                                changeType === "negative" && "status-danger",
+                                changeType === "positive" && "text-success",
+                                changeType === "negative" && "text-destructive",
                                 changeType === "neutral" && "text-muted-foreground"
                             )}
                         >

@@ -150,15 +150,6 @@
     .metric-label {
         @apply text-sm text-muted-foreground font-medium;
     }
-    .status-success {
-        @apply text-success;
-    }
-    .status-danger {
-        @apply text-destructive;
-    }
-    .status-warning {
-        @apply text-warning;
-    }
     .page-header {
         @apply text-xl md:text-2xl font-heading font-bold;
     }
@@ -167,5 +158,12 @@
     }
     .sheet-footer {
         @apply bg-background/80 backdrop-blur-2xl flex gap-2 justify-end px-4 pt-4 pb-[calc(var(--sab)+1rem)] border-t border-border;
+    }
+    .drawer-safe {
+        padding-bottom: var(--sab);
+    }
+    .sheet-safe {
+        padding-top: var(--sat);
+        padding-bottom: var(--sab);
     }
 }

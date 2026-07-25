@@ -164,9 +164,8 @@ export default function SalesForm() {
                         {[1, 2, 3].map((s) => (
                             <div key={s} className="flex items-center gap-1.5">
                                 <div
-                                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${
-                                        step >= s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                                    }`}
+                                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${step >= s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                                        }`}
                                 >
                                     {step > s ? <Check className="h-3.5 w-3.5" /> : s}
                                 </div>
@@ -192,9 +191,8 @@ export default function SalesForm() {
                                         <button
                                             key={c.id}
                                             type="button"
-                                            className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center justify-between ${
-                                                selectedCustomerId === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                                            }`}
+                                            className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center justify-between ${selectedCustomerId === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                                                }`}
                                             onClick={() => setSelectedCustomerId(c.id)}
                                         >
                                             <div>
@@ -291,8 +289,8 @@ export default function SalesForm() {
                                                     type="number"
                                                     min={1}
                                                     className="h-9 text-xs"
-                                                    value={li.quantity}
-                                                    onChange={(e) => updateLineItem(i, "quantity", Math.max(1, Number(e.target.value)))}
+                                                    value={li.quantity || ""}
+                                                    onChange={(e) => updateLineItem(i, "quantity", Math.max(0, Number(e.target.value)))}
                                                 />
 
                                                 <Input
@@ -325,7 +323,6 @@ export default function SalesForm() {
 
                                 <CategoryInlineForm />
 
-                                {/* Computed total */}
                                 <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 flex justify-between items-center">
                                     <span className="text-sm font-medium">Total ({totalItemCount} items)</span>
                                     <span className="font-heading text-lg font-bold text-primary">{currency(computedTotal)}</span>
@@ -392,13 +389,12 @@ export default function SalesForm() {
                                 </Button>
                                 {computedTotal > 0 && (
                                     <div
-                                        className={`p-3 rounded-lg text-sm font-medium flex justify-between ${
-                                            paymentExceedsTotal
-                                                ? "bg-destructive/10 text-destructive"
-                                                : balancePreview <= 0
-                                                  ? "bg-success/10 text-success"
-                                                  : "bg-muted"
-                                        }`}
+                                        className={`p-3 rounded-lg text-sm font-medium flex justify-between ${paymentExceedsTotal
+                                            ? "bg-destructive/10 text-destructive"
+                                            : balancePreview <= 0
+                                                ? "bg-success/10 text-success"
+                                                : "bg-muted"
+                                            }`}
                                     >
                                         <span>Balance after payment</span>
                                         <span>{currency(Math.max(0, balancePreview))}</span>
@@ -407,24 +403,22 @@ export default function SalesForm() {
                             </div>
                         )}
                     </div>
-                    <div className="sheet-footer">
-                        <div>
+                    <div className="sheet-footer justify-between">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                resetSaleForm();
+                                saleState.close();
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <div className="flex gap-2">
                             {step > 1 && (
-                                <Button variant="ghost" size="sm" onClick={() => setStep((s) => s - 1)}>
+                                <Button variant="outline" onClick={() => setStep((s) => s - 1)}>
                                     <ArrowLeft className="h-3 w-3 mr-1" /> Back
                                 </Button>
                             )}
-                        </div>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    resetSaleForm();
-                                    saleState.close();
-                                }}
-                            >
-                                Cancel
-                            </Button>
                             {step < 3 ? (
                                 <Button
                                     onClick={() => setStep((s) => s + 1)}

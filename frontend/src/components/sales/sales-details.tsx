@@ -157,7 +157,7 @@ export default function SalesDetails({ items, label = "View details", total, cus
             </SheetDrawer>
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
                 <DialogContent className="max-w-fit p-0 overflow-hidden">
-                    <DialogHeader className="px-4 pt-4 sr-only">
+                    <DialogHeader className="p-4">
                         <DialogTitle>Invoice preview</DialogTitle>
                     </DialogHeader>
                     <InvoiceReceipt

@@ -20,7 +20,6 @@ const RIDERS = ["Theophilus", "Daniel", "GUO", "Iyare Park"];
 
 export default function DeliveryForm({ sale, displayName, status, onClose }: DeliveryFormProps) {
     const queryClient = useQueryClient();
-
     const [showDispatch, setShowDispatch] = useState(false);
     const [rider, setRider] = useState("");
     const [notes, setNotes] = useState("");
@@ -90,12 +89,10 @@ export default function DeliveryForm({ sale, displayName, status, onClose }: Del
                             </button>
                         )}
 
-                        {/* DISPATCH FORM */}
                         {showDispatch && (
                             <>
                                 <div>
                                     <Label className="text-xs">Assign Rider</Label>
-
                                     <Select value={rider} onValueChange={setRider}>
                                         <SelectTrigger className="h-9">
                                             <SelectValue placeholder="Select rider..." />
@@ -113,7 +110,6 @@ export default function DeliveryForm({ sale, displayName, status, onClose }: Del
 
                                 <div>
                                     <Label className="text-xs">Delivery Notes</Label>
-
                                     <Textarea
                                         className="min-h-[60px] text-xs"
                                         value={notes}
