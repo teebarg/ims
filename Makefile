@@ -70,3 +70,13 @@ build-prod:
 .PHONY: push
 push:
 	docker push $(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG)
+
+.PHONY: run-local
+run-local:
+	docker run --rm -it \
+		--platform linux/amd64 \
+		--network dev-net \
+		-p 8000:8000 \
+		--env-file backend/.env \
+		$(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG) \
+		uvicorn app.main:app --host 0.0.0.0 --port 8000
