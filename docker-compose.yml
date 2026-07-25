@@ -1,6 +1,36 @@
 services:
-  ims-api:
-    image: ims-api:${TAG-latest}
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - node_cache:/app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - dev-net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dev-net
+      - traefik.http.services.ims.loadbalancer.server.port=5173
+      - traefik.http.routers.ims.rule=Host(`ims.localhost`)
+      - traefik.http.routers.ims.entrypoints=https
+      - traefik.http.routers.ims.tls=true
+      - traefik.http.routers.ims-http.rule=Host(`ims.localhost`)
+      - traefik.http.routers.ims-http.entrypoints=http
+      - traefik.http.routers.ims-http.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
     labels:
       - traefik.enable=true
       - traefik.docker.network=dev-net
@@ -14,20 +44,24 @@ services:
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
     networks:
       - dev-net
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: postgresql+psycopg2://admin:password@postgres:5432/ims
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-      args:
-        INSTALL_DEV: ${INSTALL_DEV-false}
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
-      - ./:/app
-      - /app/.venv
+      - ./backend:/app
+      - backend_venv:/app/.venv
+      - backend_uv_cache:/root/.cache/uv
+    platform: linux/amd64
+    environment:
+      - UV_HTTP_TIMEOUT=60
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 networks:
   dev-net:
     external: true
+
+volumes:
+  backend_uv_cache:
+  backend_venv:
+  node_cache:

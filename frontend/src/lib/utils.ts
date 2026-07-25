@@ -17,9 +17,4 @@ export const formatDate = (date: string): string => {
         hour: "2-digit",
         minute: "2-digit"
     });
-
-        // new Date(sale.created_at).toLocaleTimeString([], {
-        //                                             hour: "2-digit",
-        //                                             minute: "2-digit",
-        //                                         })
 };

@@ -186,7 +186,7 @@ export interface SaleDto {
 }
 
 export function listSales() {
-    return fetchApi<SaleDto[]>("/sales");
+    return fetchApi<SaleDto[]>("/sales/");
 }
 
 export interface CreateSaleInput {
@@ -202,7 +202,7 @@ export interface CreateSaleInput {
 }
 
 export function createSale(input: CreateSaleInput) {
-    return fetchApi<SaleDto>("/sales", {
+    return fetchApi<SaleDto>("/sales/", {
         method: "POST",
         body: JSON.stringify(input),
     });
@@ -222,7 +222,7 @@ export function updateSaleDelivery(saleId: number, input: UpdateSaleDeliveryInpu
 }
 
 export function getCustomerSales(customerId: string) {
-    return fetchApi<SaleDto[]>(`/customers/${customerId}/sales`);
+    return fetchApi<SaleDto[]>(`/customers/${customerId}/sales/`);
 }
 
 export function getCustomerBalance(customerId: string) {
@@ -244,7 +244,7 @@ export interface PaymentDto {
 }
 
 export function getCustomerPayments(customerId: string) {
-    return fetchApi<PaymentDto[]>(`/customers/${customerId}/payments`);
+    return fetchApi<PaymentDto[]>(`/customers/${customerId}/payments/`);
 }
 
 export interface CreatePaymentInput {
@@ -255,7 +255,7 @@ export interface CreatePaymentInput {
 }
 
 export function createPayment(input: CreatePaymentInput) {
-    return fetchApi<PaymentDto>("/payments", {
+    return fetchApi<PaymentDto>("/payments/", {
         method: "POST",
         body: JSON.stringify(input),
     });

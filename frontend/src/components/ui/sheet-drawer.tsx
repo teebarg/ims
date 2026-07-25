@@ -31,7 +31,7 @@ const SheetDrawer: React.FC<OverlayProps> = ({
         return (
             <Drawer open={open} onOpenChange={onOpenChange}>
                 {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-                <DrawerContent aria-describedby={undefined} className={cn("data-[vaul-drawer-direction=bottom]:max-h-[95vh]", drawerClassName)}>
+                <DrawerContent aria-describedby={undefined} className={cn("data-[vaul-drawer-direction=bottom]:max-h-[95vh] drawer-safe", drawerClassName)}>
                     <DrawerHeader>
                         <DrawerTitle>{title}</DrawerTitle>
                     </DrawerHeader>
@@ -46,7 +46,7 @@ const SheetDrawer: React.FC<OverlayProps> = ({
             <SheetContent
                 aria-describedby={undefined}
                 side={side}
-                className={cn("w-full sm:max-w-lg px-0 py-2 flex flex-col bg-card border-border", sheetClassName)}
+                className={cn("w-full sm:max-w-lg px-0 py-2 flex flex-col bg-card border-border sheet-safe", sheetClassName)}
             >
                 <SheetHeader className={showHeader ? "px-4 mt-1" : "sr-only"}>
                     <SheetTitle className="flex items-center gap-3 text-xl">{title}</SheetTitle>

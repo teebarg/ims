@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CreditCard, ShoppingCart, DollarSign, Truck } from "lucide-react";
-import { apiToDeliveryStatus, channelLabels, type DeliveryStatus } from "@/types/customer";
+import { Search, CreditCard, ShoppingCart, DollarSign } from "lucide-react";
+import { apiToDeliveryStatus, channelLabels } from "@/types/customer";
 import { listSales, listCustomers, type SaleDto, type ApiSalesChannel } from "@/lib/api";
-import { currency, formatDate } from "@/lib/utils";
+import { currency } from "@/lib/utils";
 import SalesForm from "@/components/sales/sales-form";
 import { Channel } from "@/types/customer";
 import SalesDetails from "@/components/sales/sales-details";
@@ -17,6 +16,7 @@ import DeliveryBadge from "@/components/sales/delivery-badge";
 import SalesActions from "@/components/sales/sales-actions";
 import { ZeroState } from "@/components/ZeroState";
 import MobileSaleCard from "@/components/sales/mobile-sale-card";
+import { StatCard } from "@/components/StatCard";
 
 function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
@@ -80,41 +80,28 @@ export default function SalesPage() {
                 </div>
                 <SalesForm />
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="stat-card">
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <ShoppingCart className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                            <p className="metric-label">Total Sales</p>
-                            <p className="metric-value text-xl">{sales.length}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                            <DollarSign className="h-5 w-5 text-success" />
-                        </div>
-                        <div>
-                            <p className="metric-label">Collected</p>
-                            <p className="metric-value text-xl text-success">{currency(totalCollected)}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                            <CreditCard className="h-5 w-5 text-destructive" />
-                        </div>
-                        <div>
-                            <p className="metric-label">Outstanding</p>
-                            <p className="metric-value text-xl text-destructive">{currency(totalOutstanding)}</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                <StatCard
+                    label="Total Sales"
+                    value={`${sales.length}`}
+                    icon={ShoppingCart}
+                    iconColor="bg-primary/10 text-primary"
+                    valueColor="text-primary"
+                />
+                <StatCard
+                    label="Collected"
+                    value={currency(totalCollected)}
+                    icon={DollarSign}
+                    iconColor="bg-success/10 text-success"
+                    valueColor="text-success"
+                />
+                <StatCard
+                    label="Collected"
+                    value={currency(totalOutstanding)}
+                    icon={CreditCard}
+                    iconColor="bg-destructive/10 text-destructive"
+                    valueColor="text-destructive"
+                />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -159,76 +146,72 @@ export default function SalesPage() {
 
             {sales.length === 0 && !isLoading && !isError && <ZeroState title="No sales found" description="Add your first sale to get started" />}
 
-            <div className="hidden md:block">
-                <Card>
-                    <CardContent className="p-0">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/30">
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Ref</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Customer</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Channel</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Items</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Total</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Paid</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Delivery</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
+            <div className="hidden md:block bg-card rounded-md overflow-hidden">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="border-b bg-muted/30">
+                            <th className="text-left p-3 font-medium text-muted-foreground">Ref</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Customer</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Channel</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Items</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Total</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Paid</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Delivery</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filtered.map((sale: SaleDto) => {
+                            const c = customerMap.get(sale.customer_id);
+                            const status = saleStatus(sale);
+                            const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
+                            return (
+                                <tr key={sale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
+                                    <td className="p-3 font-mono text-xs">{sale.reference}</td>
+                                    <td className="p-3 text-xs">{sale.sale_date}</td>
+                                    <td className="p-3">
+                                        <button
+                                            className="text-left hover:underline"
+                                            onClick={() => navigate(`/customers/${sale.customer_id}`)}
+                                        >
+                                            <span className="font-medium">{c?.display_name}</span>
+                                            <span className="block text-xs text-muted-foreground font-mono">{c?.identifier}</span>
+                                        </button>
+                                    </td>
+                                    <td className="p-3 text-xs">{channelLabels[ch]}</td>
+                                    <td className="p-3">
+                                        <SalesDetails
+                                            label={`${sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0} items`}
+                                            items={sale.items || []}
+                                            total={sale.total_amount}
+                                        />
+                                    </td>
+                                    <td className="p-3 font-medium">{currency(sale.total_amount)}</td>
+                                    <td className="p-3 space-y-1">
+                                        <div>{currency(sale.total_paid)}</div>
+                                        <SalePaymentsDetails saleId={sale.id} customerId={sale.customer_id} saleTotal={sale.total_amount} />
+                                    </td>
+                                    <td className="p-3">
+                                        <Badge
+                                            variant={status === "paid" ? "default" : status === "partial" ? "secondary" : "destructive"}
+                                            className="text-xs font-normal"
+                                        >
+                                            {status}
+                                        </Badge>
+                                    </td>
+                                    <td className="p-3">
+                                        <DeliveryBadge status={apiToDeliveryStatus(sale.delivery_status)} />
+                                    </td>
+                                    <td className="p-3">
+                                        <SalesActions sale={sale} displayName={c?.display_name || ""} status={status} />
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {filtered.map((sale: SaleDto) => {
-                                    const c = customerMap.get(sale.customer_id);
-                                    const status = saleStatus(sale);
-                                    const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
-                                    return (
-                                        <tr key={sale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                            <td className="p-3 font-mono text-xs">{sale.reference}</td>
-                                            <td className="p-3 text-xs">{sale.sale_date}</td>
-                                            <td className="p-3">
-                                                <button
-                                                    className="text-left hover:underline"
-                                                    onClick={() => navigate(`/customers/${sale.customer_id}`)}
-                                                >
-                                                    <span className="font-medium">{c?.display_name}</span>
-                                                    <span className="block text-xs text-muted-foreground font-mono">{c?.identifier}</span>
-                                                </button>
-                                            </td>
-                                            <td className="p-3 text-xs">{channelLabels[ch]}</td>
-                                            <td className="p-3">
-                                                <SalesDetails
-                                                    label={`${sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0} items`}
-                                                    items={sale.items || []}
-                                                    total={sale.total_amount}
-                                                />
-                                            </td>
-                                            <td className="p-3 font-medium">{currency(sale.total_amount)}</td>
-                                            <td className="p-3 space-y-1">
-                                                <div>{currency(sale.total_paid)}</div>
-                                                <SalePaymentsDetails saleId={sale.id} customerId={sale.customer_id} saleTotal={sale.total_amount} />
-                                            </td>
-                                            <td className="p-3">
-                                                <Badge
-                                                    variant={status === "paid" ? "default" : status === "partial" ? "secondary" : "destructive"}
-                                                    className="text-xs font-normal"
-                                                >
-                                                    {status}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-3">
-                                                <DeliveryBadge status={apiToDeliveryStatus(sale.delivery_status)} />
-                                            </td>
-                                            <td className="p-3">
-                                                <SalesActions sale={sale} displayName={c?.display_name || ""} status={status} />
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </CardContent>
-                </Card>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
 
             <div className="md:hidden space-y-3">

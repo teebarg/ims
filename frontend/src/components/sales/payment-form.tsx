@@ -90,7 +90,6 @@ export default function PaymentForm({ sale, status, displayName, onClose }: Paym
     return (
         <>
             <div className="flex flex-col gap-5 pb-4">
-                {/* Sale summary */}
                 <div className="rounded-lg border bg-muted/20 p-4 space-y-2 text-sm">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Total</span>
@@ -139,11 +138,11 @@ export default function PaymentForm({ sale, status, displayName, onClose }: Paym
                     <Label>Quick Amount</Label>
 
                     <div className="grid grid-cols-3 gap-2">
-                        <Button variant="secondary" onClick={() => setPaymentAmount(String(balance))}>
+                        <Button variant={paymentAmount === String(balance) ? "default" : "secondary"} onClick={() => setPaymentAmount(String(balance))}>
                             Full
                         </Button>
 
-                        <Button variant="secondary" onClick={() => setPaymentAmount(String((balance / 2).toFixed(2)))}>
+                        <Button variant={paymentAmount === String((balance / 2).toFixed(2)) ? "default" : "secondary"} onClick={() => setPaymentAmount(String((balance / 2).toFixed(2)))}>
                             Half
                         </Button>
 
