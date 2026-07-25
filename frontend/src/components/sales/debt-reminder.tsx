@@ -51,11 +51,13 @@ export default function CustomerDebtReminder({ sales, customerName, customerPhon
             </div>
 
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-                <DialogContent className="max-w-fit p-0 overflow-hidden">
+                <DialogContent className="w-full max-w-max p-0">
                     <DialogHeader className="px-4 pt-4">
                         <DialogTitle>Preview</DialogTitle>
                     </DialogHeader>
-                    <DebtStatement customerName={customerName} sales={outstanding} />
+                    <div className="max-h-[80vh] overflow-auto bg-[#3B1220]">
+                        <DebtStatement customerName={customerName} sales={outstanding} />
+                    </div>
                     <div className="flex gap-2 p-4 pt-0">
                         <Button variant="outline" onClick={() => setPreviewOpen(false)}>Close</Button>
                         <Button className="gap-2" onClick={handleShareImage} disabled={isGenerating}>
