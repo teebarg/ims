@@ -1,12 +1,13 @@
 import { useOverlayTriggerState } from "react-stately";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Truck } from "lucide-react";
+import { CheckCircle2, Pencil, Truck } from "lucide-react";
 import { type SaleDto, updateSaleDelivery as updateSaleDeliveryApi } from "@/lib/api";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import { ConfirmDrawer } from "@/components/ui/confirm-drawer";
 import DeliveryForm from "./delivery-form";
 import PaymentFormTrigger from "./payment-form-trigger";
+import SalesEditForm from "./sales-edit-form";
 import { apiToDeliveryStatus, type DeliveryStatus, SaleStatus } from "@/types/customer";
 
 interface SalesActionsProps {
@@ -18,6 +19,7 @@ interface SalesActionsProps {
 export default function SalesActions({ sale, displayName, status }: SalesActionsProps) {
     const deliveryState = useOverlayTriggerState({});
     const deliveredState = useOverlayTriggerState({});
+    const editState = useOverlayTriggerState({});
     const queryClient = useQueryClient();
 
     const deliveryStatus: DeliveryStatus = apiToDeliveryStatus(sale.delivery_status);
@@ -35,6 +37,18 @@ export default function SalesActions({ sale, displayName, status }: SalesActions
 
     return (
         <div className="flex items-center gap-2">
+            <SheetDrawer
+                open={editState.isOpen}
+                onOpenChange={editState.setOpen}
+                title="Edit Sale Items"
+                trigger={
+                    <Button size="sm" variant="outline" className="text-xs h-7">
+                        <Pencil className="h-3 w-3" />
+                    </Button>
+                }
+            >
+                <SalesEditForm sale={sale} displayName={displayName} onClose={editState.close} />
+            </SheetDrawer>
             {status !== "paid" && <PaymentFormTrigger sale={sale} displayName={displayName} status={status} />}
             {deliveryStatus === "processing" && (
                 <SheetDrawer

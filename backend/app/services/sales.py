@@ -11,7 +11,7 @@ from app.models.inventory import InventoryStock
 from app.models.payment import Payment
 from app.models.sale import Sale
 from app.models.sale_item import SaleItem
-from app.schemas.sale import SaleCreate, SaleDeliveryUpdate, SaleItemRead, SaleRead
+from app.schemas.sale import SaleCreate, SaleDeliveryUpdate, SaleItemRead, SaleItemsUpdate, SaleRead
 
 
 def _compute_payment_totals(db: Session, sale_ids: list[int]) -> dict[int, Decimal]:
@@ -182,6 +182,94 @@ def enrich_sales_with_payments(db: Session, sales: list[Sale]) -> list[SaleRead]
 
 def get_sale(db: Session, sale_id: int) -> Sale | None:
     return db.get(Sale, sale_id)
+
+
+def update_sale_items(db: Session, sale_id: int, items_in: SaleItemsUpdate) -> SaleRead:
+    sale = db.get(Sale, sale_id)
+    if sale is None:
+        raise ValueError("Sale not found")
+
+    if not items_in.items:
+        raise ValueError("Sale must contain at least one item")
+
+    category_ids = {item.category_id for item in items_in.items}
+    if len(category_ids) != len(items_in.items):
+        raise ValueError("Duplicate categories are not allowed")
+
+    existing_category_ids = set(
+        db.scalars(
+            select(Category.id).where(Category.id.in_(category_ids))
+        ).all()
+    )
+    missing = category_ids - existing_category_ids
+    if missing:
+        raise ValueError(f"Unknown category IDs: {sorted(missing)}")
+
+    existing_items = list(
+        db.scalars(select(SaleItem).where(SaleItem.sale_id == sale_id)).all()
+    )
+    existing_by_id = {item.id: item for item in existing_items}
+    incoming_ids = {item.id for item in items_in.items if item.id is not None}
+    invalid_ids = incoming_ids - set(existing_by_id.keys())
+    if invalid_ids:
+        raise ValueError(f"Invalid item IDs for this sale: {sorted(invalid_ids)}")
+
+    new_total = sum(Decimal(item.amount) for item in items_in.items)
+    total_paid = _compute_payment_totals(db, [sale_id]).get(sale_id, Decimal(0))
+    if new_total < total_paid:
+        raise ValueError(
+            f"New total ({new_total}) cannot be less than amount already paid ({total_paid})"
+        )
+
+    old_qty_by_cat: dict[int, int] = defaultdict(int)
+    for item in existing_items:
+        old_qty_by_cat[item.category_id] += item.quantity
+
+    new_qty_by_cat: dict[int, int] = defaultdict(int)
+    for item in items_in.items:
+        new_qty_by_cat[item.category_id] += item.quantity
+
+    try:
+        for cat_id in set(old_qty_by_cat.keys()) | set(new_qty_by_cat.keys()):
+            delta = new_qty_by_cat.get(cat_id, 0) - old_qty_by_cat.get(cat_id, 0)
+            if delta != 0:
+                db.add(
+                    InventoryStock(
+                        sale_id=sale.id,
+                        category_id=cat_id,
+                        quantity_change=-delta,
+                        reason="SALE_ADJUSTMENT",
+                    )
+                )
+
+        for item in existing_items:
+            if item.id not in incoming_ids:
+                db.delete(item)
+
+        for item_in in items_in.items:
+            if item_in.id is not None:
+                existing = existing_by_id[item_in.id]
+                existing.category_id = item_in.category_id
+                existing.quantity = item_in.quantity
+                existing.amount = Decimal(item_in.amount)
+            else:
+                db.add(
+                    SaleItem(
+                        sale_id=sale.id,
+                        category_id=item_in.category_id,
+                        quantity=item_in.quantity,
+                        amount=Decimal(item_in.amount),
+                    )
+                )
+
+        sale.total_amount = new_total
+        db.commit()
+        db.refresh(sale)
+    except Exception:
+        db.rollback()
+        raise
+
+    return enrich_sales_with_payments(db, [sale])[0]
 
 
 def update_sale_delivery(

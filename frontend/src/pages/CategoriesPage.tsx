@@ -51,8 +51,8 @@ export default function CategoriesPage() {
                 </div>
             )}
 
-            {!isLoading && categories && categories.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {categories && categories.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {categories.map((category) => (
                         <div
                             key={category.id}

@@ -30,6 +30,17 @@ class SaleCreate(BaseModel):
     )
 
 
+class SaleItemUpdate(BaseModel):
+    id: int | None = Field(default=None, description="Existing item ID; omit for new items")
+    category_id: int
+    quantity: int = Field(..., gt=0)
+    amount: Decimal = Field(..., gt=0)
+
+
+class SaleItemsUpdate(BaseModel):
+    items: list[SaleItemUpdate]
+
+
 class SaleDeliveryUpdate(BaseModel):
     delivery_status: str | None = Field(
         default=None, max_length=30, description="e.g. PENDING, OUT_FOR_DELIVERY, DELIVERED"

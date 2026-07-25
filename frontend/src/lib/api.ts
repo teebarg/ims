@@ -56,11 +56,11 @@ export interface CreateBaleInput {
 }
 
 export function listBales() {
-    return fetchApi<BaleDto[]>("/bales");
+    return fetchApi<BaleDto[]>("/bales/");
 }
 
 export function createBale(input: CreateBaleInput) {
-    return fetchApi<BaleDto>("/bales", {
+    return fetchApi<BaleDto>("/bales/", {
         method: "POST",
         body: JSON.stringify(input),
     });
@@ -221,6 +221,24 @@ export function updateSaleDelivery(saleId: number, input: UpdateSaleDeliveryInpu
     });
 }
 
+export interface UpdateSaleItemInput {
+    id?: number | null;
+    category_id: number;
+    quantity: number;
+    amount: number;
+}
+
+export interface UpdateSaleItemsInput {
+    items: UpdateSaleItemInput[];
+}
+
+export function updateSaleItems(saleId: number, input: UpdateSaleItemsInput) {
+    return fetchApi<SaleDto>(`/sales/${saleId}/items`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+    });
+}
+
 export function getCustomerSales(customerId: string) {
     return fetchApi<SaleDto[]>(`/customers/${customerId}/sales/`);
 }
@@ -244,7 +262,7 @@ export interface PaymentDto {
 }
 
 export function getCustomerPayments(customerId: string) {
-    return fetchApi<PaymentDto[]>(`/customers/${customerId}/payments/`);
+    return fetchApi<PaymentDto[]>(`/customers/${customerId}/payments`);
 }
 
 export interface CreatePaymentInput {
