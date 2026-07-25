@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import type { SaleItemDto } from "@/lib/api";
 import { currency } from "@/lib/utils";
+import { TOKENS } from "./shared";
 
 interface InvoiceReceiptProps {
     items: SaleItemDto[];
@@ -9,15 +10,6 @@ interface InvoiceReceiptProps {
     customerName?: string;
     date?: Date;
 }
-
-const TOKENS = {
-    backdrop: "#3B1220",
-    paper: "#F6EFE2",
-    ink: "#221F1A",
-    inkSoft: "#7A6E5D",
-    gold: "#B8935A",
-    goldLine: "#DCC9A0",
-};
 
 // Deterministic "barcode" so the same sale always renders the same pattern
 function barcodeWidths(seed: string, count = 46) {

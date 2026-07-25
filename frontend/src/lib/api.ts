@@ -244,7 +244,7 @@ export interface PaymentDto {
 }
 
 export function getCustomerPayments(customerId: string) {
-    return fetchApi<PaymentDto[]>(`/customers/${customerId}/payments/`);
+    return fetchApi<PaymentDto[]>(`/customers/${customerId}/payments`);
 }
 
 export interface CreatePaymentInput {

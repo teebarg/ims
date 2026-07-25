@@ -10,6 +10,7 @@ import SalesActions from "../sales/sales-actions";
 import DeliveryBadge from "../sales/delivery-badge";
 import SalePaymentsDetails from "../sales/sale-payments-details";
 import SalesDetails from "../sales/sales-details";
+import CustomerDebtReminder from "../sales/debt-reminder";
 
 function apiToUiChannel(ch: ApiSalesChannel): Channel {
     switch (ch) {
@@ -31,6 +32,7 @@ export default function CustomerSalesDetails({ sales, customer }: { sales: SaleD
         <Card className="lg:col-span-2">
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-heading">Sales History</CardTitle>
+                <CustomerDebtReminder sales={sales} customerName={customer?.display_name} customerPhone={customer?.phone} />
             </CardHeader>
 
             <CardContent className="p-0">
