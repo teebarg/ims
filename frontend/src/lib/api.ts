@@ -56,11 +56,11 @@ export interface CreateBaleInput {
 }
 
 export function listBales() {
-    return fetchApi<BaleDto[]>("/bales");
+    return fetchApi<BaleDto[]>("/bales/");
 }
 
 export function createBale(input: CreateBaleInput) {
-    return fetchApi<BaleDto>("/bales", {
+    return fetchApi<BaleDto>("/bales/", {
         method: "POST",
         body: JSON.stringify(input),
     });

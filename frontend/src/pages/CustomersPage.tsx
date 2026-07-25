@@ -129,8 +129,7 @@ export default function CustomersPage() {
                 />
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex gap-2">
                 <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input placeholder="Search by name or handle..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
@@ -198,11 +197,11 @@ export default function CustomersPage() {
                 </table>
             </div>
 
-            <div className="md:hidden space-y-3">
+            <div className="md:hidden space-y-2">
                 {filtered.map((c) => {
                     const dto = customerDtos.find((d) => d.id === c.id);
                     return (
-                        <div key={c.id} className="cursor-pointer hover:shadow-md transition-shadow bg-card p-2.5 overflow-hidden" onClick={() => navigate(`/customers/${c.id}`)}>
+                        <div key={c.id} className="cursor-pointer hover:shadow-md transition-shadow bg-card p-2.5 rounded-md overflow-hidden" onClick={() => navigate(`/customers/${c.id}`)}>
                             <div className="flex items-center justify-between gap-2">
                                 <div className="min-w-0 flex-1">
                                     <span className="font-medium block truncate">{c.displayName}</span>

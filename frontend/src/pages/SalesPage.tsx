@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CreditCard, ShoppingCart, DollarSign } from "lucide-react";
+import { Search, CreditCard, ShoppingCart, Banknote } from "lucide-react";
 import { apiToDeliveryStatus, channelLabels } from "@/types/customer";
 import { listSales, listCustomers, type SaleDto, type ApiSalesChannel } from "@/lib/api";
 import { currency } from "@/lib/utils";
@@ -80,7 +80,7 @@ export default function SalesPage() {
                 </div>
                 <SalesForm />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <StatCard
                     label="Total Sales"
                     value={`${sales.length}`}
@@ -91,12 +91,12 @@ export default function SalesPage() {
                 <StatCard
                     label="Collected"
                     value={currency(totalCollected)}
-                    icon={DollarSign}
+                    icon={Banknote}
                     iconColor="bg-success/10 text-success"
                     valueColor="text-success"
                 />
                 <StatCard
-                    label="Collected"
+                    label="Outstanding"
                     value={currency(totalOutstanding)}
                     icon={CreditCard}
                     iconColor="bg-destructive/10 text-destructive"
@@ -105,43 +105,45 @@ export default function SalesPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1 max-w-sm">
+                <div className="relative flex-1 sm:max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input placeholder="Search sales..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
                 </div>
-                <Select value={filterChannel} onValueChange={setFilterChannel}>
-                    <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Channel" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Channels</SelectItem>
-                        <SelectItem value="shop">Shop</SelectItem>
-                        <SelectItem value="social">Social Media</SelectItem>
-                        <SelectItem value="website">Website</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="paid">Paid</SelectItem>
-                        <SelectItem value="partial">Partial</SelectItem>
-                        <SelectItem value="unpaid">Unpaid</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={filterDelivery} onValueChange={setFilterDelivery}>
-                    <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Delivery" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Delivery</SelectItem>
-                        <SelectItem value="processing">Processing</SelectItem>
-                        <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                        <SelectItem value="delivered">Delivered</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                    <Select value={filterChannel} onValueChange={setFilterChannel}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Channel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Channels</SelectItem>
+                            <SelectItem value="shop">Shop</SelectItem>
+                            <SelectItem value="social">Social Media</SelectItem>
+                            <SelectItem value="website">Website</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="paid">Paid</SelectItem>
+                            <SelectItem value="partial">Partial</SelectItem>
+                            <SelectItem value="unpaid">Unpaid</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={filterDelivery} onValueChange={setFilterDelivery}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Delivery" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Delivery</SelectItem>
+                            <SelectItem value="processing">Processing</SelectItem>
+                            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                            <SelectItem value="delivered">Delivered</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             {sales.length === 0 && !isLoading && !isError && <ZeroState title="No sales found" description="Add your first sale to get started" />}

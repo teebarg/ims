@@ -19,7 +19,7 @@ import {
 } from "@/lib/api";
 import { Channel, channelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
-import { AlertTriangle, DollarSign, Package, ShoppingCart } from "lucide-react";
+import { AlertTriangle, Banknote, Package, ShoppingCart } from "lucide-react";
 import CategoryPerformance from "@/components/dashboard/category-performance";
 import SalesDetails from "@/components/sales/sales-details";
 
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                     value={currency(totalRevenue)}
                     change="All time"
                     changeType="positive"
-                    icon={DollarSign}
+                    icon={Banknote}
                     iconColor="bg-success/10 text-success"
                 />
                 <StatCard
