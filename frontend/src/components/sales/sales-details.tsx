@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useOverlayTriggerState } from "react-stately";
 import SheetDrawer from "../ui/sheet-drawer";
-import { Check, Eye, ImageDown, Loader2, MessageCircle, Receipt, Share2 } from "lucide-react";
+import { Eye, ImageDown, Loader2, Receipt, Share2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { buildInvoiceMessage, formatPhoneForWhatsApp } from "@/lib/invoice";
 import { generateInvoiceImage, shareOrDownloadInvoiceImage } from "@/lib/invoice-image";
@@ -46,18 +46,18 @@ export default function SalesDetails({ items, label = "View details", total, cus
         window.open(url, "_blank");
     };
 
-    const handleShareText = async () => {
-        const message = getMessage();
-        if (navigator.share) {
-            try { await navigator.share({ title: "Sale receipt", text: message }); } catch { }
-            return;
-        }
-        try {
-            await navigator.clipboard.writeText(message);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch { }
-    };
+    // const handleShareText = async () => {
+    //     const message = getMessage();
+    //     if (navigator.share) {
+    //         try { await navigator.share({ title: "Sale receipt", text: message }); } catch { }
+    //         return;
+    //     }
+    //     try {
+    //         await navigator.clipboard.writeText(message);
+    //         setCopied(true);
+    //         setTimeout(() => setCopied(false), 2000);
+    //     } catch { }
+    // };
 
     const handleShareImage = async () => {
         if (!receiptRef.current) return;
@@ -136,7 +136,7 @@ export default function SalesDetails({ items, label = "View details", total, cus
                             <span>{currency(total || 0)}</span>
                         </div>
                     </div>
-                    <div className="flex gap-2 py-2 px-2">
+                    {/* <div className="flex gap-2 py-2 px-2">
                         <Button variant="secondary" className="gap-2" onClick={handleShareText}>
                             {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
                             {copied ? "Copied" : "Share text"}
@@ -149,8 +149,12 @@ export default function SalesDetails({ items, label = "View details", total, cus
                             <MessageCircle className="h-4 w-4" />
                             {customerPhone ? "Send via WhatsApp" : "Find on WhatsApp"}
                         </Button>
-                    </div>
-                    <div className="sheet-footer">
+                    </div> */}
+                    <div className="sheet-footer justify-between">
+                        <Button className="gap-2" onClick={() => setPreviewOpen(true)}>
+                            <ImageDown className="h-4 w-4" />
+                            Invoice image
+                        </Button>
                         <Button variant="outline" onClick={state.close}>Close</Button>
                     </div>
                 </div>

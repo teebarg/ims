@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, CreditCard, DollarSign, Loader2, ShoppingCart, TrendingUp } from "lucide-react";
+import { ArrowLeft, Banknote, CreditCard, Loader2, ShoppingCart, Wallet } from "lucide-react";
 import { identifierTypeLabels, channelLabels } from "@/types/customer";
 import { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { currency, formatDate } from "@/lib/utils";
 import { Channel } from "@/types/customer";
 import CustomerSalesDetails from "@/components/customers/customers-sales-details";
+import { StatCard } from "@/components/StatCard";
 
 const CHANNEL_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)"];
 
@@ -164,36 +165,34 @@ export default function CustomerProfilePage() {
 
             {/* Stats Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <Card className="stat-card">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <ShoppingCart className="h-5 w-5 text-primary mb-1" />
-                        <p className="metric-value text-lg">{sales.length}</p>
-                        <p className="metric-label text-xs">Sales</p>
-                    </CardContent>
-                </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <DollarSign className="h-5 w-5 text-primary mb-1" />
-                        <p className="metric-value text-lg">{currency(lifetimeValue)}</p>
-                        <p className="metric-label text-xs">Lifetime</p>
-                    </CardContent>
-                </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <TrendingUp className="h-5 w-5 text-success mb-1" />
-                        <p className="metric-value text-lg text-success">{currency(totalPaid)}</p>
-                        <p className="metric-label text-xs">Total Paid</p>
-                    </CardContent>
-                </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <CreditCard className="h-5 w-5 text-destructive mb-1" />
-                        <p className={`metric-value text-lg ${outstandingBalance > 0 ? "text-destructive" : "text-success"}`}>
-                            {currency(outstandingBalance)}
-                        </p>
-                        <p className="metric-label text-xs">Outstanding</p>
-                    </CardContent>
-                </Card>
+                <StatCard
+                    label="Orders"
+                    value={sales.length.toString()}
+                    icon={ShoppingCart}
+                    iconColor="bg-primary/10 text-primary"
+                    valueColor="text-primary"
+                />
+                <StatCard
+                    label="Total Orders"
+                    value={currency(lifetimeValue)}
+                    icon={Banknote}
+                    iconColor="bg-blue-50 text-blue-800"
+                    valueColor="text-blue-600"
+                />
+                <StatCard
+                    label="Total Spend"
+                    value={currency(totalPaid)}
+                    icon={Wallet}
+                    iconColor="bg-success/10 text-success"
+                    valueColor="text-success"
+                />
+                <StatCard
+                    label="Outstanding"
+                    value={currency(outstandingBalance)}
+                    icon={CreditCard}
+                    iconColor="bg-primary/10 text-primary"
+                    valueColor={`${outstandingBalance > 0 ? "text-destructive" : "text-success"}`}
+                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

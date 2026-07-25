@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
@@ -9,15 +8,16 @@ interface StatCardProps {
     changeType?: "positive" | "negative" | "neutral";
     icon: LucideIcon;
     iconColor?: string;
+    valueColor?: string;
 }
 
-export function StatCard({ label, value, change, changeType = "neutral", icon: Icon, iconColor }: StatCardProps) {
+export function StatCard({ label, value, change, changeType = "neutral", icon: Icon, iconColor, valueColor }: StatCardProps) {
     return (
-        <div className="stat-card animate-slide-in">
+        <div className="bg-card rounded-xl border p-5 transition-shadow hover:shadow-md animate-slide-in">
             <div className="flex items-start justify-between">
                 <div className="space-y-2">
                     <p className="metric-label">{label}</p>
-                    <p className="metric-value">{value}</p>
+                    <p className={cn("metric-value", valueColor)}>{value}</p>
                     {change && (
                         <p
                             className={cn(

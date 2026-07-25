@@ -4,10 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CreditCard, ShoppingCart, DollarSign, Truck } from "lucide-react";
-import { apiToDeliveryStatus, channelLabels, type DeliveryStatus } from "@/types/customer";
+import { Search, CreditCard, ShoppingCart, DollarSign } from "lucide-react";
+import { apiToDeliveryStatus, channelLabels } from "@/types/customer";
 import { listSales, listCustomers, type SaleDto, type ApiSalesChannel } from "@/lib/api";
-import { currency, formatDate } from "@/lib/utils";
+import { currency } from "@/lib/utils";
 import SalesForm from "@/components/sales/sales-form";
 import { Channel } from "@/types/customer";
 import SalesDetails from "@/components/sales/sales-details";
@@ -80,32 +80,28 @@ export default function SalesPage() {
                 </div>
                 <SalesForm />
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatCard
                     label="Total Sales"
                     value={`${sales.length}`}
                     icon={ShoppingCart}
                     iconColor="bg-primary/10 text-primary"
+                    valueColor="text-primary"
                 />
-                <div className="stat-card">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                        <DollarSign className="h-5 w-5 text-success" />
-                    </div>
-                    <div>
-                        <p className="metric-label">Collected</p>
-                        <p className="metric-value text-xl text-success">{currency(totalCollected)}</p>
-                    </div>
-                </div>
-                <div className="stat-card">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                        <CreditCard className="h-5 w-5 text-destructive" />
-                    </div>
-                    <div>
-                        <p className="metric-label">Outstanding</p>
-                        <p className="metric-value text-xl text-destructive">{currency(totalOutstanding)}</p>
-                    </div>
-                </div>
+                <StatCard
+                    label="Collected"
+                    value={currency(totalCollected)}
+                    icon={DollarSign}
+                    iconColor="bg-success/10 text-success"
+                    valueColor="text-success"
+                />
+                <StatCard
+                    label="Collected"
+                    value={currency(totalOutstanding)}
+                    icon={CreditCard}
+                    iconColor="bg-destructive/10 text-destructive"
+                    valueColor="text-destructive"
+                />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">

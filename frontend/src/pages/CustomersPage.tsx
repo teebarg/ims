@@ -2,18 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useOverlayTriggerState } from "react-stately";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Users, DollarSign, AlertCircle } from "lucide-react";
+import { Plus, Search, Users, AlertCircle, Banknote } from "lucide-react";
 import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
 import { listCustomers, type CustomerDto } from "@/lib/api";
 import CustomerActions from "@/components/customers/customer-actions";
 import { CustomerForm } from "@/components/customers/customer-form";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import { currency } from "@/lib/utils";
+import { StatCard } from "@/components/StatCard";
 
 type CustomerRow = {
     id: string;
@@ -105,41 +105,28 @@ export default function CustomersPage() {
                 </SheetDrawer>
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="stat-card">
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <Users className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                            <p className="metric-label">Total Customers</p>
-                            <p className="metric-value text-xl">{totalCustomers}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                            <AlertCircle className="h-5 w-5 text-destructive" />
-                        </div>
-                        <div>
-                            <p className="metric-label">With Balance</p>
-                            <p className="metric-value text-xl text-destructive">{withBalance}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                            <DollarSign className="h-5 w-5 text-destructive" />
-                        </div>
-                        <div>
-                            <p className="metric-label">Total Outstanding</p>
-                            <p className="metric-value text-xl text-destructive">{currency(totalOutstanding)}</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                <StatCard
+                    label="Total Customers"
+                    value={totalCustomers.toString()}
+                    icon={Users}
+                    iconColor="bg-primary/10 text-primary"
+                    valueColor="text-primary"
+                />
+                <StatCard
+                    label="With Balance"
+                    value={withBalance.toString()}
+                    icon={AlertCircle}
+                    iconColor="bg-success/10 text-success"
+                    valueColor="text-success"
+                />
+                <StatCard
+                    label="Total Outstanding"
+                    value={currency(totalOutstanding)}
+                    icon={Banknote}
+                    iconColor="bg-destructive/10 text-destructive"
+                    valueColor="text-destructive"
+                />
             </div>
 
             {/* Filters */}
@@ -163,86 +150,78 @@ export default function CustomersPage() {
                 </Select>
             </div>
 
-            {/* Desktop Table */}
             <div className="hidden md:block">
-                <Card>
-                    <CardContent className="p-0">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/30">
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Customer</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Identifier</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Type</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Total Purchases</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Outstanding</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground">Last Purchase</th>
-                                    <th className="text-left p-3 font-medium text-muted-foreground w-24">Actions</th>
+                <table className="w-full text-sm bg-card rounded-md overflow-hidden">
+                    <thead>
+                        <tr className="border-b bg-muted/30">
+                            <th className="text-left p-3 font-medium text-muted-foreground">Customer</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Identifier</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Type</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Total Purchases</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Outstanding</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Last Purchase</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground w-24">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filtered.map((c) => {
+                            const dto = customerDtos.find((d) => d.id === c.id);
+                            return (
+                                <tr
+                                    key={c.id}
+                                    className="border-b last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
+                                    onClick={() => navigate(`/customers/${c.id}`)}
+                                >
+                                    <td className="p-3 font-medium">{c.displayName}</td>
+                                    <td className="p-3 font-mono text-xs">{c.identifier}</td>
+                                    <td className="p-3">
+                                        <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
+                                            {identifierTypeLabels[c.identifierType]}
+                                        </Badge>
+                                    </td>
+                                    <td className="p-3 font-medium">{currency(c.totalPurchases)}</td>
+                                    <td className="p-3">
+                                        {c.outstandingBalance > 0 ? (
+                                            <span className="font-semibold text-destructive">{currency(c.outstandingBalance)}</span>
+                                        ) : (
+                                            <span className="text-success font-medium">{currency(0)}</span>
+                                        )}
+                                    </td>
+                                    <td className="p-3 text-muted-foreground text-xs">{c.lastPurchaseDate ?? "—"}</td>
+                                    <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                                        {dto && <CustomerActions customer={dto} />}
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {filtered.map((c) => {
-                                    const dto = customerDtos.find((d) => d.id === c.id);
-                                    return (
-                                        <tr
-                                            key={c.id}
-                                            className="border-b last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
-                                            onClick={() => navigate(`/customers/${c.id}`)}
-                                        >
-                                            <td className="p-3 font-medium">{c.displayName}</td>
-                                            <td className="p-3 font-mono text-xs">{c.identifier}</td>
-                                            <td className="p-3">
-                                                <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                                    {identifierTypeLabels[c.identifierType]}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-3 font-medium">{currency(c.totalPurchases)}</td>
-                                            <td className="p-3">
-                                                {c.outstandingBalance > 0 ? (
-                                                    <span className="font-semibold text-destructive">{currency(c.outstandingBalance)}</span>
-                                                ) : (
-                                                    <span className="text-success font-medium">{currency(0)}</span>
-                                                )}
-                                            </td>
-                                            <td className="p-3 text-muted-foreground text-xs">{c.lastPurchaseDate ?? "—"}</td>
-                                            <td className="p-3" onClick={(e) => e.stopPropagation()}>
-                                                {dto && <CustomerActions customer={dto} />}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </CardContent>
-                </Card>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
 
-            {/* Mobile Cards */}
             <div className="md:hidden space-y-3">
                 {filtered.map((c) => {
                     const dto = customerDtos.find((d) => d.id === c.id);
                     return (
-                        <Card key={c.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/customers/${c.id}`)}>
-                            <CardContent className="p-4 space-y-2">
-                                <div className="flex items-center justify-between gap-2">
-                                    <div className="min-w-0 flex-1">
-                                        <span className="font-medium block truncate">{c.displayName}</span>
-                                        <span className="font-mono text-xs text-muted-foreground">{c.identifier}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 shrink-0">
-                                        <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                            {identifierTypeLabels[c.identifierType]}
-                                        </Badge>
-                                        {dto && <CustomerActions customer={dto} />}
-                                    </div>
+                        <div key={c.id} className="cursor-pointer hover:shadow-md transition-shadow bg-card p-2.5 overflow-hidden" onClick={() => navigate(`/customers/${c.id}`)}>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                    <span className="font-medium block truncate">{c.displayName}</span>
+                                    <span className="font-mono text-xs text-muted-foreground">{c.identifier}</span>
                                 </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <p className="font-heading font-bold">{currency(c.totalPurchases)}</p>
-                                    {c.outstandingBalance > 0 && (
-                                        <p className="text-xs text-destructive font-semibold">Bal: {currency(c.outstandingBalance)}</p>
-                                    )}
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
+                                        {identifierTypeLabels[c.identifierType]}
+                                    </Badge>
+                                    {dto && <CustomerActions customer={dto} />}
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                                <p className="font-heading font-bold">{currency(c.totalPurchases)}</p>
+                                {c.outstandingBalance > 0 && (
+                                    <p className="text-xs text-destructive font-semibold">Bal: {currency(c.outstandingBalance)}</p>
+                                )}
+                            </div>
+                        </div>
                     );
                 })}
             </div>
