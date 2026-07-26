@@ -73,7 +73,7 @@ export default function MobileSaleCard({ sale, c_display_name, c_identifier }: {
             )}
 
             <div className="flex items-center justify-between pt-1 border-t border-dashed">
-                <SalesDetails label={`${itemsCount} items`} items={sale.items || []} total={sale.total_amount} />
+                <SalesDetails customerName={c_display_name} label={`${itemsCount} items`} items={sale.items || []} total={sale.total_amount} />
                 <SalesActions sale={sale} displayName={c_display_name || ""} status={status} />
             </div>
         </div>

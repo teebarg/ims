@@ -10,7 +10,7 @@ export async function generateInvoiceImage(node: HTMLElement, pixelRatio = 3): P
         backgroundColor: undefined,
     });
 
-    if (!blob) throw new Error("Could not generate invoice image");
+    if (!blob) throw new Error("Could not generate invoice");
     return blob;
 }
 

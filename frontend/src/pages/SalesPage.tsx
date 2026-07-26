@@ -139,6 +139,7 @@ export default function SalesPage() {
                             <th className="text-left p-3 font-medium text-muted-foreground">Items</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Total</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Paid</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Payments</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Delivery</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
@@ -165,6 +166,7 @@ export default function SalesPage() {
                                     <td className="p-3 text-xs">{channelLabels[ch]}</td>
                                     <td className="p-3">
                                         <SalesDetails
+                                            customerName={c?.display_name}
                                             label={`${sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0} items`}
                                             items={sale.items || []}
                                             total={sale.total_amount}
@@ -173,6 +175,8 @@ export default function SalesPage() {
                                     <td className="p-3 font-medium">{currency(sale.total_amount)}</td>
                                     <td className="p-3 space-y-1">
                                         <div>{currency(sale.total_paid)}</div>
+                                    </td>
+                                    <td className="p-3 space-y-1">
                                         <SalePaymentsDetails saleId={sale.id} customerId={sale.customer_id} saleTotal={sale.total_amount} />
                                     </td>
                                     <td className="p-3">

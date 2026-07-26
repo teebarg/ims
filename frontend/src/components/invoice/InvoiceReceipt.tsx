@@ -84,7 +84,6 @@ const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
                             Thank you for shopping with us
                         </div>
 
-                        {/* Fake barcode */}
                         <div className="flex items-end justify-center gap-[2px] h-8 mb-1">
                             {widths.map((w, i) => (
                                 <div key={i} style={{ width: w, height: "100%", backgroundColor: TOKENS.ink }} />
