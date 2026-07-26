@@ -64,7 +64,7 @@ export default function SalesDetails({ items, label = "View details", total, cus
         setIsGenerating(true);
         try {
             const blob = await generateInvoiceImage(receiptRef.current);
-            await shareOrDownloadInvoiceImage(blob, `receipt-${Date.now()}.png`, `Your receipt from ${import.meta.env.VITE_APP_NAME}`);
+            await shareOrDownloadInvoiceImage(blob, `receipt-${Date.now()}.png`, `Your invoice from ${import.meta.env.VITE_APP_NAME}`);
         } catch (err) {
             console.error("Failed to share invoice image", err);
         } finally {
