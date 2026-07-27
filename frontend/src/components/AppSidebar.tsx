@@ -18,15 +18,15 @@ import {
 
 const mainItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "user"] },
-    { title: "Sales", url: "/sales", icon: ShoppingCart, roles: ["admin", "user"] },
     { title: "Bales", url: "/bales", icon: Package, roles: ["admin"] },
+    { title: "Sales", url: "/sales", icon: ShoppingCart, roles: ["admin", "user"] },
     { title: "Customers", url: "/customers", icon: Users, roles: ["admin", "user"] },
     { title: "Categories", url: "/categories", icon: Tag, roles: ["admin", "user"] },
     { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ["admin"] },
 ];
 
 export function AppSidebar() {
-    const { state, toggleSidebar } = useSidebar();
+    const { state, toggleSidebar, isMobile, setOpenMobile } = useSidebar();
     const collapsed = state === "collapsed";
     const location = useLocation();
     const { user } = useUser();
@@ -35,6 +35,11 @@ export function AppSidebar() {
     const filteredItems = mainItems.filter((item) => item.roles.includes(role || ""));
 
     const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
+    const handleNavigate = () => {
+        if (isMobile) {
+            setOpenMobile(false);
+        }
+    };
 
     return (
         <Sidebar collapsible="icon">
@@ -65,6 +70,7 @@ export function AppSidebar() {
                                             end={item.url === "/"}
                                             className="transition-colors"
                                             activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                                            onClick={handleNavigate}
                                         >
                                             <item.icon className="h-4 w-4" />
                                             {!collapsed && <span>{item.title}</span>}

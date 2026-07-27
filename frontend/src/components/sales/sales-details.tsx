@@ -22,7 +22,6 @@ interface SalesDetailsProps {
 
 export default function SalesDetails({ items, label = "View details", total, customerName, customerPhone }: SalesDetailsProps) {
     const state = useOverlayTriggerState({});
-    const [copied, setCopied] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const receiptRef = useRef<HTMLDivElement>(null);
@@ -64,7 +63,7 @@ export default function SalesDetails({ items, label = "View details", total, cus
         setIsGenerating(true);
         try {
             const blob = await generateInvoiceImage(receiptRef.current);
-            await shareOrDownloadInvoiceImage(blob, `receipt-${Date.now()}.png`, `Your receipt from ${import.meta.env.VITE_APP_NAME}`);
+            await shareOrDownloadInvoiceImage(blob, `receipt-${Date.now()}.png`, `Your invoice from ${import.meta.env.VITE_APP_NAME}`);
         } catch (err) {
             console.error("Failed to share invoice image", err);
         } finally {
@@ -153,7 +152,7 @@ export default function SalesDetails({ items, label = "View details", total, cus
                     <div className="sheet-footer justify-between">
                         <Button className="gap-2" onClick={() => setPreviewOpen(true)}>
                             <ImageDown className="h-4 w-4" />
-                            Invoice image
+                            Invoice
                         </Button>
                         <Button variant="outline" onClick={state.close}>Close</Button>
                     </div>

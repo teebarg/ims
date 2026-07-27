@@ -109,7 +109,7 @@ export default function BaleForm({ onClose }: Props) {
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
+                        <div className="min-w-0">
                             <Label>Total Cost (₦)</Label>
                             <Input
                                 type="number"
@@ -119,10 +119,11 @@ export default function BaleForm({ onClose }: Props) {
                                 onChange={(e) => setNewBale((p) => ({ ...p, totalCost: e.target.value }))}
                             />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <Label>Purchase Date</Label>
                             <Input
                                 type="date"
+                                className="w-full min-w-0 max-w-full box-border [appearance:none] [-webkit-appearance:none] pr-2"
                                 value={newBale.purchaseDate}
                                 onChange={(e) => setNewBale((p) => ({ ...p, purchaseDate: e.target.value }))}
                             />

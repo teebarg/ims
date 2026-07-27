@@ -2,7 +2,7 @@ from collections import defaultdict
 from decimal import Decimal
 from datetime import date, datetime, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.models.category import Category
@@ -270,6 +270,20 @@ def update_sale_items(db: Session, sale_id: int, items_in: SaleItemsUpdate) -> S
         raise
 
     return enrich_sales_with_payments(db, [sale])[0]
+
+
+def delete_sale(db: Session, sale_id: int) -> None:
+    sale = db.get(Sale, sale_id)
+    if sale is None:
+        raise ValueError("Sale not found")
+
+    try:
+        db.execute(delete(InventoryStock).where(InventoryStock.sale_id == sale_id))
+        db.delete(sale)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
 
 
 def update_sale_delivery(

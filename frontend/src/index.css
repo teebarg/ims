@@ -141,12 +141,6 @@
 }
 
 @layer components {
-    .metric-value {
-        @apply text-2xl md:text-3xl font-heading font-bold tracking-tight;
-    }
-    .metric-label {
-        @apply text-sm text-muted-foreground font-medium;
-    }
     .page-header {
         @apply text-xl md:text-2xl font-heading font-bold;
     }

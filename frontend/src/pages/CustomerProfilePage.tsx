@@ -13,6 +13,7 @@ import { getCustomerProfile, createPayment, type ApiIdentifierType, type ApiSale
 import { toast } from "sonner";
 import { currency, formatDate } from "@/lib/utils";
 import CustomerSalesDetails from "@/components/customers/customers-sales-details";
+import SalesForm from "@/components/sales/sales-form";
 import { StatCard } from "@/components/StatCard";
 import { apiToUiChannel } from "@/lib/sales";
 import { apiToUiIdentifierType } from "@/lib/profile";
@@ -121,21 +122,23 @@ export default function CustomerProfilePage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" onClick={() => navigate("/customers")}>
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <div>
+                <div className="flex-1">
                     <h1 className="page-header">{customer.display_name}</h1>
                     <p className="page-subtitle font-mono">
                         {customer.identifier} · {identifierTypeLabels[identifierType]}
                     </p>
                 </div>
+                <SalesForm
+                    initialCustomerId={id}
+                    buttonSize="sm"
+                />
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <StatCard
                     label="Orders"
                     value={sales.length.toString()}

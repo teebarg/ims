@@ -3,9 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.core.security import UserRole, require_roles
 from app.db.session import get_db
+from app.schemas.generic import Message
 from app.schemas.sale import SaleCreate, SaleDeliveryUpdate, SaleItemsUpdate, SaleRead
 from app.services.sales import (
     create_sale,
+    delete_sale,
     enrich_sales_with_payments,
     get_sale,
     list_sales,
@@ -59,6 +61,19 @@ def update_items(
         detail = str(exc)
         status_code = 404 if detail == "Sale not found" else 400
         raise HTTPException(status_code=status_code, detail=detail) from exc
+
+
+@router.delete("/{sale_id}", response_model=Message)
+def delete_sale_endpoint(
+    sale_id: int,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+) -> Message:
+    try:
+        delete_sale(db, sale_id)
+        return Message(details="Sale deleted successfully")
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.patch("/{sale_id}/delivery", response_model=SaleRead)
