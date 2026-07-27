@@ -234,7 +234,7 @@ export default function SalesForm() {
                                 )}
 
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div>
+                                    <div className="min-w-0">
                                         <Label className="text-xs">Channel</Label>
                                         <Select value={saleChannel} onValueChange={(v: Channel) => setSaleChannel(v)}>
                                             <SelectTrigger className="h-9">
@@ -248,9 +248,9 @@ export default function SalesForm() {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div>
+                                    <div className="min-w-0">
                                         <Label className="text-xs">Date</Label>
-                                        <Input type="date" className="h-9" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} />
+                                        <Input type="date" className="h-9 w-full min-w-0 max-w-full box-border [appearance:none] [-webkit-appearance:none] pr-2" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} />
                                     </div>
                                 </div>
 

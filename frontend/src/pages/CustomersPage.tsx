@@ -81,7 +81,7 @@ export default function CustomersPage() {
                     title="Add New Customer"
                     trigger={
                         <Button>
-                            <Plus className="h-4 w-4 mr-2" /> Add Customer
+                            <Plus className="h-4 w-4" /> Add Customer
                         </Button>
                     }
                     onOpenChange={addState.setOpen}

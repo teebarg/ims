@@ -13,6 +13,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    ports:
+      - "51730:5173"
     networks:
       - dev-net
     labels:
@@ -42,6 +44,8 @@ services:
       - traefik.http.routers.ims-api-http.entrypoints=http
       - traefik.http.routers.ims-api-http.middlewares=redirect-to-https
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+    ports:
+      - "80000:8000"
     networks:
       - dev-net
     volumes:

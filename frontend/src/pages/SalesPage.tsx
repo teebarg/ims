@@ -181,7 +181,7 @@ export default function SalesPage() {
                                     </td>
                                     <td className="p-3">
                                         <Badge
-                                            variant={status === "paid" ? "default" : status === "partial" ? "secondary" : "destructive"}
+                                            variant={status === "paid" ? "success" : status === "partial" ? "default" : "destructive"}
                                             className="text-xs font-normal"
                                         >
                                             {status}
