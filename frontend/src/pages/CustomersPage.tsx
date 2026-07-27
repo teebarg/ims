@@ -10,6 +10,7 @@ import { Plus, Search, Users, AlertCircle, Banknote } from "lucide-react";
 import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
 import { listCustomers } from "@/lib/api";
 import CustomerActions from "@/components/customers/customer-actions";
+import SalesForm from "@/components/sales/sales-form";
 import { CustomerForm } from "@/components/customers/customer-form";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import { currency } from "@/lib/utils";
@@ -90,7 +91,7 @@ export default function CustomersPage() {
                 </SheetDrawer>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <StatCard
                     label="Total Customers"
                     value={totalCustomers.toString()}
@@ -186,11 +187,11 @@ export default function CustomersPage() {
                 {filtered.map((c) => {
                     const dto = customerDtos.find((d) => d.id === c.id);
                     return (
-                        <div key={c.id} className="cursor-pointer hover:shadow-md transition-shadow bg-card p-2.5 rounded-md overflow-hidden" onClick={() => navigate(`/customers/${c.id}`)}>
+                        <div key={c.id} className="cursor-pointer hover:shadow-md transition-shadow bg-card p-2.5 rounded-md overflow-hidden">
                             <div className="flex items-center justify-between gap-2">
-                                <div className="min-w-0 flex-1">
+                                <div className="min-w-0 flex-1 flex items-center gap-1" onClick={() => navigate(`/customers/${c.id}`)}>
                                     <span className="font-medium block truncate">{c.displayName}</span>
-                                    <span className="font-mono text-xs text-muted-foreground">{c.identifier}</span>
+                                    <span className="font-mono text-xs text-muted-foreground">({c.identifier})</span>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
@@ -204,6 +205,10 @@ export default function CustomersPage() {
                                 {c.outstandingBalance > 0 && (
                                     <p className="text-xs text-destructive font-semibold">Bal: {currency(c.outstandingBalance)}</p>
                                 )}
+                            </div>
+                            <hr className="my-2" />
+                            <div className="flex items-center justify-end text-sm">
+                                <SalesForm buttonSize="sm" initialCustomerId={c.id} />
                             </div>
                         </div>
                     );

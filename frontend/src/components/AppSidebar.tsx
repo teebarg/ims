@@ -18,8 +18,8 @@ import {
 
 const mainItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "user"] },
-    { title: "Sales", url: "/sales", icon: ShoppingCart, roles: ["admin", "user"] },
     { title: "Bales", url: "/bales", icon: Package, roles: ["admin"] },
+    { title: "Sales", url: "/sales", icon: ShoppingCart, roles: ["admin", "user"] },
     { title: "Customers", url: "/customers", icon: Users, roles: ["admin", "user"] },
     { title: "Categories", url: "/categories", icon: Tag, roles: ["admin", "user"] },
     { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ["admin"] },

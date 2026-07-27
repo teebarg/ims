@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOverlayTriggerState } from "react-stately";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,12 @@ function uiToApiChannel(ch: Channel): ApiSalesChannel {
 
 const emptyLineItem = (): SaleLineItem => ({ category: "", quantity: 1, amount: 0 });
 
-export default function SalesForm() {
+interface SalesFormProps {
+    initialCustomerId?: string;
+    buttonSize?: "sm" | "default" | "lg";
+}
+
+export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: SalesFormProps) {
     const queryClient = useQueryClient();
 
     const saleState = useOverlayTriggerState({});
@@ -74,14 +79,33 @@ export default function SalesForm() {
     const lineItemsValid = lineItems.length > 0 && lineItems.every((li) => li.category && li.quantity > 0 && li.amount > 0);
     const canAddMore = lineItems.length < categories.length;
 
-    const resetSaleForm = () => {
+    const resetSaleFormFields = () => {
         setStep(1);
         setSelectedCustomerId(null);
         setCustomerSearch("");
+        setLineItems([emptyLineItem()]);
         setSaleChannel("shop");
         setSaleDate(new Date().toISOString().slice(0, 10));
         setSalePaid("");
     };
+
+    const openForm = () => {
+        resetSaleFormFields();
+        if (initialCustomerId) {
+            setSelectedCustomerId(initialCustomerId);
+            setStep(2);
+        }
+        saleState.open();
+    };
+
+    useEffect(() => {
+        if (!saleState.isOpen) return;
+        resetSaleFormFields();
+        if (initialCustomerId) {
+            setSelectedCustomerId(initialCustomerId);
+            setStep(2);
+        }
+    }, [saleState.isOpen, initialCustomerId]);
 
     const createSaleMutation = useMutation({
         mutationFn: async () => {
@@ -119,7 +143,7 @@ export default function SalesForm() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["sales"] });
             queryClient.invalidateQueries({ queryKey: ["customers"] });
-            resetSaleForm();
+            resetSaleFormFields();
             confirmSaleState.close();
             saleState.close();
             toast.success("Sale recorded");
@@ -146,15 +170,16 @@ export default function SalesForm() {
         <>
             <SheetDrawer
                 open={saleState.isOpen}
-                onOpenChange={saleState.setOpen}
+                onOpenChange={(nextOpen) => {
+                    if (nextOpen) {
+                        openForm();
+                    } else {
+                        saleState.close();
+                    }
+                }}
                 title="Record New Sale"
                 trigger={
-                    <Button
-                        onClick={() => {
-                            resetSaleForm();
-                            saleState.open();
-                        }}
-                    >
+                    <Button size={buttonSize} onClick={openForm}>
                         <Plus className="h-4 w-4" /> Record Sale
                     </Button>
                 }
@@ -250,11 +275,11 @@ export default function SalesForm() {
                                     </div>
                                     <div className="min-w-0">
                                         <Label className="text-xs">Date</Label>
-                                        <Input 
+                                        <Input
                                             type="date"
-                                            className="h-9 w-full min-w-0 max-w-full box-border [appearance:none] [-webkit-appearance:none] pr-2" 
-                                            value={saleDate} 
-                                            onChange={(e) => setSaleDate(e.target.value)} 
+                                            className="h-9 w-full min-w-0 max-w-full box-border [appearance:none] [-webkit-appearance:none] pr-2"
+                                            value={saleDate}
+                                            onChange={(e) => setSaleDate(e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -412,7 +437,7 @@ export default function SalesForm() {
                         <Button
                             variant="outline"
                             onClick={() => {
-                                resetSaleForm();
+                                resetSaleFormFields();
                                 saleState.close();
                             }}
                         >

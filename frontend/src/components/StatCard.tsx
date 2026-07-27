@@ -16,8 +16,8 @@ export function StatCard({ label, value, change, changeType = "neutral", icon: I
         <div className="bg-card rounded-xl border p-5 transition-shadow hover:shadow-md animate-slide-in">
             <div className="flex items-start justify-between">
                 <div className="space-y-2">
-                    <p className="metric-label">{label}</p>
-                    <p className={cn("metric-value", valueColor)}>{value}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground font-medium">{label}</p>
+                    <p className={cn("text-xl md:text-3xl font-bold", valueColor)}>{value}</p>
                     {change && (
                         <p
                             className={cn(
@@ -31,8 +31,8 @@ export function StatCard({ label, value, change, changeType = "neutral", icon: I
                         </p>
                     )}
                 </div>
-                <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", iconColor || "bg-primary/10 text-primary")}>
-                    <Icon className="h-5 w-5" />
+                <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", iconColor || "bg-primary/10 text-primary")}>
+                    <Icon className="h-4 w-4" />
                 </div>
             </div>
         </div>
