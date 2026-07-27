@@ -155,7 +155,7 @@ export default function SalesForm() {
                             saleState.open();
                         }}
                     >
-                        <Plus className="h-4 w-4 mr-2" /> Record Sale
+                        <Plus className="h-4 w-4" /> Record Sale
                     </Button>
                 }
             >

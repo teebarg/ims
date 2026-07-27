@@ -239,6 +239,12 @@ export function updateSaleItems(saleId: number, input: UpdateSaleItemsInput) {
     });
 }
 
+export function deleteSale(saleId: number) {
+    return fetchApi<{ details: string }>(`/sales/${saleId}`, {
+        method: "DELETE",
+    });
+}
+
 export function getCustomerSales(customerId: string) {
     return fetchApi<SaleDto[]>(`/customers/${customerId}/sales/`);
 }
