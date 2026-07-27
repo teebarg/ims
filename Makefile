@@ -38,7 +38,7 @@ stop:
 
 .PHONY: update
 update:
-	$(DOCKER_COMPOSE) up -d --build --force-recreate $(s)
+	$(DOCKER_COMPOSE) up -d --force-recreate $(s)
 
 # --- Database & Migrations (Routed through uv) ---
 .PHONY: migration
