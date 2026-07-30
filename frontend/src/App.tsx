@@ -16,56 +16,61 @@ import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import CategoriesPage from "./pages/CategoriesPage";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
 import PWABadge from "./PWABadge";
+import MaintenancePage from "./pages/MaintenancePage";
 // import { SafeAreaDebug } from "./components/SafeAreaDebug";
 
 const queryClient = new QueryClient();
 
 const App = () => (
     <>
-        <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                    <Routes>
-                        <Route
-                            path="/*"
-                            element={
-                                <ProtectedRoute>
-                                    <DashboardLayout>
-                                        <Routes>
-                                            <Route path="/" element={<DashboardPage />} />
-                                            <Route
-                                                path="/bales"
-                                                element={
-                                                    <RoleProtectedRoute allowedRoles={["admin"]}>
-                                                        <BalesPage />
-                                                    </RoleProtectedRoute>
-                                                }
-                                            />
-                                            <Route path="/customers" element={<CustomersPage />} />
-                                            <Route path="/customers/:id" element={<CustomerProfilePage />} />
-                                            <Route path="/sales" element={<SalesPage />} />
-                                            <Route
-                                                path="/analytics"
-                                                element={
-                                                    <RoleProtectedRoute allowedRoles={["admin"]}>
-                                                        <AnalyticsPage />
-                                                    </RoleProtectedRoute>
-                                                }
-                                            />
-                                            <Route path="/categories" element={<CategoriesPage />} />
-                                            <Route path="/no-access" element={<AccessDeniedPage />} />
-                                            <Route path="*" element={<NotFound />} />
-                                        </Routes>
-                                    </DashboardLayout>
-                                </ProtectedRoute>
-                            }
-                        />
-                    </Routes>
-                </BrowserRouter>
-            </TooltipProvider>
-        </QueryClientProvider>
+        {import.meta.env.VITE_MAINTENANCE_MODE === 'true' ? (
+            <MaintenancePage />
+        ) : (
+            <QueryClientProvider client={queryClient}>
+                <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                        <Routes>
+                            <Route
+                                path="/*"
+                                element={
+                                    <ProtectedRoute>
+                                        <DashboardLayout>
+                                            <Routes>
+                                                <Route path="/" element={<DashboardPage />} />
+                                                <Route
+                                                    path="/bales"
+                                                    element={
+                                                        <RoleProtectedRoute allowedRoles={["admin"]}>
+                                                            <BalesPage />
+                                                        </RoleProtectedRoute>
+                                                    }
+                                                />
+                                                <Route path="/customers" element={<CustomersPage />} />
+                                                <Route path="/customers/:id" element={<CustomerProfilePage />} />
+                                                <Route path="/sales" element={<SalesPage />} />
+                                                <Route
+                                                    path="/analytics"
+                                                    element={
+                                                        <RoleProtectedRoute allowedRoles={["admin"]}>
+                                                            <AnalyticsPage />
+                                                        </RoleProtectedRoute>
+                                                    }
+                                                />
+                                                <Route path="/categories" element={<CategoriesPage />} />
+                                                <Route path="/no-access" element={<AccessDeniedPage />} />
+                                                <Route path="*" element={<NotFound />} />
+                                            </Routes>
+                                        </DashboardLayout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                        </Routes>
+                    </BrowserRouter>
+                </TooltipProvider>
+            </QueryClientProvider>
+        )}
         <PWABadge />
         {/* <SafeAreaDebug /> */}
     </>
