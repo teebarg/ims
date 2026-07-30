@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { listSales, getAnalyticsSummary, listCategories, type ApiSalesChannel, type CategoryDto } from "@/lib/api";
-import { channelLabels } from "@/types/customer";
+import { listSales, getAnalyticsSummary, listCategories, type CategoryDto } from "@/lib/api";
+import { CHANNEL_LABELS, ChannelType } from "@/types/customer";
 import { currency } from "@/lib/utils";
-import { apiToUiChannel } from "@/lib/sales";
 
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
 
@@ -71,29 +70,30 @@ export default function CategoryPerformance() {
     }, [sales, categories]);
 
     const channelData = useMemo(() => {
-        const byChannel: Record<string, { sales: number; revenue: number }> = {
-            shop: { sales: 0, revenue: 0 },
-            tiktok: { sales: 0, revenue: 0 },
-            instagram: { sales: 0, revenue: 0 },
-            website: { sales: 0, revenue: 0 },
+        const byChannel: Record<ChannelType, { sales: number; revenue: number }> = {
+            SHOP: { sales: 0, revenue: 0 },
+            TIKTOK: { sales: 0, revenue: 0 },
+            FACEBOOK: { sales: 0, revenue: 0 },
+            INSTAGRAM: { sales: 0, revenue: 0 },
+            WEBSITE: { sales: 0, revenue: 0 },
         };
         sales.forEach((s) => {
-            const ch = apiToUiChannel(s.channel as ApiSalesChannel);
+            const ch = s.channel;
             if (!byChannel[ch]) byChannel[ch] = { sales: 0, revenue: 0 };
             byChannel[ch].sales += 1;
             byChannel[ch].revenue += Number(s.total_amount);
         });
         return [
-            { channel: channelLabels.shop, sales: byChannel.shop.sales, revenue: byChannel.shop.revenue },
-            { channel: channelLabels.tiktok, sales: byChannel.tiktok.sales, revenue: byChannel.tiktok.revenue },
-            { channel: channelLabels.instagram, sales: byChannel.instagram.sales, revenue: byChannel.instagram.revenue },
-            { channel: channelLabels.website, sales: byChannel.website.sales, revenue: byChannel.website.revenue },
+            { channel: CHANNEL_LABELS.SHOP, sales: byChannel.SHOP.sales, revenue: byChannel.SHOP.revenue },
+            { channel: CHANNEL_LABELS.TIKTOK, sales: byChannel.TIKTOK.sales, revenue: byChannel.TIKTOK.revenue },
+            { channel: CHANNEL_LABELS.FACEBOOK, sales: byChannel.FACEBOOK.sales, revenue: byChannel.FACEBOOK.revenue },
+            { channel: CHANNEL_LABELS.INSTAGRAM, sales: byChannel.INSTAGRAM.sales, revenue: byChannel.INSTAGRAM.revenue },
+            { channel: CHANNEL_LABELS.WEBSITE, sales: byChannel.WEBSITE.sales, revenue: byChannel.WEBSITE.revenue },
         ];
     }, [sales]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Category Detail Table */}
             <Card className="lg:col-span-2">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-base font-heading">Category Performance</CardTitle>
@@ -207,12 +207,9 @@ export default function CategoryPerformance() {
                     </div>
                 </CardContent>
             </Card>
-            {/* Channel breakdown */}
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-heading">Sales by Channel</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
+            <div className="p-4 bg-card rounded-md border">
+                <p className="text-base font-heading mb-1">Sales by Channel</p>
+                <div className="space-y-2">
                     {channelData.map((ch) => (
                         <div key={ch.channel} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                             <div>
@@ -223,8 +220,8 @@ export default function CategoryPerformance() {
                         </div>
                     ))}
                     {channelData.every((ch) => ch.sales === 0) && <p className="text-sm text-muted-foreground py-2">No sales by channel yet</p>}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 }

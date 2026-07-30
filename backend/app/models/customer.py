@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import enum
 import uuid
 from datetime import datetime
 
@@ -8,21 +7,8 @@ from sqlalchemy import DateTime, Enum, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.models.enums import Channel
 from app.db.base import Base
-
-
-class IdentifierType(str, enum.Enum):
-    TIKTOK = "TIKTOK"
-    INSTAGRAM = "INSTAGRAM"
-    STREET = "STREET"
-    WEBSITE = "WEBSITE"
-
-
-class SalesChannel(str, enum.Enum):
-    SHOP = "SHOP"
-    TIKTOK = "TIKTOK"
-    INSTAGRAM = "INSTAGRAM"
-    WEBSITE = "WEBSITE"
 
 
 class Customer(Base):
@@ -33,8 +19,8 @@ class Customer(Base):
     )
     display_name: Mapped[str] = mapped_column(String(255), nullable=False)
     identifier: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    identifier_type: Mapped[IdentifierType] = mapped_column(
-        Enum(IdentifierType, name="identifier_type", native_enum=False),
+    identifier_type: Mapped[Channel] = mapped_column(
+        Enum(Channel, name="identifier_type", native_enum=False),
         nullable=False,
     )
     phone: Mapped[str | None] = mapped_column(String(50), nullable=True)

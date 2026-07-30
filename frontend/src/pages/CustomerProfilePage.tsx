@@ -6,17 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, Banknote, CreditCard, Loader2, ShoppingCart, Wallet } from "lucide-react";
-import { identifierTypeLabels, channelLabels } from "@/types/customer";
+import { CHANNEL_LABELS, Channels } from "@/types/customer";
 import { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { getCustomerProfile, createPayment, type ApiIdentifierType, type ApiSalesChannel } from "@/lib/api";
+import { getCustomerProfile, createPayment } from "@/lib/api";
 import { toast } from "sonner";
 import { currency, formatDate } from "@/lib/utils";
 import CustomerSalesDetails from "@/components/customers/customers-sales-details";
 import SalesForm from "@/components/sales/sales-form";
 import { StatCard } from "@/components/StatCard";
-import { apiToUiChannel } from "@/lib/sales";
-import { apiToUiIdentifierType } from "@/lib/profile";
 
 const CHANNEL_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)"];
 
@@ -61,10 +59,12 @@ export default function CustomerProfilePage() {
 
     const totalPaid = lifetimeValue - outstandingBalance;
 
-    const channelData = ["shop", "tiktok", "instagram", "website"]
-        .map((ch) => ({
-            name: channelLabels[ch],
-            value: sales.filter((s) => apiToUiChannel(s.channel as ApiSalesChannel) === ch).reduce((a, s) => a + Number(s.total_amount), 0),
+    const channelData = Channels
+        .map((channel) => ({
+            name: CHANNEL_LABELS[channel],
+            value: sales
+                .filter((s) => s.channel === channel)
+                .reduce((sum, s) => sum + Number(s.total_amount), 0),
         }))
         .filter((d) => d.value > 0);
 
@@ -118,8 +118,6 @@ export default function CustomerProfilePage() {
         );
     }
 
-    const identifierType = apiToUiIdentifierType(customer.identifier_type);
-
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3">
@@ -129,7 +127,7 @@ export default function CustomerProfilePage() {
                 <div className="flex-1">
                     <h1 className="page-header">{customer.display_name}</h1>
                     <p className="page-subtitle font-mono">
-                        {customer.identifier} · {identifierTypeLabels[identifierType]}
+                        {customer.identifier} · {CHANNEL_LABELS[customer.identifier_type]}
                     </p>
                 </div>
                 <SalesForm
@@ -170,37 +168,30 @@ export default function CustomerProfilePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Sales by Channel */}
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-heading">Sales by Channel</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {channelData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={180}>
-                                <PieChart>
-                                    <Pie
-                                        data={channelData}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={70}
-                                        dataKey="value"
-                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                    >
-                                        {channelData.map((_, i) => (
-                                            <Cell key={i} fill={CHANNEL_COLORS[i % CHANNEL_COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <p className="text-sm text-muted-foreground text-center py-8">No sales yet</p>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* Sales History */}
+                <div className="card">
+                    <p className="text-sm font-heading mb-1">Sales by Channel</p>
+                    {channelData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={180}>
+                            <PieChart>
+                                <Pie
+                                    data={channelData}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={70}
+                                    dataKey="value"
+                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                >
+                                    {channelData.map((_, i) => (
+                                        <Cell key={i} fill={CHANNEL_COLORS[i % CHANNEL_COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <p className="text-sm text-muted-foreground text-center py-8">No sales yet</p>
+                    )}
+                </div>
                 <CustomerSalesDetails sales={sales} customer={customer} />
             </div>
 

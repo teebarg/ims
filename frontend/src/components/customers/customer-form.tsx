@@ -9,15 +9,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createCustomer, updateCustomer, type CustomerDto, type ApiIdentifierType } from "@/lib/api";
-import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
-
-const IDENTIFIER_TYPES: IdentifierType[] = ["tiktok", "instagram", "street", "website"];
+import { createCustomer, updateCustomer, type CustomerDto } from "@/lib/api";
+import { CHANNEL_LABELS, Channels } from "@/types/customer";
 
 const CustomerFormSchema = z.object({
     display_name: z.string().min(1, "Display name is required"),
     identifier: z.string().min(1, "Identifier is required"),
-    identifier_type: z.enum(["tiktok", "instagram", "street", "website"]),
+    identifier_type: z.enum(Channels),
     phone: z
         .string()
         .trim()
@@ -35,19 +33,6 @@ const CustomerFormSchema = z.object({
 
 export type CustomerFormValues = z.infer<typeof CustomerFormSchema>;
 
-function uiToApiIdentifierType(t: IdentifierType): ApiIdentifierType {
-    switch (t) {
-        case "tiktok":
-            return "TIKTOK";
-        case "instagram":
-            return "INSTAGRAM";
-        case "street":
-            return "STREET";
-        case "website":
-            return "WEBSITE";
-    }
-}
-
 interface Props {
     current?: CustomerDto;
     type?: "create" | "update";
@@ -58,26 +43,11 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
     const queryClient = useQueryClient();
     const isCreate = type === "create";
 
-    const defaultIdentifierType = (t: CustomerDto["identifier_type"]): IdentifierType => {
-        switch (t) {
-            case "TIKTOK":
-                return "tiktok";
-            case "INSTAGRAM":
-                return "instagram";
-            case "STREET":
-                return "street";
-            case "WEBSITE":
-                return "website";
-            default:
-                return "instagram";
-        }
-    };
-
     const defaultValues = React.useMemo<CustomerFormValues>(
         () => ({
             display_name: current?.display_name || "",
             identifier: current?.identifier || "",
-            identifier_type: current ? defaultIdentifierType(current.identifier_type) : "instagram",
+            identifier_type: current?.identifier_type ?? "SHOP",
             phone: current?.phone ?? "",
         }),
         [current]
@@ -95,7 +65,7 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
             createCustomer({
                 display_name: data.display_name,
                 identifier: data.identifier,
-                identifier_type: uiToApiIdentifierType(data.identifier_type),
+                identifier_type: data.identifier_type,
                 phone: data.phone?.trim() || null,
             }),
         onSuccess: () => {
@@ -112,7 +82,7 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
             updateCustomer(id, {
                 display_name: data.display_name,
                 identifier: data.identifier,
-                identifier_type: uiToApiIdentifierType(data.identifier_type),
+                identifier_type: data.identifier_type,
                 phone: data.phone?.trim() || null,
             }),
         onSuccess: () => {
@@ -175,9 +145,9 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {IDENTIFIER_TYPES.map((t) => (
-                                            <SelectItem key={t} value={t}>
-                                                {identifierTypeLabels[t]}
+                                        {Channels.map((type) => (
+                                            <SelectItem key={type} value={type}>
+                                                {CHANNEL_LABELS[type]}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

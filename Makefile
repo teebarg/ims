@@ -28,10 +28,6 @@ build:
 up:
 	$(DOCKER_COMPOSE) up
 
-.PHONY: up-d
-up-d:
-	$(DOCKER_COMPOSE) up -d
-
 .PHONY: stop
 stop:
 	$(DOCKER_COMPOSE) stop

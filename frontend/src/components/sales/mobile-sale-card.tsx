@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { channelLabels, type DeliveryStatus } from "@/types/customer";
-import { type SaleDto, type ApiSalesChannel } from "@/lib/api";
+import { CHANNEL_LABELS } from "@/types/customer";
+import { type SaleDto } from "@/lib/api";
 import { currency, formatDate } from "@/lib/utils";
 import SalesDetails from "@/components/sales/sales-details";
 import SalePaymentsDetails from "@/components/sales/sale-payments-details";
 import DeliveryBadge from "@/components/sales/delivery-badge";
 import SalesActions from "@/components/sales/sales-actions";
 import { Truck } from "lucide-react";
-import { apiToUiChannel, saleStatus } from "@/lib/sales";
+import { saleStatus } from "@/lib/sales";
 
 
 const STATUS_STYLES = {
@@ -19,8 +19,6 @@ const STATUS_STYLES = {
 export default function MobileSaleCard({ sale, c_display_name, c_identifier }: { sale: SaleDto; c_display_name?: string; c_identifier?: string }) {
     const navigate = useNavigate();
     const status = saleStatus(sale);
-    const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
-    const deliveryStatus = (sale.delivery_status as DeliveryStatus)?.toLowerCase() || "processing";
     const bal = Number(sale.total_amount) - Number(sale.total_paid);
     const itemsCount = sale.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ?? 0;
     const style = STATUS_STYLES[status];
@@ -46,7 +44,7 @@ export default function MobileSaleCard({ sale, c_display_name, c_identifier }: {
                     <SalePaymentsDetails saleId={sale.id} customerId={sale.customer_id} saleTotal={sale.total_amount} />
                 </div>
                 <span className="text-xs text-muted-foreground font-mono">
-                    {c_identifier} · {channelLabels[ch]}
+                    {c_identifier} · {CHANNEL_LABELS[sale.channel]}
                 </span>
             </div>
 
@@ -60,15 +58,15 @@ export default function MobileSaleCard({ sale, c_display_name, c_identifier }: {
                 </div>
             </div>
 
-            {deliveryStatus !== "processing" && (
+            {sale.delivery_status !== "PROCESSING" && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Truck className="h-3 w-3" />
                     <span>
-                        {deliveryStatus === "out_for_delivery"
+                        {sale.delivery_status === "OUT_FOR_DELIVERY"
                             ? `Out for delivery · ${sale.delivery_assigned_to || "Unassigned"}`
                             : "Delivered"}
                     </span>
-                    <DeliveryBadge status={(deliveryStatus as DeliveryStatus)} />
+                    <DeliveryBadge status={sale.delivery_status || "PROCESSING"} />
                 </div>
             )}
 

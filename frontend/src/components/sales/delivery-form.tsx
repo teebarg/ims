@@ -6,7 +6,7 @@ import DeliveryTimeline from "./delivery-timeline";
 import PaymentForm from "./payment-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { DeliveryStatus, SaleStatus } from "@/types/customer";
+import { SaleStatus, StatusType } from "@/types/customer";
 import { toast } from "sonner";
 
 interface DeliveryFormProps {
@@ -16,7 +16,7 @@ interface DeliveryFormProps {
     onClose?: () => void;
 }
 
-const RIDERS = ["Theophilus", "Daniel", "GUO", "Iyare Park"];
+const RIDERS = ["Staff", "Theophilus", "Bokku", "Owolabi", "Daniel", "GUO", "Iyana Ipaja", "Iyare Park"];
 
 export default function DeliveryForm({ sale, displayName, status, onClose }: DeliveryFormProps) {
     const queryClient = useQueryClient();
@@ -25,13 +25,13 @@ export default function DeliveryForm({ sale, displayName, status, onClose }: Del
     const [notes, setNotes] = useState("");
 
     const deliveryMutation = useMutation({
-        mutationFn: (payload: { delivery_status?: DeliveryStatus; delivery_assigned_to?: string; delivery_notes?: string }) =>
+        mutationFn: (payload: { delivery_status?: StatusType; delivery_assigned_to?: string; delivery_notes?: string }) =>
             updateSaleDeliveryApi(sale.id, {
                 ...payload,
             }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["sales"] });
-            toast.success("Delivery updated");
+            toast.success("Status updated");
             setShowDispatch(false);
         },
         onError: (err: unknown) => {
@@ -55,7 +55,7 @@ export default function DeliveryForm({ sale, displayName, status, onClose }: Del
         }
 
         deliveryMutation.mutate({
-            delivery_status: "out_for_delivery",
+            delivery_status: "OUT_FOR_DELIVERY",
             delivery_assigned_to: rider,
             delivery_notes: notes,
         });
@@ -63,7 +63,7 @@ export default function DeliveryForm({ sale, displayName, status, onClose }: Del
 
     const markDelivered = () => {
         deliveryMutation.mutate({
-            delivery_status: "delivered",
+            delivery_status: "DELIVERED",
         });
     };
 
@@ -127,13 +127,13 @@ export default function DeliveryForm({ sale, displayName, status, onClose }: Del
                             </>
                         )}
 
-                        {sale.delivery_status === "out_for_delivery" && (
+                        {sale.delivery_status === "OUT_FOR_DELIVERY" && (
                             <button className="h-9 w-full rounded-md bg-green-600 text-white text-xs font-medium" onClick={markDelivered}>
                                 Mark Delivered
                             </button>
                         )}
 
-                        {sale.delivery_status === "delivered" && <div className="text-xs text-green-600 font-medium">Order completed</div>}
+                        {sale.delivery_status === "DELIVERED" && <div className="text-xs text-green-600 font-medium">Order completed</div>}
                     </div>
                 </div>
             </div>

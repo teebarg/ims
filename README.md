@@ -11,7 +11,7 @@ Revoque IMS is designed to streamline thrift shop inventory management by tracki
 - **Bale Management**: Track bulk inventory purchases with cost tracking and item categorization
 - **Multi-Channel Sales**: Record and manage sales across Shop, TikTok, Instagram, and Website channels
 - **Payment Processing**: Support partial and full payments with automatic balance calculation and validation
-- **Customer Management**: Customer profiles with multiple identifier types (TikTok, Instagram, Street, Website)
+- **Customer Management**: Customer profiles with multiple identifier types (TikTok, Facebook, Instagram, Shop, Website)
 - **Inventory Tracking**: Real-time stock levels at category and total levels with movement tracking
 - **Delivery Workflow**: Track delivery status from processing to delivered with assignment and notes
 - **Analytics Dashboard**: Sales trends (weekly/monthly), cost vs revenue analysis, top customers, channel distribution

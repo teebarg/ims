@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Users, AlertCircle, Banknote } from "lucide-react";
-import { identifierTypeLabels, type IdentifierType } from "@/types/customer";
+import { CHANNEL_LABELS, Channels, ChannelType } from "@/types/customer";
 import { listCustomers } from "@/lib/api";
 import CustomerActions from "@/components/customers/customer-actions";
 import SalesForm from "@/components/sales/sales-form";
@@ -15,12 +15,11 @@ import { CustomerForm } from "@/components/customers/customer-form";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import { currency } from "@/lib/utils";
 import { StatCard } from "@/components/StatCard";
-import { apiToUiIdentifierType } from "@/lib/profile";
 
 type CustomerRow = {
     id: string;
     displayName: string;
-    identifierType: IdentifierType;
+    identifierType: ChannelType;
     identifier: string;
     phone?: string;
     totalPurchases: number;
@@ -43,7 +42,7 @@ export default function CustomersPage() {
         id: c.id,
         displayName: c.display_name,
         identifier: c.identifier,
-        identifierType: apiToUiIdentifierType(c.identifier_type),
+        identifierType: c.identifier_type,
         phone: c.phone ?? undefined,
         totalPurchases: Number(c.lifetime_value ?? 0),
         outstandingBalance: Number(c.balance ?? 0),
@@ -60,12 +59,13 @@ export default function CustomersPage() {
     const totalCustomers = customers.length;
     const withBalance = customers.filter((c) => c.outstandingBalance > 0).length;
 
-    const typeIcon = (type: IdentifierType) => {
-        const colors: Record<IdentifierType, string> = {
-            tiktok: "bg-foreground/10 text-foreground",
-            instagram: "bg-primary/10 text-primary",
-            street: "bg-warning/20 text-warning",
-            website: "bg-success/20 text-success",
+    const typeIcon = (type: ChannelType) => {
+        const colors: Record<ChannelType, string> = {
+            TIKTOK: "bg-foreground/10 text-foreground",
+            FACEBOOK: "bg-indigo-800 text-indigo-100",
+            INSTAGRAM: "bg-primary/10 text-primary",
+            SHOP: "bg-warning/20 text-warning",
+            WEBSITE: "bg-success/20 text-success",
         };
         return colors[type];
     };
@@ -126,9 +126,9 @@ export default function CustomersPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Types</SelectItem>
-                        {(Object.entries(identifierTypeLabels) as [IdentifierType, string][]).map(([k, v]) => (
-                            <SelectItem key={k} value={k}>
-                                {v}
+                        {Channels.map((type) => (
+                            <SelectItem key={type} value={type}>
+                                {CHANNEL_LABELS[type]}
                             </SelectItem>
                         ))}
                     </SelectContent>
@@ -161,7 +161,7 @@ export default function CustomersPage() {
                                     <td className="p-3 font-mono text-xs">{c.identifier}</td>
                                     <td className="p-3">
                                         <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                            {identifierTypeLabels[c.identifierType]}
+                                            {CHANNEL_LABELS[c.identifierType]}
                                         </Badge>
                                     </td>
                                     <td className="p-3 font-medium">{currency(c.totalPurchases)}</td>
@@ -195,7 +195,7 @@ export default function CustomersPage() {
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                        {identifierTypeLabels[c.identifierType]}
+                                        {CHANNEL_LABELS[c.identifierType]}
                                     </Badge>
                                     {dto && <CustomerActions customer={dto} />}
                                 </div>

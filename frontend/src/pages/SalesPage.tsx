@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, CreditCard, ShoppingCart, Banknote } from "lucide-react";
-import { apiToDeliveryStatus, channelLabels } from "@/types/customer";
-import { listSales, listCustomers, type SaleDto, type ApiSalesChannel } from "@/lib/api";
+import { CHANNEL_LABELS, Channels, Status, StatusLabels } from "@/types/customer";
+import { listSales, listCustomers, type SaleDto } from "@/lib/api";
 import { currency } from "@/lib/utils";
 import SalesForm from "@/components/sales/sales-form";
 import SalesDetails from "@/components/sales/sales-details";
@@ -16,7 +16,7 @@ import SalesActions from "@/components/sales/sales-actions";
 import { ZeroState } from "@/components/ZeroState";
 import MobileSaleCard from "@/components/sales/mobile-sale-card";
 import { StatCard } from "@/components/StatCard";
-import { apiToUiChannel, saleStatus } from "@/lib/sales";
+import { saleStatus } from "@/lib/sales";
 
 
 export default function SalesPage() {
@@ -38,10 +38,9 @@ export default function SalesPage() {
         const ident = c?.identifier ?? "";
         const matchSearch =
             name.toLowerCase().includes(search.toLowerCase()) || ident.toLowerCase().includes(search.toLowerCase()) || String(s.id).includes(search);
-        const ch = apiToUiChannel(s.channel as ApiSalesChannel);
-        const matchChannel = filterChannel === "all" || ch === filterChannel;
+        const matchChannel = filterChannel === "all" || s.channel === filterChannel;
         const status = saleStatus(s);
-        const delivery = apiToDeliveryStatus(s.delivery_status);
+        const delivery = s.delivery_status;
         const matchStatus = filterStatus === "all" || status === filterStatus;
         const matchDelivery = filterDelivery === "all" || delivery === filterDelivery;
         return matchSearch && matchChannel && matchStatus && matchDelivery;
@@ -96,9 +95,11 @@ export default function SalesPage() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Channels</SelectItem>
-                            <SelectItem value="shop">Shop</SelectItem>
-                            <SelectItem value="social">Social Media</SelectItem>
-                            <SelectItem value="website">Website</SelectItem>
+                            {Channels.map((type) => (
+                                <SelectItem key={type} value={type}>
+                                    {CHANNEL_LABELS[type]}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                     <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -117,10 +118,12 @@ export default function SalesPage() {
                             <SelectValue placeholder="Delivery" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Delivery</SelectItem>
-                            <SelectItem value="processing">Processing</SelectItem>
-                            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                            <SelectItem value="delivered">Delivered</SelectItem>
+                            <SelectItem value="all">All Status</SelectItem>
+                            {Status.map((type) => (
+                                <SelectItem key={type} value={type}>
+                                    {StatusLabels[type]}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -140,8 +143,8 @@ export default function SalesPage() {
                             <th className="text-left p-3 font-medium text-muted-foreground">Total</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Paid</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Payments</th>
+                            <th className="text-left p-3 font-medium text-muted-foreground">Payment Status</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
-                            <th className="text-left p-3 font-medium text-muted-foreground">Delivery</th>
                             <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
                         </tr>
                     </thead>
@@ -149,7 +152,6 @@ export default function SalesPage() {
                         {filtered.map((sale: SaleDto) => {
                             const c = customerMap.get(sale.customer_id);
                             const status = saleStatus(sale);
-                            const ch = apiToUiChannel(sale.channel as ApiSalesChannel);
                             return (
                                 <tr key={sale.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
                                     <td className="p-3 font-mono text-xs">{sale.reference}</td>
@@ -163,7 +165,7 @@ export default function SalesPage() {
                                             <span className="block text-xs text-muted-foreground font-mono">{c?.identifier}</span>
                                         </button>
                                     </td>
-                                    <td className="p-3 text-xs">{channelLabels[ch]}</td>
+                                    <td className="p-3 text-xs">{CHANNEL_LABELS[sale.channel]}</td>
                                     <td className="p-3">
                                         <SalesDetails
                                             customerName={c?.display_name}
@@ -188,7 +190,7 @@ export default function SalesPage() {
                                         </Badge>
                                     </td>
                                     <td className="p-3">
-                                        <DeliveryBadge status={apiToDeliveryStatus(sale.delivery_status)} />
+                                        <DeliveryBadge status={sale.delivery_status} />
                                     </td>
                                     <td className="p-3">
                                         <SalesActions sale={sale} displayName={c?.display_name || ""} status={status} />
