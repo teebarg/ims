@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, CreditCard, ShoppingCart, Banknote } from "lucide-react";
-import { CHANNEL_LABELS, Channels, Status, StatusLabels } from "@/types/customer";
+import { ChannelLabels, Channels, Status, StatusLabels } from "@/types/customer";
 import { listSales, listCustomers, type SaleDto } from "@/lib/api";
 import { currency } from "@/lib/utils";
 import SalesForm from "@/components/sales/sales-form";
@@ -97,7 +97,7 @@ export default function SalesPage() {
                             <SelectItem value="all">All Channels</SelectItem>
                             {Channels.map((type) => (
                                 <SelectItem key={type} value={type}>
-                                    {CHANNEL_LABELS[type]}
+                                    {ChannelLabels[type]}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -165,7 +165,7 @@ export default function SalesPage() {
                                             <span className="block text-xs text-muted-foreground font-mono">{c?.identifier}</span>
                                         </button>
                                     </td>
-                                    <td className="p-3 text-xs">{CHANNEL_LABELS[sale.channel]}</td>
+                                    <td className="p-3 text-xs">{ChannelLabels[sale.channel]}</td>
                                     <td className="p-3">
                                         <SalesDetails
                                             customerName={c?.display_name}

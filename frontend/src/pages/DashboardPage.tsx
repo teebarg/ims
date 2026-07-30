@@ -15,7 +15,7 @@ import {
     listCategories,
     type CategoryDto,
 } from "@/lib/api";
-import { CHANNEL_LABELS } from "@/types/customer";
+import { ChannelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
 import { AlertTriangle, Banknote, Package, ShoppingCart } from "lucide-react";
 import CategoryPerformance from "@/components/dashboard/category-performance";
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                 itemsCount,
                 amount: Number(s.total_amount),
                 status: saleStatus(s),
-                channelLabel: CHANNEL_LABELS[s.channel],
+                channelLabel: ChannelLabels[s.channel],
             };
         });
     }, [sales, customerMap]);

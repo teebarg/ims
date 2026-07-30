@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, ArrowRight, ArrowLeft, Check, Trash2 } from "lucide-react";
-import { CHANNEL_LABELS, Channels, ChannelType, SaleLineItem } from "@/types/customer";
+import { ChannelLabels, Channels, ChannelType, SaleLineItem } from "@/types/customer";
 import { listCustomers, createSale, createPayment, fetchApi } from "@/lib/api";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import { ConfirmDrawer } from "@/components/ui/confirm-drawer";
@@ -255,7 +255,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                                                 <SelectItem value="all">All Types</SelectItem>
                                                 {Channels.map((type) => (
                                                     <SelectItem key={type} value={type}>
-                                                        {CHANNEL_LABELS[type]}
+                                                        {ChannelLabels[type]}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -376,7 +376,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Channel</span>
-                                        <span>{CHANNEL_LABELS[saleChannel]}</span>
+                                        <span>{ChannelLabels[saleChannel]}</span>
                                     </div>
                                 </div>
                                 <div>

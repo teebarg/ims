@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { CHANNEL_LABELS } from "@/types/customer";
+import { ChannelLabels } from "@/types/customer";
 import { type SaleDto } from "@/lib/api";
 import { currency, formatDate } from "@/lib/utils";
 import SalesDetails from "@/components/sales/sales-details";
@@ -44,7 +44,7 @@ export default function MobileSaleCard({ sale, c_display_name, c_identifier }: {
                     <SalePaymentsDetails saleId={sale.id} customerId={sale.customer_id} saleTotal={sale.total_amount} />
                 </div>
                 <span className="text-xs text-muted-foreground font-mono">
-                    {c_identifier} · {CHANNEL_LABELS[sale.channel]}
+                    {c_identifier} · {ChannelLabels[sale.channel]}
                 </span>
             </div>
 

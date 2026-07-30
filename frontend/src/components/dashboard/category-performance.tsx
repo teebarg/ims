@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { listSales, getAnalyticsSummary, listCategories, type CategoryDto } from "@/lib/api";
-import { CHANNEL_LABELS, ChannelType } from "@/types/customer";
+import { ChannelLabels, ChannelType } from "@/types/customer";
 import { currency } from "@/lib/utils";
 
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
@@ -84,11 +84,11 @@ export default function CategoryPerformance() {
             byChannel[ch].revenue += Number(s.total_amount);
         });
         return [
-            { channel: CHANNEL_LABELS.SHOP, sales: byChannel.SHOP.sales, revenue: byChannel.SHOP.revenue },
-            { channel: CHANNEL_LABELS.TIKTOK, sales: byChannel.TIKTOK.sales, revenue: byChannel.TIKTOK.revenue },
-            { channel: CHANNEL_LABELS.FACEBOOK, sales: byChannel.FACEBOOK.sales, revenue: byChannel.FACEBOOK.revenue },
-            { channel: CHANNEL_LABELS.INSTAGRAM, sales: byChannel.INSTAGRAM.sales, revenue: byChannel.INSTAGRAM.revenue },
-            { channel: CHANNEL_LABELS.WEBSITE, sales: byChannel.WEBSITE.sales, revenue: byChannel.WEBSITE.revenue },
+            { channel: ChannelLabels.SHOP, sales: byChannel.SHOP.sales, revenue: byChannel.SHOP.revenue },
+            { channel: ChannelLabels.TIKTOK, sales: byChannel.TIKTOK.sales, revenue: byChannel.TIKTOK.revenue },
+            { channel: ChannelLabels.FACEBOOK, sales: byChannel.FACEBOOK.sales, revenue: byChannel.FACEBOOK.revenue },
+            { channel: ChannelLabels.INSTAGRAM, sales: byChannel.INSTAGRAM.sales, revenue: byChannel.INSTAGRAM.revenue },
+            { channel: ChannelLabels.WEBSITE, sales: byChannel.WEBSITE.sales, revenue: byChannel.WEBSITE.revenue },
         ];
     }, [sales]);
 

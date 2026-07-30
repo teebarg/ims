@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, Banknote, CreditCard, Loader2, ShoppingCart, Wallet } from "lucide-react";
-import { CHANNEL_LABELS, Channels } from "@/types/customer";
+import { ChannelLabels, Channels } from "@/types/customer";
 import { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { getCustomerProfile, createPayment } from "@/lib/api";
@@ -61,7 +61,7 @@ export default function CustomerProfilePage() {
 
     const channelData = Channels
         .map((channel) => ({
-            name: CHANNEL_LABELS[channel],
+            name: ChannelLabels[channel],
             value: sales
                 .filter((s) => s.channel === channel)
                 .reduce((sum, s) => sum + Number(s.total_amount), 0),
@@ -127,7 +127,7 @@ export default function CustomerProfilePage() {
                 <div className="flex-1">
                     <h1 className="page-header">{customer.display_name}</h1>
                     <p className="page-subtitle font-mono">
-                        {customer.identifier} · {CHANNEL_LABELS[customer.identifier_type]}
+                        {customer.identifier} · {ChannelLabels[customer.identifier_type]}
                     </p>
                 </div>
                 <SalesForm

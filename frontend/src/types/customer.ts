@@ -9,7 +9,7 @@ export const Channels = [
 
 export type ChannelType = (typeof Channels)[number]
 
-export const CHANNEL_LABELS: Record<ChannelType, string> = {
+export const ChannelLabels: Record<ChannelType, string> = {
     SHOP: "Shop",
     TIKTOK: "TikTok",
     FACEBOOK: "Facebook",

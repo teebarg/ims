@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCustomer, updateCustomer, type CustomerDto } from "@/lib/api";
-import { CHANNEL_LABELS, Channels } from "@/types/customer";
+import { ChannelLabels, Channels } from "@/types/customer";
 
 const CustomerFormSchema = z.object({
     display_name: z.string().min(1, "Display name is required"),
@@ -147,7 +147,7 @@ const CustomerForm = forwardRef<object, Props>(({ type = "create", onClose, curr
                                     <SelectContent>
                                         {Channels.map((type) => (
                                             <SelectItem key={type} value={type}>
-                                                {CHANNEL_LABELS[type]}
+                                                {ChannelLabels[type]}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

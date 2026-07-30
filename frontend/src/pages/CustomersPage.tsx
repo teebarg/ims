@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Users, AlertCircle, Banknote } from "lucide-react";
-import { CHANNEL_LABELS, Channels, ChannelType } from "@/types/customer";
+import { ChannelLabels, Channels, ChannelType } from "@/types/customer";
 import { listCustomers } from "@/lib/api";
 import CustomerActions from "@/components/customers/customer-actions";
 import SalesForm from "@/components/sales/sales-form";
@@ -128,7 +128,7 @@ export default function CustomersPage() {
                         <SelectItem value="all">All Types</SelectItem>
                         {Channels.map((type) => (
                             <SelectItem key={type} value={type}>
-                                {CHANNEL_LABELS[type]}
+                                {ChannelLabels[type]}
                             </SelectItem>
                         ))}
                     </SelectContent>
@@ -161,7 +161,7 @@ export default function CustomersPage() {
                                     <td className="p-3 font-mono text-xs">{c.identifier}</td>
                                     <td className="p-3">
                                         <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                            {CHANNEL_LABELS[c.identifierType]}
+                                            {ChannelLabels[c.identifierType]}
                                         </Badge>
                                     </td>
                                     <td className="p-3 font-medium">{currency(c.totalPurchases)}</td>
@@ -195,7 +195,7 @@ export default function CustomersPage() {
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <Badge variant="outline" className={`text-xs ${typeIcon(c.identifierType)}`}>
-                                        {CHANNEL_LABELS[c.identifierType]}
+                                        {ChannelLabels[c.identifierType]}
                                     </Badge>
                                     {dto && <CustomerActions customer={dto} />}
                                 </div>
