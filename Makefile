@@ -28,10 +28,6 @@ build:
 up:
 	$(DOCKER_COMPOSE) up
 
-.PHONY: up-d
-up-d:
-	$(DOCKER_COMPOSE) up -d
-
 .PHONY: stop
 stop:
 	$(DOCKER_COMPOSE) stop
@@ -83,3 +79,15 @@ run-local:
 		--env-file backend/.env \
 		$(DOCKER_USER)/$(APP_NAME)-backend:$(IMAGE_TAG) \
 		uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# Frontend
+.PHONY: build-frontend
+build-frontend:
+	@cd frontend; npm run build
+
+.PHONY: test-frontend
+test-frontend:
+	@cd frontend; node --env-file=.env .output/server/index.mjs
+
+.PHONY: run-frontend
+run-frontend: build-frontend test-frontend

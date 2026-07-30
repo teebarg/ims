@@ -1,17 +1,43 @@
-export type IdentifierType = "tiktok" | "instagram" | "street" | "website";
-export const CHANNELS = {
-    SHOP: "shop",
-    TIKTOK: "tiktok",
-    INSTAGRAM: "instagram",
-    WEBSITE: "website",
-} as const;
 
-export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS];
+export const Channels = [
+    "SHOP",
+    "TIKTOK",
+    "FACEBOOK",
+    "INSTAGRAM",
+    "WEBSITE",
+] as const;
+
+export type ChannelType = (typeof Channels)[number]
+
+export const ChannelLabels: Record<ChannelType, string> = {
+    SHOP: "Shop",
+    TIKTOK: "TikTok",
+    FACEBOOK: "Facebook",
+    INSTAGRAM: "Instagram",
+    WEBSITE: "Website",
+};
+
+
+export const Status = [
+    "PROCESSING",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+] as const;
+
+export type StatusType = (typeof Status)[number]
+
+export const StatusLabels: Record<StatusType, string> = {
+    PROCESSING: "Processing",
+    OUT_FOR_DELIVERY: "Out for delivery",
+    DELIVERED: "Delivered",
+};
+
+export type SaleStatus = "paid" | "partial" | "unpaid";
 
 export interface Customer {
     id: string;
     displayName: string;
-    identifierType: IdentifierType;
+    identifierType: ChannelType;
     identifier: string;
     phone?: string;
     totalPurchases: number;
@@ -32,7 +58,7 @@ export interface Sale {
     items: SaleLineItem[];
     total: number;
     paid: number;
-    channel: Channel;
+    channel: ChannelType;
     status: "paid" | "partial" | "unpaid";
 }
 
@@ -41,47 +67,4 @@ export interface Payment {
     saleId: string;
     date: string;
     amount: number;
-}
-
-export const identifierTypeLabels: Record<IdentifierType, string> = {
-    tiktok: "TikTok",
-    instagram: "Instagram",
-    street: "Shop",
-    website: "Website",
-};
-
-export const identifierTypePrefixes: Record<IdentifierType, string> = {
-    tiktok: "@",
-    instagram: "@",
-    street: "",
-    website: "",
-};
-
-export const channelLabels: Record<string, string> = {
-    shop: "Shop",
-    tiktok: "TikTok",
-    instagram: "Instagram",
-    website: "Website",
-};
-
-export type DeliveryStatus = "processing" | "out_for_delivery" | "delivered";
-export type SaleStatus = "paid" | "partial" | "unpaid";
-
-export const deliveryStatusLabels: Record<DeliveryStatus, string> = {
-    processing: "Processing",
-    out_for_delivery: "Out for Delivery",
-    delivered: "Delivered",
-};
-
-export function apiToDeliveryStatus(status?: string | null): DeliveryStatus {
-    switch (status) {
-        case "OUT_FOR_DELIVERY":
-        case "out_for_delivery":
-            return "out_for_delivery";
-        case "DELIVERED":
-        case "delivered":
-            return "delivered";
-        default:
-            return "processing";
-    }
 }

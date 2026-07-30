@@ -1,4 +1,5 @@
 import { getToken } from "@clerk/react";
+import { ChannelType, StatusType } from "@/types/customer";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://niyi.dev";
 
@@ -67,7 +68,6 @@ export function createBale(input: CreateBaleInput) {
 }
 
 // ---- Categories ----
-
 export interface CategoryDto {
     id: number;
     name: string;
@@ -91,13 +91,11 @@ export function createCategory(input: CreateCategoryInput) {
 }
 
 // ---- Customers ----
-export type ApiIdentifierType = "TIKTOK" | "INSTAGRAM" | "STREET" | "WEBSITE";
-
 export interface CustomerDto {
     id: string;
     display_name: string;
     identifier: string;
-    identifier_type: ApiIdentifierType;
+    identifier_type: ChannelType;
     phone: string | null;
     created_at: string;
     updated_at: string;
@@ -110,7 +108,7 @@ export interface CustomerDto {
 export interface CreateCustomerInput {
     display_name: string;
     identifier: string;
-    identifier_type: ApiIdentifierType;
+    identifier_type: ChannelType;
     phone?: string | null;
 }
 
@@ -156,8 +154,6 @@ export function getCustomerProfile(id: string) {
     return fetchApi<CustomerProfileDto>(`/customers/${id}/profile`);
 }
 
-export type ApiSalesChannel = "SHOP" | "TIKTOK" | "INSTAGRAM" | "WEBSITE";
-
 export interface SaleItemDto {
     id: number;
     category_id: number;
@@ -169,7 +165,7 @@ export interface SaleDto {
     id: number;
     reference: string;
     customer_id: string;
-    channel: ApiSalesChannel | string;
+    channel: ChannelType;
     user_id: string | null;
     sale_date: string;
     created_at: string;
@@ -178,7 +174,7 @@ export interface SaleDto {
     balance: number;
     items: SaleItemDto[];
 
-    delivery_status?: string | null;
+    delivery_status?: StatusType;
     delivery_assigned_to?: string | null;
     delivery_notes?: string | null;
     out_for_delivery_at?: string | null;
@@ -191,7 +187,7 @@ export function listSales() {
 
 export interface CreateSaleInput {
     customer_id: string;
-    channel: ApiSalesChannel | string;
+    channel: ChannelType;
     user_id?: string | null;
     sale_date?: string | null;
     items: Array<{
@@ -209,7 +205,7 @@ export function createSale(input: CreateSaleInput) {
 }
 
 export interface UpdateSaleDeliveryInput {
-    delivery_status?: string;
+    delivery_status?: StatusType;
     delivery_assigned_to?: string | null;
     delivery_notes?: string | null;
 }

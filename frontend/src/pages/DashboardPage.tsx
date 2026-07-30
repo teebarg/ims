@@ -13,15 +13,14 @@ import {
     getAnalyticsTrends,
     getAnalyticsStock,
     listCategories,
-    type ApiSalesChannel,
     type CategoryDto,
 } from "@/lib/api";
-import { channelLabels } from "@/types/customer";
+import { ChannelLabels } from "@/types/customer";
 import { currency } from "@/lib/utils";
 import { AlertTriangle, Banknote, Package, ShoppingCart } from "lucide-react";
 import CategoryPerformance from "@/components/dashboard/category-performance";
 import SalesDetails from "@/components/sales/sales-details";
-import { apiToUiChannel, saleStatus } from "@/lib/sales";
+import { saleStatus } from "@/lib/sales";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const PIE_COLORS = ["hsl(25, 75%, 47%)", "hsl(152, 60%, 40%)", "hsl(38, 92%, 50%)", "hsl(30, 10%, 46%)", "hsl(220, 70%, 50%)"];
@@ -151,7 +150,7 @@ export default function DashboardPage() {
                 itemsCount,
                 amount: Number(s.total_amount),
                 status: saleStatus(s),
-                channelLabel: channelLabels[apiToUiChannel(s.channel as ApiSalesChannel)],
+                channelLabel: ChannelLabels[s.channel],
             };
         });
     }, [sales, customerMap]);
@@ -265,68 +264,62 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            {/* Category Detail Table + Channel */}
             <CategoryPerformance />
 
-            {/* Recent Transactions */}
-            <Card>
-                <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="text-base font-heading">Recent Transactions</CardTitle>
-                        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("/sales")}>
-                            View All
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b text-muted-foreground">
-                                    <th className="text-left py-2 font-medium">ID</th>
-                                    <th className="text-left py-2 font-medium">Customer</th>
-                                    <th className="text-left py-2 font-medium hidden sm:table-cell">Categories</th>
-                                    <th className="text-left py-2 font-medium">Amount</th>
-                                    <th className="text-left py-2 font-medium">Status</th>
+            <div className="card">
+                <div className="flex items-center justify-between mb-2">
+                    <CardTitle className="text-base font-heading">Recent Transactions</CardTitle>
+                    <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("/sales")}>
+                        View All
+                    </Button>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b text-muted-foreground">
+                                <th className="text-left py-2 font-medium">ID</th>
+                                <th className="text-left py-2 font-medium">Customer</th>
+                                <th className="text-left py-2 font-medium hidden sm:table-cell">Categories</th>
+                                <th className="text-left py-2 font-medium">Amount</th>
+                                <th className="text-left py-2 font-medium">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentTransactions.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="py-6 text-center text-muted-foreground text-sm">
+                                        No transactions yet
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {recentTransactions.length === 0 && (
-                                    <tr>
-                                        <td colSpan={5} className="py-6 text-center text-muted-foreground text-sm">
-                                            No transactions yet
-                                        </td>
-                                    </tr>
-                                )}
-                                {recentTransactions.map((txn) => (
-                                    <tr key={txn.id} className="border-b last:border-0 hover:bg-muted/20">
-                                        <td className="py-2.5 font-mono text-xs">{txn.id}</td>
-                                        <td className="py-2.5 cursor-pointer" onClick={() => txn.customerId && navigate(`/customers/${txn.customerId}`)}>
-                                            {txn.customerName ?? "Unknown"}
-                                        </td>
-                                        <td className="py-2.5 hidden sm:table-cell">
-                                            <SalesDetails
-                                                label={`${txn.itemsCount} item${txn.itemsCount === 1 ? "" : "s"}`}
-                                                items={txn.items}
-                                                total={txn.amount}
-                                            />
-                                        </td>
-                                        <td className="py-2.5 font-medium">{currency(txn.amount)}</td>
-                                        <td className="py-2.5">
-                                            <Badge
-                                                variant={txn.status === "paid" ? "success" : txn.status === "partial" ? "default" : "destructive"}
-                                                className="text-xs font-normal"
-                                            >
-                                                {txn.status}
-                                            </Badge>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
-            </Card>
+                            )}
+                            {recentTransactions.map((txn) => (
+                                <tr key={txn.id} className="border-b last:border-0 hover:bg-muted/20">
+                                    <td className="py-2.5 font-mono text-xs">{txn.id}</td>
+                                    <td className="py-2.5 cursor-pointer" onClick={() => txn.customerId && navigate(`/customers/${txn.customerId}`)}>
+                                        {txn.customerName ?? "Unknown"}
+                                    </td>
+                                    <td className="py-2.5 hidden sm:table-cell">
+                                        <SalesDetails
+                                            label={`${txn.itemsCount} item${txn.itemsCount === 1 ? "" : "s"}`}
+                                            items={txn.items}
+                                            total={txn.amount}
+                                        />
+                                    </td>
+                                    <td className="py-2.5 font-medium">{currency(txn.amount)}</td>
+                                    <td className="py-2.5">
+                                        <Badge
+                                            variant={txn.status === "paid" ? "success" : txn.status === "partial" ? "default" : "destructive"}
+                                            className="text-xs font-normal"
+                                        >
+                                            {txn.status}
+                                        </Badge>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

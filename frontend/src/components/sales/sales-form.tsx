@@ -6,29 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, ArrowRight, ArrowLeft, Check, Trash2 } from "lucide-react";
-import { channelLabels, SaleLineItem } from "@/types/customer";
-import { listCustomers, createSale, createPayment, type ApiSalesChannel, fetchApi } from "@/lib/api";
+import { ChannelLabels, Channels, ChannelType, SaleLineItem } from "@/types/customer";
+import { listCustomers, createSale, createPayment, fetchApi } from "@/lib/api";
 import SheetDrawer from "@/components/ui/sheet-drawer";
 import { ConfirmDrawer } from "@/components/ui/confirm-drawer";
 import { CustomerForm } from "@/components/customers/customer-form";
 import { toast } from "sonner";
 import { currency } from "@/lib/utils";
 import { Category } from "@/schema/category";
-import { Channel } from "@/types/customer";
 import CategoryInlineForm from "../categories/category-inline-form";
-
-function uiToApiChannel(ch: Channel): ApiSalesChannel {
-    switch (ch) {
-        case "shop":
-            return "SHOP";
-        case "tiktok":
-            return "TIKTOK";
-        case "instagram":
-            return "INSTAGRAM";
-        case "website":
-            return "WEBSITE";
-    }
-}
 
 const emptyLineItem = (): SaleLineItem => ({ category: "", quantity: 1, amount: 0 });
 
@@ -50,7 +36,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
 
     // Step 2: Line items
     const [lineItems, setLineItems] = useState<SaleLineItem[]>([emptyLineItem()]);
-    const [saleChannel, setSaleChannel] = useState<Channel>("shop");
+    const [saleChannel, setSaleChannel] = useState<ChannelType>("SHOP");
     const [saleDate, setSaleDate] = useState(new Date().toISOString().slice(0, 10));
 
     // Step 3: Payment
@@ -84,7 +70,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
         setSelectedCustomerId(null);
         setCustomerSearch("");
         setLineItems([emptyLineItem()]);
-        setSaleChannel("shop");
+        setSaleChannel("SHOP");
         setSaleDate(new Date().toISOString().slice(0, 10));
         setSalePaid("");
     };
@@ -119,7 +105,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
             const categoryByName = new Map(categories.map((c) => [c.name, c.id]));
             const payload = {
                 customer_id: selectedCustomerId,
-                channel: uiToApiChannel(saleChannel),
+                channel: saleChannel,
                 sale_date: saleDate || null,
                 items: lineItems.map((li) => ({
                     category_id: (() => {
@@ -261,15 +247,17 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="min-w-0">
                                         <Label className="text-xs">Channel</Label>
-                                        <Select value={saleChannel} onValueChange={(v: Channel) => setSaleChannel(v)}>
+                                        <Select value={saleChannel} onValueChange={(v: ChannelType) => setSaleChannel(v)}>
                                             <SelectTrigger className="h-9">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="shop">Shop</SelectItem>
-                                                <SelectItem value="tiktok">Tiktok</SelectItem>
-                                                <SelectItem value="instagram">Instagram</SelectItem>
-                                                <SelectItem value="website">Website</SelectItem>
+                                                <SelectItem value="all">All Types</SelectItem>
+                                                {Channels.map((type) => (
+                                                    <SelectItem key={type} value={type}>
+                                                        {ChannelLabels[type]}
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -388,7 +376,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Channel</span>
-                                        <span>{channelLabels[saleChannel]}</span>
+                                        <span>{ChannelLabels[saleChannel]}</span>
                                     </div>
                                 </div>
                                 <div>

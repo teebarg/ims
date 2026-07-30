@@ -9,7 +9,7 @@ import { ConfirmDrawer } from "@/components/ui/confirm-drawer";
 import DeliveryForm from "./delivery-form";
 import PaymentFormTrigger from "./payment-form-trigger";
 import SalesEditForm from "./sales-edit-form";
-import { apiToDeliveryStatus, type DeliveryStatus, SaleStatus } from "@/types/customer";
+import { SaleStatus } from "@/types/customer";
 
 interface SalesActionsProps {
     sale: SaleDto;
@@ -23,8 +23,6 @@ export default function SalesActions({ sale, displayName, status }: SalesActions
     const editState = useOverlayTriggerState({});
     const deleteState = useOverlayTriggerState({});
     const queryClient = useQueryClient();
-
-    const deliveryStatus: DeliveryStatus = apiToDeliveryStatus(sale.delivery_status);
 
     const deliveryMutation = useMutation({
         mutationFn: () =>
@@ -69,7 +67,7 @@ export default function SalesActions({ sale, displayName, status }: SalesActions
                 <SalesEditForm sale={sale} displayName={displayName} onClose={editState.close} />
             </SheetDrawer>
             {status !== "paid" && <PaymentFormTrigger sale={sale} displayName={displayName} status={status} />}
-            {deliveryStatus === "processing" && (
+            {sale.delivery_status === "PROCESSING" && (
                 <SheetDrawer
                     open={deliveryState.isOpen}
                     onOpenChange={deliveryState.setOpen}
@@ -83,7 +81,7 @@ export default function SalesActions({ sale, displayName, status }: SalesActions
                     <DeliveryForm sale={sale} displayName={displayName} onClose={deliveryState.close} status={status} />
                 </SheetDrawer>
             )}
-            {deliveryStatus === "out_for_delivery" && (
+            {sale.delivery_status === "OUT_FOR_DELIVERY" && (
                 <ConfirmDrawer
                     open={deliveredState.isOpen}
                     onOpenChange={deliveredState.setOpen}

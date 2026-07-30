@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
 from uuid import UUID
+from app.models.enums import Channel
 
 from pydantic import BaseModel, Field
 
@@ -11,17 +11,10 @@ from app.schemas.payment import PaymentRead
 from app.schemas.sale import SaleRead
 
 
-class IdentifierType(str, Enum):
-    TIKTOK = "TIKTOK"
-    INSTAGRAM = "INSTAGRAM"
-    STREET = "STREET"
-    WEBSITE = "WEBSITE"
-
-
 class CustomerBase(BaseModel):
     display_name: str = Field(..., max_length=255)
     identifier: str = Field(..., max_length=255)
-    identifier_type: IdentifierType
+    identifier_type: Channel
     phone: str | None = Field(default=None, max_length=50)
 
 

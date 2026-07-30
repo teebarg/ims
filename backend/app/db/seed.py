@@ -27,7 +27,7 @@ def seed():
         additional_customers = [
             {"identifier": "tiktok_user", "identifier_type": "TIKTOK", "display_name": "Tiktok Customer"},
             {"identifier": "insta_user", "identifier_type": "INSTAGRAM", "display_name": "Instagram Customer"},
-            {"identifier": "street_user", "identifier_type": "STREET", "display_name": "Street Customer"},
+            {"identifier": "shop_user", "identifier_type": "SHOP", "display_name": "Shop Customer"},
             {"identifier": "web_user", "identifier_type": "WEBSITE", "display_name": "Website Customer"},
         ]
         customers = [walkin]
@@ -62,17 +62,17 @@ def seed():
             ("SALE001", datetime(2026, 2, 1, tzinfo=timezone.utc), Decimal("10000.00"), "walkin"),
             ("SALE002", datetime(2026, 3, 1, tzinfo=timezone.utc), Decimal("20000.00"), "tiktok_user"),
             ("SALE003", datetime(2026, 1, 15, tzinfo=timezone.utc), Decimal("15000.00"), "insta_user"),
-            ("SALE004", datetime(2026, 4, 10, tzinfo=timezone.utc), Decimal("25000.00"), "street_user"),
+            ("SALE004", datetime(2026, 4, 10, tzinfo=timezone.utc), Decimal("25000.00"), "shop_user"),
             ("SALE005", datetime(2026, 5, 5, tzinfo=timezone.utc), Decimal("18000.00"), "web_user"),
             ("SALE006", datetime(2026, 1, 20, tzinfo=timezone.utc), Decimal("12000.00"), "walkin"),
             ("SALE007", datetime(2026, 2, 15, tzinfo=timezone.utc), Decimal("22000.00"), "tiktok_user"),
             ("SALE008", datetime(2026, 3, 10, tzinfo=timezone.utc), Decimal("17000.00"), "insta_user"),
-            ("SALE009", datetime(2026, 4, 5, tzinfo=timezone.utc), Decimal("19000.00"), "street_user"),
+            ("SALE009", datetime(2026, 4, 5, tzinfo=timezone.utc), Decimal("19000.00"), "shop_user"),
             ("SALE010", datetime(2026, 5, 10, tzinfo=timezone.utc), Decimal("21000.00"), "web_user"),
             ("SALE011", datetime(2026, 1, 25, tzinfo=timezone.utc), Decimal("16000.00"), "walkin"),
             ("SALE012", datetime(2026, 2, 20, tzinfo=timezone.utc), Decimal("14000.00"), "tiktok_user"),
             ("SALE013", datetime(2026, 3, 15, tzinfo=timezone.utc), Decimal("23000.00"), "insta_user"),
-            ("SALE014", datetime(2026, 4, 20, tzinfo=timezone.utc), Decimal("20000.00"), "street_user"),
+            ("SALE014", datetime(2026, 4, 20, tzinfo=timezone.utc), Decimal("20000.00"), "shop_user"),
             ("SALE015", datetime(2026, 5, 15, tzinfo=timezone.utc), Decimal("24000.00"), "web_user"),
         ]
         for ref, date, amount, cust_key in sales_data:
