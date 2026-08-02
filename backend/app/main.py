@@ -43,6 +43,7 @@ app.add_api_route(
     name="get_stock",
 )
 
+@app.head("/health", tags=["health"])
 @app.get("/health", tags=["health"])
 def health_check() -> dict:
     return {"status": "ok"}
