@@ -14,6 +14,7 @@ class SaleItem(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"), index=True)
 
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    unit_price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
 
     sale: Mapped["Sale"] = relationship("Sale", back_populates="items")

@@ -22,6 +22,7 @@ fileConfig(config.config_file_name)
 # from app.models import SQLModel  # noqa
 from app.core.config import settings # noqa
 from app.db.base import Base
+from app import models  # noqa: F401
 
 # target_metadata = SQLModel.metadata
 target_metadata = Base.metadata
