@@ -1,6 +1,6 @@
 from collections import defaultdict
-from decimal import Decimal
 from datetime import date, datetime, timezone
+from decimal import Decimal
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
@@ -11,7 +11,13 @@ from app.models.inventory import InventoryStock
 from app.models.payment import Payment
 from app.models.sale import Sale
 from app.models.sale_item import SaleItem
-from app.schemas.sale import SaleCreate, SaleDeliveryUpdate, SaleItemRead, SaleItemsUpdate, SaleRead
+from app.schemas.sale import (
+    SaleCreate,
+    SaleDeliveryUpdate,
+    SaleItemRead,
+    SaleItemsUpdate,
+    SaleRead,
+)
 
 
 def _compute_payment_totals(db: Session, sale_ids: list[int]) -> dict[int, Decimal]:
@@ -26,7 +32,9 @@ def _compute_payment_totals(db: Session, sale_ids: list[int]) -> dict[int, Decim
     return {sale_id: Decimal(total) for sale_id, total in rows}
 
 
-def _load_items_for_sales(db: Session, sale_ids: list[int]) -> dict[int, list[SaleItem]]:
+def _load_items_for_sales(
+    db: Session, sale_ids: list[int]
+) -> dict[int, list[SaleItem]]:
     if not sale_ids:
         return {}
     stmt = select(SaleItem).where(SaleItem.sale_id.in_(sale_ids))
@@ -47,15 +55,15 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
 
     category_ids = {item.category_id for item in sale_in.items}
     existing_category_ids = set(
-        db.scalars(
-            select(Category.id).where(Category.id.in_(category_ids))
-        ).all()
+        db.scalars(select(Category.id).where(Category.id.in_(category_ids))).all()
     )
     missing = category_ids - existing_category_ids
     if missing:
         raise ValueError(f"Unknown category IDs: {sorted(missing)}")
 
-    total_amount = sum(Decimal(item.amount) for item in sale_in.items)
+    total_amount = sum(
+        Decimal(item.quantity * item.unit_price) for item in sale_in.items
+    )
 
     created_items: list[SaleItem] = []
     try:
@@ -77,7 +85,8 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
                 sale_id=sale.id,
                 category_id=item_in.category_id,
                 quantity=item_in.quantity,
-                amount=Decimal(item_in.amount),
+                unit_price=item_in.unit_price,
+                amount=Decimal(item_in.quantity * item_in.unit_price),
             )
             db.add(item)
             created_items.append(item)
@@ -104,6 +113,7 @@ def create_sale(db: Session, sale_in: SaleCreate) -> SaleRead:
             id=item.id,
             category_id=item.category_id,
             quantity=item.quantity,
+            unit_price=item.unit_price,
             amount=item.amount,
         )
         for item in created_items
@@ -152,6 +162,7 @@ def enrich_sales_with_payments(db: Session, sales: list[Sale]) -> list[SaleRead]
                 id=item.id,
                 category_id=item.category_id,
                 quantity=item.quantity,
+                unit_price=item.unit_price,
                 amount=item.amount,
             )
             for item in items
@@ -193,13 +204,9 @@ def update_sale_items(db: Session, sale_id: int, items_in: SaleItemsUpdate) -> S
         raise ValueError("Sale must contain at least one item")
 
     category_ids = {item.category_id for item in items_in.items}
-    if len(category_ids) != len(items_in.items):
-        raise ValueError("Duplicate categories are not allowed")
 
     existing_category_ids = set(
-        db.scalars(
-            select(Category.id).where(Category.id.in_(category_ids))
-        ).all()
+        db.scalars(select(Category.id).where(Category.id.in_(category_ids))).all()
     )
     missing = category_ids - existing_category_ids
     if missing:
@@ -214,7 +221,7 @@ def update_sale_items(db: Session, sale_id: int, items_in: SaleItemsUpdate) -> S
     if invalid_ids:
         raise ValueError(f"Invalid item IDs for this sale: {sorted(invalid_ids)}")
 
-    new_total = sum(Decimal(item.amount) for item in items_in.items)
+    new_total = sum(Decimal(item.unit_price * item.quantity) for item in items_in.items)
     total_paid = _compute_payment_totals(db, [sale_id]).get(sale_id, Decimal(0))
     if new_total < total_paid:
         raise ValueError(
@@ -251,14 +258,16 @@ def update_sale_items(db: Session, sale_id: int, items_in: SaleItemsUpdate) -> S
                 existing = existing_by_id[item_in.id]
                 existing.category_id = item_in.category_id
                 existing.quantity = item_in.quantity
-                existing.amount = Decimal(item_in.amount)
+                existing.unit_price = item_in.unit_price
+                existing.amount = Decimal(item_in.quantity * item_in.unit_price)
             else:
                 db.add(
                     SaleItem(
                         sale_id=sale.id,
                         category_id=item_in.category_id,
                         quantity=item_in.quantity,
-                        amount=Decimal(item_in.amount),
+                        unit_price=item_in.unit_price,
+                        amount=Decimal(item_in.quantity * item_in.unit_price),
                     )
                 )
 
@@ -303,4 +312,3 @@ def update_sale_delivery(
     db.refresh(sale)
     sales_read = enrich_sales_with_payments(db, [sale])
     return sales_read[0]
-

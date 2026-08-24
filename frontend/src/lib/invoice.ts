@@ -5,7 +5,7 @@ export interface OutstandingSale {
     id: string | number;
     reference?: string;
     date: string;
-    items: { name: string; quantity: number; amount: number }[];
+    items: { name: string; quantity: number; unit_price: number; amount: number }[];
     total: number;
     paid: number;
     balance: number;
@@ -21,6 +21,7 @@ export function toOutstandingSales(sales: SaleDto[], categoryNameById: Map<numbe
             items: (s.items || []).map((item) => ({
                 name: categoryNameById.get(item.category_id) ?? `Item ${item.category_id}`,
                 quantity: item.quantity,
+                unit_price: item.unit_price,
                 amount: Number(item.amount),
             })),
             total: Number(s.total_amount),
@@ -71,7 +72,7 @@ export function buildInvoiceMessage({ items, categoryNameById, total, customerNa
 }): string {
     const lines = items.map((item) => {
         const name = categoryNameById.get(item.category_id) ?? `Category ${item.category_id}`;
-        return `${name} x${item.quantity} — ${currency(item.amount)}`;
+        return `${name} x${item.quantity} *  ${item.unit_price} — ${currency(item.amount)}`;
     });
 
     return [

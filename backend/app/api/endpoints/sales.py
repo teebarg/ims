@@ -15,7 +15,6 @@ from app.services.sales import (
     update_sale_items,
 )
 
-
 router = APIRouter()
 
 
@@ -39,7 +38,9 @@ def get_sale_by_id(
 def record_sale(
     sale_in: SaleCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(
+        require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+    ),
 ) -> SaleRead:
     try:
         sale = create_sale(db, sale_in)
@@ -53,7 +54,9 @@ def update_items(
     sale_id: int,
     items_in: SaleItemsUpdate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(
+        require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+    ),
 ) -> SaleRead:
     try:
         return update_sale_items(db, sale_id, items_in)
@@ -67,7 +70,9 @@ def update_items(
 def delete_sale_endpoint(
     sale_id: int,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(
+        require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+    ),
 ) -> Message:
     try:
         delete_sale(db, sale_id)
@@ -81,11 +86,11 @@ def update_delivery(
     sale_id: int,
     delivery_in: SaleDeliveryUpdate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)),
+    _: None = Depends(
+        require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+    ),
 ) -> SaleRead:
     try:
         return update_sale_delivery(db, sale_id, delivery_in)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-
-

@@ -13,6 +13,7 @@ import CategoryInlineForm from "../categories/category-inline-form";
 interface EditLineItem {
     id?: number;
     categoryId: number | null;
+    unit_price: number;
     quantity: number;
     amount: number;
 }
@@ -23,7 +24,7 @@ interface SalesEditFormProps {
     onClose: () => void;
 }
 
-const emptyLineItem = (): EditLineItem => ({ categoryId: null, quantity: 1, amount: 0 });
+const emptyLineItem = (): EditLineItem => ({ categoryId: null, quantity: 1, unit_price: 0, amount: 0 });
 
 export default function SalesEditForm({ sale, displayName, onClose }: SalesEditFormProps) {
     const queryClient = useQueryClient();
@@ -37,12 +38,13 @@ export default function SalesEditForm({ sale, displayName, onClose }: SalesEditF
                 id: item.id,
                 categoryId: item.category_id,
                 quantity: item.quantity,
+                unit_price: item.unit_price,
                 amount: Number(item.amount),
             }))
         );
     }, [sale]);
 
-    const computedTotal = lineItems.reduce((sum, li) => sum + li.amount, 0);
+    const computedTotal = lineItems.reduce((sum, li) => sum + li.quantity * li.unit_price, 0);
     const totalItemCount = lineItems.reduce((sum, li) => sum + li.quantity, 0);
     const totalPaid = Number(sale.total_paid);
     const totalBelowPaid = computedTotal < totalPaid;
@@ -65,7 +67,7 @@ export default function SalesEditForm({ sale, displayName, onClose }: SalesEditF
                     id: li.id ?? null,
                     category_id: li.categoryId!,
                     quantity: li.quantity,
-                    amount: li.amount,
+                    unit_price: li.unit_price,
                 })),
             };
             return updateSaleItems(sale.id, payload);
@@ -83,7 +85,7 @@ export default function SalesEditForm({ sale, displayName, onClose }: SalesEditF
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex-1 overflow-auto px-4 pb-4 space-y-4">
+            <div className="flex-1 overflow-auto px-2 pb-4 space-y-4">
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1 text-sm">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Reference</span>
@@ -101,21 +103,21 @@ export default function SalesEditForm({ sale, displayName, onClose }: SalesEditF
 
                 <div className="space-y-2">
                     <Label className="text-xs">Line items</Label>
-                    <div className="grid grid-cols-[1fr_70px_90px_32px] gap-2 text-xs font-medium text-muted-foreground px-1">
+                    <div className="grid grid-cols-[1fr_60px_70px_90px_30px] gap-1 text-xs font-medium text-muted-foreground px-1">
                         <span>Category</span>
                         <span>Qty</span>
-                        <span>Amount (₦)</span>
+                        <span>Price (₦)</span>
+                        <span>Total (₦)</span>
                         <span></span>
                     </div>
                     {lineItems.map((li, i) => {
                         const selectedCategoryIds = lineItems.map((item) => item.categoryId).filter(Boolean);
 
-                        const availableCategories = categories.filter(
-                            (cat) => !selectedCategoryIds.includes(cat.id) || cat.id === li.categoryId
-                        );
+                        // const availableCategories = categories.filter((cat) => !selectedCategoryIds.includes(cat.id) || cat.id === li.categoryId);
+                        const availableCategories = categories || [];
 
                         return (
-                            <div key={li.id ?? `new-${i}`} className="grid grid-cols-[1fr_70px_90px_32px] gap-2 items-center">
+                            <div key={li.id ?? `new-${i}`} className="grid grid-cols-[1fr_60px_70px_90px_30px] gap-1 items-center">
                                 <Select
                                     value={li.categoryId ? String(li.categoryId) : ""}
                                     onValueChange={(v) => updateLineItem(i, "categoryId", Number(v))}
@@ -142,11 +144,18 @@ export default function SalesEditForm({ sale, displayName, onClose }: SalesEditF
 
                                 <Input
                                     type="number"
+                                    min={1}
+                                    className="h-9 text-xs"
+                                    value={li.unit_price || ""}
+                                    onChange={(e) => updateLineItem(i, "unit_price", Math.max(0, Number(e.target.value)))}
+                                />
+
+                                <Input
+                                    type="number"
+                                    disabled
                                     min={0}
                                     className="h-9 text-xs"
-                                    value={li.amount || ""}
-                                    onChange={(e) => updateLineItem(i, "amount", Math.max(0, Number(e.target.value)))}
-                                    placeholder="0"
+                                    value={li.quantity * li.unit_price}
                                 />
 
                                 <Button
@@ -175,21 +184,14 @@ export default function SalesEditForm({ sale, displayName, onClose }: SalesEditF
                     <span className="font-heading text-lg font-bold text-primary">{currency(computedTotal)}</span>
                 </div>
 
-                {totalBelowPaid && (
-                    <p className="text-xs text-destructive">
-                        New total cannot be less than {currency(totalPaid)} already paid.
-                    </p>
-                )}
+                {totalBelowPaid && <p className="text-xs text-destructive">New total cannot be less than {currency(totalPaid)} already paid.</p>}
             </div>
 
             <div className="sheet-footer justify-between">
                 <Button variant="outline" onClick={onClose}>
                     Cancel
                 </Button>
-                <Button
-                    onClick={() => updateMutation.mutate()}
-                    disabled={updateMutation.isPending || !lineItemsValid || totalBelowPaid}
-                >
+                <Button onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending || !lineItemsValid || totalBelowPaid}>
                     {updateMutation.isPending ? "Saving..." : "Save Changes"}
                 </Button>
             </div>

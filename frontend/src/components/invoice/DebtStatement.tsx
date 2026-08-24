@@ -25,14 +25,20 @@ const DebtStatement = forwardRef<HTMLDivElement, DebtStatementProps>(
                         <div className="text-2xl italic" style={{ fontFamily: "'Fraunces', serif", fontWeight: 600 }}>
                             {import.meta.env.VITE_APP_NAME}
                         </div>
-                        <div className="text-[10px] uppercase tracking-[0.15em] mt-1" style={{ color: TOKENS.gold, fontFamily: "'IBM Plex Mono', monospace" }}>
+                        <div
+                            className="text-[10px] uppercase tracking-[0.15em] mt-1"
+                            style={{ color: TOKENS.gold, fontFamily: "'IBM Plex Mono', monospace" }}
+                        >
                             Statement of account
                         </div>
                     </div>
 
                     <div className="border-t-2 mt-3 mb-4" style={{ borderColor: TOKENS.goldLine }} />
 
-                    <div className="flex justify-between text-[10px] uppercase tracking-wide mb-5" style={{ color: TOKENS.inkSoft, fontFamily: "'IBM Plex Mono', monospace" }}>
+                    <div
+                        className="flex justify-between text-[10px] uppercase tracking-wide mb-5"
+                        style={{ color: TOKENS.inkSoft, fontFamily: "'IBM Plex Mono', monospace" }}
+                    >
                         <span>{customerName ? `For ${customerName}` : "Customer"}</span>
                         <span>As at {asAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</span>
                     </div>
@@ -41,21 +47,33 @@ const DebtStatement = forwardRef<HTMLDivElement, DebtStatementProps>(
                     <div className="space-y-4 mb-4">
                         {sales.map((sale) => (
                             <div key={sale.id}>
-                                <div className="text-[10px] uppercase tracking-wide mb-1.5" style={{ color: TOKENS.gold, fontFamily: "'IBM Plex Mono', monospace" }}>
+                                <div
+                                    className="text-[10px] uppercase tracking-wide mb-1.5"
+                                    style={{ color: TOKENS.gold, fontFamily: "'IBM Plex Mono', monospace" }}
+                                >
                                     Ref {sale.reference ?? sale.id} · {sale.date}
                                 </div>
                                 <div className="space-y-1 mb-1.5" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
                                     {sale.items.map((item, i) => (
                                         <div key={i} className="flex items-baseline text-xs gap-2">
-                                            <span className="whitespace-nowrap">{item.name} x{item.quantity}</span>
-                                            <span className="flex-1 border-b border-dotted" style={{ borderColor: TOKENS.inkSoft, transform: "translateY(-3px)" }} />
+                                            <span className="whitespace-nowrap">
+                                                {item.name} x{item.quantity} @ {currency(item.unit_price)}
+                                            </span>
+                                            <span
+                                                className="flex-1 border-b border-dotted"
+                                                style={{ borderColor: TOKENS.inkSoft, transform: "translateY(-3px)" }}
+                                            />
                                             <span className="whitespace-nowrap">{currency(item.amount)}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex justify-between text-[11px]" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                                    <span style={{ color: TOKENS.inkSoft }}>Total {currency(sale.total)} · Paid {currency(sale.paid)}</span>
-                                    <span className="font-semibold" style={{ color: TOKENS.stampRed }}>Bal {currency(sale.balance)}</span>
+                                <div className="flex justify-between text-[12.5px]" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                                    <span style={{ color: TOKENS.inkSoft }}>
+                                        Total {currency(sale.total)} · Paid {currency(sale.paid)}
+                                    </span>
+                                    <span className="font-semibold" style={{ color: TOKENS.stampRed }}>
+                                        Bal {currency(sale.balance)}
+                                    </span>
                                 </div>
                                 <div className="border-t border-dashed mt-3" style={{ borderColor: TOKENS.goldLine }} />
                             </div>
@@ -75,8 +93,15 @@ const DebtStatement = forwardRef<HTMLDivElement, DebtStatementProps>(
                     </div>
                     <div className="border-t-2 mb-2" style={{ borderColor: TOKENS.stampRed }} />
                     <div className="flex justify-between items-baseline mb-5">
-                        <span className="text-sm uppercase tracking-wide" style={{ color: TOKENS.stampRed, fontFamily: "'IBM Plex Mono', monospace" }}>Balance due</span>
-                        <span className="text-2xl font-bold" style={{ color: TOKENS.stampRed }}>{currency(totalOwed)}</span>
+                        <span
+                            className="text-sm uppercase tracking-wide"
+                            style={{ color: TOKENS.stampRed, fontFamily: "'IBM Plex Mono', monospace" }}
+                        >
+                            Balance due
+                        </span>
+                        <span className="text-2xl font-bold" style={{ color: TOKENS.stampRed }}>
+                            {currency(totalOwed)}
+                        </span>
                     </div>
 
                     <div className="text-center text-xs" style={{ color: TOKENS.inkSoft }}>

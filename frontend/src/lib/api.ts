@@ -158,6 +158,7 @@ export interface SaleItemDto {
     id: number;
     category_id: number;
     quantity: number;
+    unit_price: number;
     amount: number;
 }
 
@@ -193,7 +194,7 @@ export interface CreateSaleInput {
     items: Array<{
         category_id: number;
         quantity: number;
-        amount: number;
+        unit_price: number;
     }>;
 }
 
@@ -221,7 +222,7 @@ export interface UpdateSaleItemInput {
     id?: number | null;
     category_id: number;
     quantity: number;
-    amount: number;
+    unit_price: number;
 }
 
 export interface UpdateSaleItemsInput {

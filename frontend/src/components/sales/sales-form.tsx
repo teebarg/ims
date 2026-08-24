@@ -16,7 +16,7 @@ import { currency } from "@/lib/utils";
 import { Category } from "@/schema/category";
 import CategoryInlineForm from "../categories/category-inline-form";
 
-const emptyLineItem = (): SaleLineItem => ({ category: "", quantity: 1, amount: 0 });
+const emptyLineItem = (): SaleLineItem => ({ category: "", quantity: 1, amount: 0, unit_price: 0 });
 
 interface SalesFormProps {
     initialCustomerId?: string;
@@ -52,7 +52,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
             c.display_name.toLowerCase().includes(customerSearch.toLowerCase()) || c.identifier.toLowerCase().includes(customerSearch.toLowerCase())
     );
 
-    const computedTotal = lineItems.reduce((sum, li) => sum + li.amount, 0);
+    const computedTotal = lineItems.reduce((sum, li) => sum + li.unit_price * li.quantity, 0);
     const totalItemCount = lineItems.reduce((sum, li) => sum + li.quantity, 0);
 
     const updateLineItem = (index: number, field: keyof SaleLineItem, value: string | number) => {
@@ -62,7 +62,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
     const addLineItem = () => setLineItems((prev) => [...prev, emptyLineItem()]);
     const removeLineItem = (index: number) => setLineItems((prev) => prev.filter((_, i) => i !== index));
 
-    const lineItemsValid = lineItems.length > 0 && lineItems.every((li) => li.category && li.quantity > 0 && li.amount > 0);
+    const lineItemsValid = lineItems.length > 0 && lineItems.every((li) => li.category && li.quantity > 0 && li.unit_price > 0);
     const canAddMore = lineItems.length < categories.length;
 
     const resetSaleFormFields = () => {
@@ -116,7 +116,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                         return id;
                     })(),
                     quantity: li.quantity,
-                    amount: li.amount,
+                    unit_price: li.unit_price,
                 })),
             };
             const sale = await createSale(payload);
@@ -276,10 +276,11 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
 
                                 {/* Line items */}
                                 <div className="space-y-2">
-                                    <div className="grid grid-cols-[1fr_70px_90px_32px] gap-2 text-xs font-medium text-muted-foreground px-1">
+                                    <div className="grid grid-cols-[1fr_60px_70px_90px_30px] gap-1 text-xs font-medium text-muted-foreground px-1">
                                         <span>Category</span>
                                         <span>Qty</span>
-                                        <span>Amount (₦)</span>
+                                        <span>price (₦)</span>
+                                        <span>Total (₦)</span>
                                         <span></span>
                                     </div>
                                     {lineItems.map((li, i) => {
@@ -292,7 +293,7 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                                         const availableCategories = categories;
 
                                         return (
-                                            <div key={i} className="grid grid-cols-[1fr_70px_90px_32px] gap-2 items-center">
+                                            <div key={i} className="grid grid-cols-[1fr_60px_70px_90px_30px] gap-1 items-center">
                                                 <Select value={li.category} onValueChange={(v) => updateLineItem(i, "category", v)}>
                                                     <SelectTrigger className="h-9 text-xs">
                                                         <SelectValue placeholder="Select..." />
@@ -317,18 +318,25 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
 
                                                 <Input
                                                     type="number"
+                                                    min={1}
+                                                    className="h-9 text-xs"
+                                                    value={li.unit_price || ""}
+                                                    onChange={(e) => updateLineItem(i, "unit_price", Math.max(0, Number(e.target.value)))}
+                                                />
+
+                                                <Input
+                                                    type="number"
+                                                    disabled
                                                     min={0}
                                                     className="h-9 text-xs"
-                                                    value={li.amount || ""}
-                                                    onChange={(e) => updateLineItem(i, "amount", Math.max(0, Number(e.target.value)))}
-                                                    placeholder="0"
+                                                    value={li.quantity * li.unit_price}
                                                 />
 
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-9 w-9"
+                                                    className="h-8 w-8"
                                                     disabled={lineItems.length <= 1}
                                                     onClick={() => removeLineItem(i)}
                                                 >
@@ -369,9 +377,9 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                                     {lineItems.map((li, i) => (
                                         <div key={i} className="flex justify-between text-xs pl-4">
                                             <span className="text-muted-foreground">
-                                                {li.category} × {li.quantity}
+                                                {li.category} × {li.quantity} @ {li.unit_price}
                                             </span>
-                                            <span>{currency(li.amount)}</span>
+                                            <span>{currency(li.unit_price * li.quantity)}</span>
                                         </div>
                                     ))}
                                     <div className="flex justify-between pt-1 border-t">
@@ -415,8 +423,8 @@ export default function SalesForm({ initialCustomerId, buttonSize = "sm" }: Sale
                                             paymentExceedsTotal
                                                 ? "bg-destructive/10 text-destructive"
                                                 : balancePreview <= 0
-                                                  ? "bg-success/10 text-success"
-                                                  : "bg-muted"
+                                                ? "bg-success/10 text-success"
+                                                : "bg-muted"
                                         }`}
                                     >
                                         <span>Balance after payment</span>

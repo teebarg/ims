@@ -110,7 +110,7 @@ export default function SalesDetails({ items, label = "View details", total, cus
 
                                     <div className="flex justify-between text-xs text-muted-foreground">
                                         <span>Unit</span>
-                                        <span>{currency(item.amount / item.quantity)}</span>
+                                        <span>{currency(item.unit_price)}</span>
                                     </div>
                                 </div>
                             );
@@ -120,11 +120,6 @@ export default function SalesDetails({ items, label = "View details", total, cus
                     <div className="border-t border-dashed" />
 
                     <div className="px-4 py-4 space-y-3">
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                            <span>Categories</span>
-                            <span>{items.length}</span>
-                        </div>
-
                         <div className="flex justify-between text-sm text-muted-foreground">
                             <span>Total quantity</span>
                             <span>{totalQty}</span>
