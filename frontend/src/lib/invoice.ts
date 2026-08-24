@@ -30,7 +30,11 @@ export function toOutstandingSales(sales: SaleDto[], categoryNameById: Map<numbe
         }));
 }
 
-export function buildDebtReminderMessage({ customerName, sales, businessName = import.meta.env.VITE_APP_NAME }: {
+export function buildDebtReminderMessage({
+    customerName,
+    sales,
+    businessName = import.meta.env.VITE_APP_NAME,
+}: {
     customerName?: string;
     sales: OutstandingSale[];
     businessName?: string;
@@ -38,7 +42,7 @@ export function buildDebtReminderMessage({ customerName, sales, businessName = i
     const totalOwed = sales.reduce((sum, s) => sum + s.balance, 0);
 
     const lines = sales.map((s) => {
-        const itemLines = s.items.map((i) => `  ${i.name} x${i.quantity} — ${currency(i.amount)}`).join("\n");
+        const itemLines = s.items.map((i) => `  ${i.name} x${i.quantity} @ ${i.unit_price} — ${currency(i.amount)}`).join("\n");
         return `Ref ${s.reference ?? s.id} (${s.date})\n${itemLines}\n  Total ${currency(s.total)} · Paid ${currency(s.paid)} · Balance ${currency(s.balance)}`;
     });
 
@@ -64,7 +68,12 @@ export function formatPhoneForWhatsApp(phone: string): string | null {
     return `234${digits}`;
 }
 
-export function buildInvoiceMessage({ items, categoryNameById, total, customerName }: {
+export function buildInvoiceMessage({
+    items,
+    categoryNameById,
+    total,
+    customerName,
+}: {
     items: SaleItemDto[];
     categoryNameById: Map<number, string>;
     total: number;
@@ -84,5 +93,7 @@ export function buildInvoiceMessage({ items, categoryNameById, total, customerNa
         `*Total: ${currency(total)}*`,
         "",
         "Thank you for shopping with us! 🧡",
-    ].filter((l) => l !== undefined).join("\n");
+    ]
+        .filter((l) => l !== undefined)
+        .join("\n");
 }
