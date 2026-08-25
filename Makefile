@@ -39,10 +39,6 @@ update:
 # --- Database & Migrations (Routed through uv) ---
 .PHONY: migration
 migration:
-	@if [ -z "$(name)" ]; then \
-		echo "Error: 'name' is required. Usage: make migration name=add_users_table"; \
-		exit 1; \
-	fi
 	$(DOCKER_COMPOSE) exec $(BACKEND_SERVICE) uv run alembic revision --autogenerate -m "$(name)"
 
 .PHONY: migrate

@@ -60,8 +60,13 @@ const InvoiceReceipt = forwardRef<HTMLDivElement, InvoiceReceiptProps>(
                                 const name = categoryNameById.get(item.category_id) ?? `Item ${item.category_id}`;
                                 return (
                                     <div key={item.id} className="flex items-baseline text-xs gap-2">
-                                        <span className="whitespace-nowrap">{name} x{item.quantity}</span>
-                                        <span className="flex-1 border-b border-dotted" style={{ borderColor: TOKENS.inkSoft, transform: "translateY(-3px)" }} />
+                                        <span className="whitespace-nowrap">
+                                            {name} x{item.quantity} @ {currency(item.unit_price)}
+                                        </span>
+                                        <span
+                                            className="flex-1 border-b border-dotted"
+                                            style={{ borderColor: TOKENS.inkSoft, transform: "translateY(-3px)" }}
+                                        />
                                         <span className="whitespace-nowrap font-semibold">{currency(item.amount)}</span>
                                     </div>
                                 );

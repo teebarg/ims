@@ -49,6 +49,7 @@ export interface SaleLineItem {
     category: string;
     quantity: number;
     amount: number;
+    unit_price: number;
 }
 
 export interface Sale {

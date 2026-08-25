@@ -8,11 +8,12 @@ from pydantic import BaseModel, Field
 class SaleItemInput(BaseModel):
     category_id: int
     quantity: int = Field(..., gt=0)
-    amount: Decimal = Field(..., gt=0)
+    unit_price: Decimal = Field(..., gt=0)
 
 
 class SaleItemRead(SaleItemInput):
     id: int
+    amount: Decimal = Field(..., gt=0)
 
     class Config:
         from_attributes = True
@@ -34,7 +35,7 @@ class SaleItemUpdate(BaseModel):
     id: int | None = Field(default=None, description="Existing item ID; omit for new items")
     category_id: int
     quantity: int = Field(..., gt=0)
-    amount: Decimal = Field(..., gt=0)
+    unit_price: Decimal = Field(..., gt=0)
 
 
 class SaleItemsUpdate(BaseModel):

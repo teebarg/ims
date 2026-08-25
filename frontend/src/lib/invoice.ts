@@ -5,7 +5,7 @@ export interface OutstandingSale {
     id: string | number;
     reference?: string;
     date: string;
-    items: { name: string; quantity: number; amount: number }[];
+    items: { name: string; quantity: number; unit_price: number; amount: number }[];
     total: number;
     paid: number;
     balance: number;
@@ -21,6 +21,7 @@ export function toOutstandingSales(sales: SaleDto[], categoryNameById: Map<numbe
             items: (s.items || []).map((item) => ({
                 name: categoryNameById.get(item.category_id) ?? `Item ${item.category_id}`,
                 quantity: item.quantity,
+                unit_price: item.unit_price,
                 amount: Number(item.amount),
             })),
             total: Number(s.total_amount),
@@ -29,7 +30,11 @@ export function toOutstandingSales(sales: SaleDto[], categoryNameById: Map<numbe
         }));
 }
 
-export function buildDebtReminderMessage({ customerName, sales, businessName = import.meta.env.VITE_APP_NAME }: {
+export function buildDebtReminderMessage({
+    customerName,
+    sales,
+    businessName = import.meta.env.VITE_APP_NAME,
+}: {
     customerName?: string;
     sales: OutstandingSale[];
     businessName?: string;
@@ -37,7 +42,7 @@ export function buildDebtReminderMessage({ customerName, sales, businessName = i
     const totalOwed = sales.reduce((sum, s) => sum + s.balance, 0);
 
     const lines = sales.map((s) => {
-        const itemLines = s.items.map((i) => `  ${i.name} x${i.quantity} — ${currency(i.amount)}`).join("\n");
+        const itemLines = s.items.map((i) => `  ${i.name} x${i.quantity} @ ${i.unit_price} — ${currency(i.amount)}`).join("\n");
         return `Ref ${s.reference ?? s.id} (${s.date})\n${itemLines}\n  Total ${currency(s.total)} · Paid ${currency(s.paid)} · Balance ${currency(s.balance)}`;
     });
 
@@ -63,7 +68,12 @@ export function formatPhoneForWhatsApp(phone: string): string | null {
     return `234${digits}`;
 }
 
-export function buildInvoiceMessage({ items, categoryNameById, total, customerName }: {
+export function buildInvoiceMessage({
+    items,
+    categoryNameById,
+    total,
+    customerName,
+}: {
     items: SaleItemDto[];
     categoryNameById: Map<number, string>;
     total: number;
@@ -71,7 +81,7 @@ export function buildInvoiceMessage({ items, categoryNameById, total, customerNa
 }): string {
     const lines = items.map((item) => {
         const name = categoryNameById.get(item.category_id) ?? `Category ${item.category_id}`;
-        return `${name} x${item.quantity} — ${currency(item.amount)}`;
+        return `${name} x${item.quantity} *  ${item.unit_price} — ${currency(item.amount)}`;
     });
 
     return [
@@ -83,5 +93,7 @@ export function buildInvoiceMessage({ items, categoryNameById, total, customerNa
         `*Total: ${currency(total)}*`,
         "",
         "Thank you for shopping with us! 🧡",
-    ].filter((l) => l !== undefined).join("\n");
+    ]
+        .filter((l) => l !== undefined)
+        .join("\n");
 }
